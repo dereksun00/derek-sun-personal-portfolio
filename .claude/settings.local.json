@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(awk 'NR==4835,/^}\\\\\\);$/' \"C:\\\\Users\\\\sunde\\\\OneDrive\\\\Documents\\\\derek-sun-portfolio\\\\index.html\")",
-      "Bash(awk 'NR>=4835 && /^}\\\\\\);$/ {print NR; exit}' \"C:\\\\Users\\\\sunde\\\\OneDrive\\\\Documents\\\\derek-sun-portfolio\\\\index.html\")"
-    ]
-  }
-}
