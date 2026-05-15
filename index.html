@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
@@ -963,10 +963,6 @@
       0 0 28px rgba(107,255,138,0.45);
   }
   /* Per-card accent */
-  .game-card[data-game="pacman"] { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #FFE000, 0 0 0 9px #0c0820, 0 0 18px rgba(255,224,0,0.2); }
-  .game-card[data-game="pacman"]:hover { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #fff080, 0 0 0 9px #0c0820, 0 0 30px rgba(255,224,0,0.5); }
-  .game-card[data-game="pacman"] .gc-preview { border-color: rgba(255,224,0,0.5); background: #000; }
-  .game-card[data-game="pacman"] .gc-coin { color: #FFE000; }
   .game-card[data-game="fighter"] { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ff3300, 0 0 0 9px #0c0820, 0 0 18px rgba(255,51,0,0.25); }
   .game-card[data-game="fighter"]:hover { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ff7a55, 0 0 0 9px #0c0820, 0 0 30px rgba(255,51,0,0.5); }
   .game-card[data-game="fighter"] .gc-preview { border-color: rgba(255,51,0,0.5); background: #1a0000; }
@@ -996,17 +992,6 @@
   @keyframes invader-hop {
     0%, 100% { transform: translateY(0); }
     50%      { transform: translateY(-6px); }
-  }
-  .preview-pac {
-    width: 24px; height: 24px;
-    background: #FFE000;
-    border-radius: 50%;
-    clip-path: polygon(50% 50%, 100% 25%, 100% 75%);
-    animation: pac-chomp 0.4s steps(2) infinite;
-  }
-  @keyframes pac-chomp {
-    0%, 100% { clip-path: polygon(50% 50%, 100% 25%, 100% 75%); }
-    50%      { clip-path: polygon(50% 50%, 100% 50%, 100% 50%); }
   }
   .preview-fight {
     width: 28px; height: 22px;
@@ -1046,149 +1031,6 @@
   /* ============================================================
      PER-GAME THEME OVERRIDES (body class scoped)
      ============================================================ */
-
-  /* PAC-MAN */
-  body.game-pacman {
-    --green: #FFE000;
-    --green-dim: #b39800;
-    --bg: #000;
-    --purple-deep: #000;
-  }
-  body.game-pacman #screen-quest {
-    background:
-      radial-gradient(ellipse at top, rgba(0,180,216,0.10), transparent 60%),
-      #000;
-  }
-  body.game-pacman .panel {
-    background: #0a0800;
-    box-shadow:
-      0 0 0 3px #0a0800,
-      0 0 0 6px #FFE000,
-      0 0 0 9px #0a0800;
-  }
-  body.game-pacman .panel.quests::after { background: rgba(255,224,0,0.15); }
-  body.game-pacman .panel-title { color: #00b4d8; border-bottom-color: rgba(255,224,0,0.35); }
-  body.game-pacman .quest-item.active {
-    background: rgba(255,224,0,0.14);
-    color: #FFE000;
-    text-shadow: 0 0 6px rgba(255,224,0,0.45);
-  }
-  body.game-pacman .quest-item .cursor { color: #FFE000; }
-  body.game-pacman .quest-tag {
-    background: rgba(255,224,0,0.16);
-    color: #FFE000;
-  }
-  body.game-pacman .quest-tag.gold { background: rgba(255,107,157,0.22); color: #ff6b9d; }
-  body.game-pacman .detail .quest-head { color: #FFE000; }
-  body.game-pacman .detail .status-line { color: #FFE000; }
-  body.game-pacman .detail .tech { color: #00b4d8; }
-  body.game-pacman .detail .tech .lbl { color: #FFE000; }
-  body.game-pacman .hud-bottom { border-top-color: rgba(255,224,0,0.45); }
-  body.game-pacman .hud-bottom .key { color: #FFE000; }
-  body.game-pacman .hud-top { color: #FFE000; }
-
-  /* Pac-Man pellets next to quest items */
-  .pellet-row {
-    display: inline-flex;
-    align-items: center;
-    margin-left: 10px;
-    gap: 4px;
-  }
-  .pellet {
-    width: 4px;
-    height: 4px;
-    background: #FFE000;
-    border-radius: 50%;
-    opacity: 0.8;
-    transition: opacity 0.12s ease-out, transform 0.12s ease-out;
-  }
-  .pellet.eaten {
-    opacity: 0;
-    transform: scale(0);
-  }
-
-  /* Pac-Man ghost */
-  #pac-ghost {
-    position: absolute;
-    width: 36px;
-    height: 40px;
-    background: #ff6b9d;
-    border-top-left-radius: 18px;
-    border-top-right-radius: 18px;
-    z-index: 6;
-    pointer-events: auto;
-    cursor: none;
-    display: none;
-    box-shadow: 0 0 14px rgba(255,107,157,0.5);
-  }
-  #pac-ghost::before {
-    /* wavy bottom */
-    content: "";
-    position: absolute;
-    left: 0; right: 0;
-    bottom: -6px;
-    height: 8px;
-    background:
-      radial-gradient(circle at 6px 0, transparent 6px, #ff6b9d 6px),
-      radial-gradient(circle at 18px 0, transparent 6px, #ff6b9d 6px),
-      radial-gradient(circle at 30px 0, transparent 6px, #ff6b9d 6px);
-  }
-  #pac-ghost::after {
-    content: "";
-    position: absolute;
-    inset: 10px 6px auto 6px;
-    height: 12px;
-    background:
-      radial-gradient(circle at 6px 6px, #2a2 0 2.5px, #fff 2.5px 6px, transparent 6px),
-      radial-gradient(circle at 18px 6px, #2a2 0 2.5px, #fff 2.5px 6px, transparent 6px);
-  }
-  .score-pop {
-    position: absolute;
-    color: #FFE000;
-    font-size: 14px;
-    letter-spacing: 0.15em;
-    pointer-events: none;
-    z-index: 10;
-    animation: score-pop 0.9s ease-out forwards;
-    text-shadow: 0 0 8px rgba(255,224,0,0.6);
-  }
-  @keyframes score-pop {
-    0%   { opacity: 0; transform: translateY(0); }
-    20%  { opacity: 1; }
-    100% { opacity: 0; transform: translateY(-40px); }
-  }
-  .boo-flash {
-    position: fixed;
-    inset: 0;
-    z-index: 1003;
-    pointer-events: none;
-    display: flex; align-items: center; justify-content: center;
-    color: #ff6b9d;
-    font-size: 56px;
-    letter-spacing: 0.2em;
-    text-shadow: 0 0 24px rgba(255,107,157,0.8);
-    opacity: 0;
-    animation: boo-flash 0.6s ease-out forwards;
-  }
-  @keyframes boo-flash {
-    0%   { opacity: 0; transform: scale(0.7); }
-    25%  { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 0; transform: scale(1); }
-  }
-
-  /* Pac-Man chomp wipe */
-  #chomp-wipe {
-    position: fixed;
-    width: 30px;
-    height: 30px;
-    background: #FFE000;
-    border-radius: 50%;
-    z-index: 970;
-    pointer-events: none;
-    transform: translate(-50%, -50%) scale(0);
-    opacity: 0;
-    box-shadow: 0 0 40px rgba(255,224,0,0.5);
-  }
 
   /* STREET FIGHTER */
   body.game-fighter {
@@ -1504,32 +1346,8 @@
   #hud-change-game:hover { background: rgba(255,207,82,0.18); color: #fff; }
   body.game-mario #hud-change-game { background: rgba(0,0,80,0.6); border-color: #ffd700; color: #ffd700; }
   body.game-fighter #hud-change-game { background: rgba(30,5,5,0.6); border-color: #ff3300; color: #ffd700; }
-  body.game-pacman #hud-change-game { background: rgba(10,8,0,0.6); border-color: #FFE000; color: #FFE000; }
 
   /* Per-game overlay reskins */
-  body.game-pacman .lore-scroll {
-    color: #ffffff;
-    border-left-color: #FFE000;
-    text-shadow: 0 0 6px rgba(255,224,0,0.35);
-  }
-  body.game-pacman .tech-tag-pixel {
-    color: #FFE000;
-    border-color: #FFE000;
-    background: rgba(255,224,0,0.06);
-    text-shadow: 0 0 6px rgba(255,224,0,0.5);
-    box-shadow: 0 0 0 2px #000080, 0 0 10px rgba(255,224,0,0.25);
-  }
-  body.game-pacman #ov-title { color: #ffffff; }
-  body.game-pacman .glitch-sm::before { color: #ff6b9d; }
-  body.game-pacman .glitch-sm::after  { color: #00b4d8; }
-  body.game-pacman .overlay { background:
-      radial-gradient(ellipse at top, rgba(255,224,0,0.10), transparent 60%),
-      #000080; }
-  body.game-pacman .panel,
-  body.game-pacman .overlay {
-    --panel-bg: #000080;
-  }
-
   body.game-fighter .lore-scroll {
     color: #ffd700;
     border-left-color: #ff3300;
@@ -1899,25 +1717,20 @@
      ============================================================ */
   /* Hide legacy quest-frame and mario-scene whenever a game is active */
   body.game-invaders .quest-frame,
-  body.game-pacman   .quest-frame,
   body.game-fighter  .quest-frame,
   body.game-mario    .quest-frame,
   body.game-invaders #mario-scene,
-  body.game-pacman   #mario-scene,
   body.game-fighter  #mario-scene,
   body.game-mario    #mario-scene,
   body.game-invaders .hud-top,
-  body.game-pacman   .hud-top,
   body.game-fighter  .hud-top,
   body.game-mario    .hud-top,
   body.game-invaders .hud-bottom,
-  body.game-pacman   .hud-bottom,
   body.game-fighter  .hud-bottom,
   body.game-mario    .hud-bottom { display: none !important; }
 
   .game-root { display: none; position: absolute; inset: 0; z-index: 2; }
   body.game-invaders #game-invaders,
-  body.game-pacman   #game-pacman,
   body.game-fighter  #game-fighter,
   body.game-mario    #game-mario { display: block; }
 
@@ -1945,7 +1758,6 @@
     pointer-events: none;
   }
   .game-hud .ghud-center { color: var(--amber); }
-  body.game-pacman .game-hud  { color: #FFE000; }
   body.game-fighter .game-hud { color: #ffd700; }
   body.game-mario  .game-hud  { display: none; }
 
@@ -1955,13 +1767,6 @@
     background: var(--green);
     clip-path: polygon(50% 0%, 100% 100%, 0% 100%);
   }
-  body.game-pacman .life-ship {
-    background: #FFE000;
-    border-radius: 50%;
-    clip-path: polygon(50% 50%, 100% 25%, 100% 75%);
-    width: 12px; height: 12px;
-  }
-
   /* Game-Over banner */
   .game-over {
     position: absolute;
@@ -2245,14 +2050,12 @@
   #screen-select * {
     cursor: default !important;
   }
-  /* Pac-Man and Mario games: hide cursor only over their game canvas */
-  body.game-pacman #canvas-pacman,
+  /* Mario game: hide cursor only over the game canvas */
   body.game-mario  #canvas-mario { cursor: none !important; }
   /* Cursor canvas show/hide handled in JS via inline style */
 
   /* Hide ambient particle canvas inside actual games (they draw their own bg) */
   body.game-invaders #quest-ambient,
-  body.game-pacman   #quest-ambient,
   body.game-fighter  #quest-ambient,
   body.game-mario    #quest-ambient { display: none; }
 
@@ -2269,11 +2072,10 @@
 
   /* Cabinet preview stylings (bigger) */
   .preview-invader { width: 36px; height: 26px; animation: invader-hop 1.4s steps(2) infinite; }
-  .preview-pac     { width: 40px; height: 40px; animation: pac-chomp 0.4s steps(2) infinite; }
   .preview-fight   { width: 44px; height: 36px; }
   .preview-mario   { width: 42px; height: 42px; font-size: 22px; }
 
-  /* Mobile touch d-pad for Mario / Pac-Man */
+  /* Mobile touch d-pad for Mario */
   #touch-dpad {
     position: absolute;
     bottom: 12px; left: 12px;
@@ -2311,7 +2113,6 @@
     user-select: none;
   }
   @media (hover: none), (pointer: coarse) {
-    body.game-pacman #touch-dpad,
     body.game-mario  #touch-dpad { display: grid; }
     body.game-invaders #touch-action,
     body.game-mario    #touch-action { display: flex; }
@@ -2361,11 +2162,6 @@
       <div class="gc-title">SPACE INVADERS</div>
       <div class="gc-coin">INSERT COIN</div>
     </div>
-    <div class="game-card" data-game="pacman">
-      <div class="gc-preview"><div class="preview-pac"></div></div>
-      <div class="gc-title">PAC-MAN</div>
-      <div class="gc-coin">INSERT COIN</div>
-    </div>
     <div class="game-card" data-game="fighter">
       <div class="gc-preview"><div class="preview-fight"></div></div>
       <div class="gc-title">STREET FIGHTER</div>
@@ -2385,7 +2181,6 @@
 
   <!-- =========== FULL GAME ROOTS =========== -->
   <div class="game-root" id="game-invaders"><canvas id="canvas-invaders"></canvas></div>
-  <div class="game-root" id="game-pacman"><canvas id="canvas-pacman"></canvas></div>
   <div class="game-root" id="game-fighter">
     <div class="sf-title">SELECT OPPONENT</div>
     <div class="sf-grid" id="sf-grid"></div>
@@ -2501,10 +2296,8 @@
 </div>
 
 <!-- Per-game transition overlays -->
-<div id="chomp-wipe"></div>
 <div id="ko-overlay"><div class="ko-text" id="ko-text">K.O.</div></div>
 <div id="pipe-warp"></div>
-<div id="pac-ghost"></div>
 
 <!-- Cursor + crack overlays -->
 <svg id="crack-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
@@ -3338,7 +3131,7 @@ function drawBeams() {
   cctx.restore();
 }
 
-const GAME_NAMES = ['invaders', 'pacman', 'fighter', 'mario'];
+const GAME_NAMES = ['invaders', 'fighter', 'mario'];
 function tickCursor() {
   // Bail if we're not in a game — wipe any leftover crosshair first.
   if (!currentGame || !GAME_NAMES.includes(currentGame)) {
@@ -3711,7 +3504,7 @@ function clickActivateSelection(cx, cy) {
 }
 
 /* Capture-phase click on the quest screen — Space Invaders shoot mechanic.
-   Per-game dispatch (defined later) handles Pac-Man / Fighter / Mario. */
+   Per-game dispatch (defined later) handles Fighter / Mario. */
 screens.quest.addEventListener('click', (e) => {
   if (overlayOpen) return;
   if (typeof currentGame !== 'undefined' && currentGame !== 'invaders') return;
@@ -3758,22 +3551,18 @@ let marioScore = 0;
 let marioCoins = 0;
 let fighterWins = 0;
 let _fighterOnOverlayClose = null;
-let pacGhostTimer = null;
-let pacGhostInstance = null;
 
 function setGameTheme(name) {
   currentGame = name;
-  document.body.classList.remove('game-invaders','game-pacman','game-fighter','game-mario');
+  document.body.classList.remove('game-invaders','game-fighter','game-mario');
   document.body.classList.add('game-' + name);
   // reset per-game HUD state
   if (name !== 'mario') usedMarioBlocks.clear();
   if (name === 'mario')   { marioScore = 0; marioCoins = 0; updateMarioHUD(); }
   if (name === 'fighter') { fighterWins = 0; updateWinsDisplay(); }
-  if (name === 'pacman')  { schedulePacGhost(); }
-  else cancelPacGhost();
   // Cursor visibility:
   //   invaders + fighter  → custom canvas crosshair, hide OS cursor on body
-  //   pacman + mario      → OS cursor default on body, hidden over their canvas via CSS
+  //   mario               → OS cursor default on body, hidden over its canvas via CSS
   const cc = document.getElementById('cursor-canvas');
   if (name === 'invaders' || name === 'fighter') {
     cc.style.display = 'block';
@@ -3788,7 +3577,7 @@ function setGameTheme(name) {
 function resetCursorState() {
   currentGame = null;
   document.body.style.cursor = 'default';
-  document.body.classList.remove('game-invaders','game-pacman','game-fighter','game-mario');
+  document.body.classList.remove('game-invaders','game-fighter','game-mario');
   const cc = document.getElementById('cursor-canvas');
   cc.style.display = 'none';
   // Also clear the cursor canvas immediately so no stale crosshair remains.
@@ -3836,7 +3625,6 @@ document.getElementById('hud-change-game').addEventListener('click', (e) => {
   e.stopPropagation();
   ensureAudio();
   if (overlayOpen) closeOverlay();
-  cancelPacGhost();
   if (typeof currentGameAPI !== 'undefined' && currentGameAPI && currentGameAPI.teardown) {
     currentGameAPI.teardown();
     currentGameAPI = null;
@@ -3852,7 +3640,6 @@ document.getElementById('hud-change-game').addEventListener('click', (e) => {
    ============================================================ */
 let lastMouseT = performance.now();
 let mouseVX = 0, mouseVY = 0;
-let pacFaceAngle = 0;
 let gloveDown = false;
 
 window.addEventListener('mousemove', (e) => {
@@ -3864,37 +3651,6 @@ window.addEventListener('mousemove', (e) => {
 }, { passive: true });
 window.addEventListener('mousedown', () => { gloveDown = true; });
 window.addEventListener('mouseup',   () => { gloveDown = false; });
-
-function drawPacmanCursor(x, y) {
-  // Direction follows recent velocity; ease toward it
-  const speed = Math.hypot(mouseVX, mouseVY);
-  if (speed > 0.5) {
-    const target = Math.atan2(mouseVY, mouseVX);
-    // shortest-path lerp
-    let d = target - pacFaceAngle;
-    while (d > Math.PI) d -= Math.PI * 2;
-    while (d < -Math.PI) d += Math.PI * 2;
-    pacFaceAngle += d * 0.25;
-  }
-  // Mouth animates between 5° and 45°
-  const t = performance.now() / 300;
-  let mouth = (Math.sin(t * Math.PI * 2) * 0.5 + 0.5) * (45 - 5) + 5;
-  if (speed < 0.4) mouth = 5 + (mouth - 5) * 0.15; // mostly closed when still
-  const mouthRad = mouth * Math.PI / 180;
-
-  cctx.save();
-  cctx.shadowBlur = 12;
-  cctx.shadowColor = 'rgba(255, 224, 0, 0.7)';
-  cctx.translate(x, y);
-  cctx.rotate(pacFaceAngle);
-  cctx.fillStyle = '#FFE000';
-  cctx.beginPath();
-  cctx.moveTo(0, 0);
-  cctx.arc(0, 0, 14, mouthRad, Math.PI * 2 - mouthRad);
-  cctx.closePath();
-  cctx.fill();
-  cctx.restore();
-}
 
 function drawGloveCursor(x, y) {
   // Default rotation -15°, on mousedown -35° + scale 0.85
@@ -3979,7 +3735,6 @@ function drawCursorForGame(x, y) {
     return;
   }
   switch (currentGame) {
-    case 'pacman':  drawPacmanCursor(x, y); break;
     case 'fighter': drawGloveCursor(x, y); break;
     case 'mario':   drawFistCursor(x, y);  break;
     default:        _origDrawCrosshair(x, y);
@@ -3992,12 +3747,6 @@ drawCrosshair = function(x, y) { drawCursorForGame(x, y); };
 /* ============================================================
    PER-GAME SOUNDS
    ============================================================ */
-function sfxPacChomp() {
-  const ctx = ensureAudio(); if (!ctx) return;
-  const t0 = ctx.currentTime;
-  const notes = [440, 330, 440, 330, 440, 330, 440, 330];
-  notes.forEach((f, i) => beep(f, 0.04, 'square', 0.08, i * 0.05));
-}
 function sfxPunch() {
   const ctx = ensureAudio(); if (!ctx) return;
   const t0 = ctx.currentTime;
@@ -4116,11 +3865,6 @@ function sfxPipeWarp() {
   const seq = [880, 830, 780, 730, 680, 600, 520, 440];
   seq.forEach((f, i) => beep(f, 0.05, 'sine', 0.07, i * 0.05));
 }
-function sfxGhostEaten() {
-  const seq = [1200, 1050, 900, 780, 660, 540];
-  seq.forEach((f, i) => beep(f, 0.05, 'square', 0.08, i * 0.06));
-}
-
 /* ============================================================
    SCREEN SHAKE
    ============================================================ */
@@ -4182,35 +3926,6 @@ function updateMarioHUD() {
 /* ============================================================
    PER-GAME OVERLAY OPEN TRANSITIONS
    ============================================================ */
-function openOverlayChomp(q, cx, cy) {
-  // Pre-place overlay invisible
-  openProjectOverlay(q, { clickMode: true });
-  sfxPacChomp();
-  const w = document.getElementById('chomp-wipe');
-  w.style.left = cx + 'px';
-  w.style.top  = cy + 'px';
-  w.style.transition = 'transform 0.35s ease-in, opacity 0.35s ease-in';
-  w.style.opacity = '1';
-  const diag = Math.hypot(window.innerWidth, window.innerHeight);
-  const grow = diag * 2 / 30;  // base circle is 30px wide
-  requestAnimationFrame(() => {
-    w.style.transform = `translate(-50%, -50%) scale(${grow})`;
-  });
-  setTimeout(() => {
-    w.style.transition = 'transform 0.35s ease-out, opacity 0.35s ease-out';
-    w.style.transform = 'translate(-50%, -50%) scale(0)';
-    w.style.opacity = '0.4';
-    setTimeout(() => {
-      w.style.opacity = '0';
-      // Reveal overlay
-      const overlayEl = document.getElementById('quest-overlay');
-      overlayEl.style.transition = 'opacity 0.25s ease-out';
-      requestAnimationFrame(() => { overlayEl.style.opacity = '1'; });
-      setTimeout(() => runOverlayContentReveal(q), 250);
-    }, 350);
-  }, 350);
-}
-
 function openOverlayKO(q, cx, cy) {
   openProjectOverlay(q, { clickMode: true });
   sfxPunch();
@@ -4295,25 +4010,6 @@ function addShockRing(cx, cy) {
 const _origCloseOverlay = closeOverlay;
 closeOverlay = function() {
   if (!overlayOpen) return;
-  if (currentGame === 'pacman') {
-    // Reverse chomp from center
-    const w = document.getElementById('chomp-wipe');
-    w.style.left = (window.innerWidth / 2) + 'px';
-    w.style.top  = (window.innerHeight / 2) + 'px';
-    w.style.transition = 'transform 0.3s ease-in, opacity 0.2s ease-in';
-    w.style.opacity = '1';
-    requestAnimationFrame(() => {
-      w.style.transform = 'translate(-50%, -50%) scale(30)';
-    });
-    sfxPacChomp();
-    setTimeout(() => {
-      _origCloseOverlay();
-      w.style.transition = 'transform 0.3s ease-out, opacity 0.25s ease-out';
-      w.style.transform = 'translate(-50%, -50%) scale(0)';
-      setTimeout(() => { w.style.opacity = '0'; }, 250);
-    }, 300);
-    return;
-  }
   if (currentGame === 'fighter') {
     // Notify the fighter game so it can mark the defeated portrait
     if (typeof _fighterOnOverlayClose === 'function') _fighterOnOverlayClose();
@@ -4443,89 +4139,6 @@ function onMarioBlockClick(q, block) {
 }
 
 /* ============================================================
-   PAC-MAN GHOST EASTER EGG
-   ============================================================ */
-function schedulePacGhost() {
-  cancelPacGhost();
-  pacGhostTimer = setTimeout(spawnPacGhost, 15000);
-}
-function cancelPacGhost() {
-  if (pacGhostTimer) { clearTimeout(pacGhostTimer); pacGhostTimer = null; }
-  if (pacGhostInstance) {
-    pacGhostInstance.stopped = true;
-    document.getElementById('pac-ghost').style.display = 'none';
-    pacGhostInstance = null;
-  }
-}
-function spawnPacGhost() {
-  if (currentScreen !== 'quest' || currentGame !== 'pacman' || overlayOpen) {
-    schedulePacGhost();
-    return;
-  }
-  const ghost = document.getElementById('pac-ghost');
-  const rightPanel = document.querySelector('#screen-quest .panel.detail');
-  if (!rightPanel) { schedulePacGhost(); return; }
-  const r = rightPanel.getBoundingClientRect();
-  // Spawn from a random edge of the right panel
-  const edge = Math.floor(Math.random() * 4);
-  let x, y;
-  if (edge === 0) { x = r.left + Math.random() * r.width; y = r.top - 30; }
-  else if (edge === 1) { x = r.right + 20; y = r.top + Math.random() * r.height; }
-  else if (edge === 2) { x = r.left + Math.random() * r.width; y = r.bottom + 10; }
-  else { x = r.left - 50; y = r.top + Math.random() * r.height; }
-  const cx = r.left + r.width / 2;
-  const cy = r.top + r.height / 2;
-  ghost.style.left = x + 'px';
-  ghost.style.top  = y + 'px';
-  ghost.style.display = 'block';
-
-  const instance = { stopped: false };
-  pacGhostInstance = instance;
-
-  ghost.onclick = () => {
-    if (instance.stopped) return;
-    instance.stopped = true;
-    sfxGhostEaten();
-    ghost.style.display = 'none';
-    // +200 score popup
-    const pop = document.createElement('div');
-    pop.className = 'score-pop';
-    pop.textContent = '+200';
-    pop.style.left = ghost.style.left;
-    pop.style.top  = ghost.style.top;
-    document.body.appendChild(pop);
-    setTimeout(() => pop.remove(), 900);
-    schedulePacGhost();
-  };
-
-  const t0 = performance.now();
-  const dur = 6000;
-  function move() {
-    if (instance.stopped) return;
-    const e = performance.now() - t0;
-    const k = Math.min(e / dur, 1);
-    const nx = x + (cx - x) * k;
-    const ny = y + (cy - y) * k;
-    ghost.style.left = nx + 'px';
-    ghost.style.top  = ny + 'px';
-    if (k >= 1) {
-      // Reached center — BOO! flash and reset
-      const boo = document.createElement('div');
-      boo.className = 'boo-flash';
-      boo.textContent = 'BOO!';
-      document.body.appendChild(boo);
-      setTimeout(() => boo.remove(), 600);
-      ghost.style.display = 'none';
-      instance.stopped = true;
-      schedulePacGhost();
-      return;
-    }
-    requestAnimationFrame(move);
-  }
-  requestAnimationFrame(move);
-}
-
-/* ============================================================
    PER-GAME CLICK DISPATCH on the quest screen
    Replaces the invaders-only capture-phase handler.
    ============================================================ */
@@ -4552,18 +4165,6 @@ screens.quest.addEventListener('click', (e) => {
   }
   flashActiveItem();
 
-  // Pac-Man: eat the pellets then chomp open
-  if (currentGame === 'pacman') {
-    eatPellets(item);
-    if (q.kind === 'project') {
-      // Pac-Man eats the quest text char by char then chomps
-      eatQuestText(item, () => openOverlayChomp(q, e.clientX, e.clientY));
-    } else {
-      sfxConfirm();
-    }
-    return;
-  }
-
   // Street Fighter: punch + KO transition
   if (currentGame === 'fighter') {
     if (q.kind === 'project') openOverlayKO(q, e.clientX, e.clientY);
@@ -4571,68 +4172,6 @@ screens.quest.addEventListener('click', (e) => {
     return;
   }
 }, true);
-
-function eatPellets(item) {
-  const pellets = item.querySelectorAll('.pellet');
-  pellets.forEach((p, i) => {
-    setTimeout(() => p.classList.add('eaten'), i * 40);
-  });
-}
-function eatQuestText(item, done) {
-  const nameEl = item.querySelector('.quest-name');
-  if (!nameEl) { done && done(); return; }
-  const text = nameEl.textContent;
-  let i = text.length;
-  function tick() {
-    if (i <= 0) { done && done(); return; }
-    nameEl.textContent = ' ' + text.slice(text.length - i + 1);
-    i--;
-    setTimeout(tick, 30);
-  }
-  tick();
-}
-
-/* ============================================================
-   Patch renderQuestList to add Pac-Man pellets
-   ============================================================ */
-const _origRenderQuestList = renderQuestList;
-renderQuestList = function() {
-  _origRenderQuestList();
-  if (currentGame === 'pacman') {
-    listEl.querySelectorAll('.quest-item').forEach((row) => {
-      const idx = parseInt(row.dataset.idx, 10);
-      if (isNaN(idx)) return;
-      if (QUESTS[idx].kind !== 'project') return;
-      const pellets = document.createElement('span');
-      pellets.className = 'pellet-row';
-      for (let i = 0; i < 5; i++) {
-        const p = document.createElement('span');
-        p.className = 'pellet';
-        pellets.appendChild(p);
-      }
-      const line = row.querySelector('.qi-line');
-      if (line) line.appendChild(pellets);
-    });
-  }
-};
-
-/* Re-render quest list whenever the user navigates with W/S so the
-   chomped pellets reset between selections. */
-const _origNavList = navList;
-navList = function(dir) {
-  _origNavList(dir);
-  // Reset Pac-Man activity timer
-  if (currentGame === 'pacman') schedulePacGhost();
-};
-
-/* Activity also resets the ghost spawn */
-['click', 'mousemove', 'keydown'].forEach(ev => {
-  window.addEventListener(ev, () => {
-    if (currentGame === 'pacman' && currentScreen === 'quest') {
-      schedulePacGhost();
-    }
-  }, { passive: true });
-});
 
 /* Default cursor state for non-game screens (boot / title / save / select). */
 document.body.style.cursor = 'default';
@@ -4714,7 +4253,6 @@ function openProjectFromGame(qid) {
   if (currentGameAPI && currentGameAPI.pause) currentGameAPI.pause();
   // Use the per-game open transition we already have
   const cx = window.innerWidth / 2, cy = window.innerHeight / 2;
-  if (currentGame === 'pacman')  return openOverlayChomp(q, cx, cy);
   if (currentGame === 'fighter') return openOverlayKO(q, cx, cy);
   if (currentGame === 'mario')   return openOverlayPipe(q);
   // Invaders default: pre-place + simple fade-in (no shatter inside game)
@@ -5159,565 +4697,6 @@ registerGame('invaders', function initInvaders() {
     },
   };
   return api;
-});
-
-/* ============================================================
-   GAME 2: PAC-MAN — simplified maze
-   ============================================================ */
-registerGame('pacman', function initPacman() {
-  const canvas = document.getElementById('canvas-pacman');
-  const ctx = canvas.getContext('2d');
-  const CELL_SIZE = 28;
-  const CELL = CELL_SIZE; // alias kept for any in-line use
-  // 19x21 maze (unchanged). # = wall, . = pellet, o = power, ' ' = open, = = ghost-house DOOR
-  const layout = [
-    "###################",
-    "#........#........#",
-    "#o##.###.#.###.##o#",
-    "#.................#",
-    "#.##.#.#####.#.##.#",
-    "#....#...#...#....#",
-    "####.### # ###.####",
-    "   #.#       #.#   ",
-    "####.# ##=## #.####",
-    "    .  #   #  .    ",
-    "####.# ##### #.####",
-    "   #.#       #.#   ",
-    "####.# ##### #.####",
-    "#........#........#",
-    "#.##.###.#.###.##.#",
-    "#o.#...........#.o#",
-    "##.#.#.#####.#.#.##",
-    "#....#...#...#....#",
-    "#.######.#.######.#",
-    "#.................#",
-    "###################",
-  ];
-  const ROWS = layout.length, COLS = layout[0].length;
-  const EXIT_R = 7, EXIT_C = 9;          // open cell above the '=' door
-  const START_CELL_X = 9, START_CELL_Y = 15;
-
-  let W, H, mazeOffsetX, mazeOffsetY;
-  function resize() {
-    const dpr = window.devicePixelRatio || 1;
-    W = window.innerWidth; H = window.innerHeight;
-    canvas.width = W * dpr; canvas.height = H * dpr;
-    canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-    ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
-    const mw = COLS * CELL_SIZE, mh = ROWS * CELL_SIZE;
-    mazeOffsetX = Math.max(20, (W - mw) / 2);
-    mazeOffsetY = Math.max(60, (H - mh) / 2);
-  }
-  resize();
-  window.addEventListener('resize', resize);
-
-  // ---------- Maze cell helpers ----------
-  const cells = layout.map(row => row.split(''));
-  function isWall(r,c)   { return cells[r] && (cells[r][c] === '#' || cells[r][c] === '='); }
-  function inBounds(r,c) { return r >= 0 && r < ROWS && c >= 0 && c < COLS; }
-  function canMove(cellX, cellY) {
-    return inBounds(cellY, cellX) && !isWall(cellY, cellX);
-  }
-  function canMoveInDir(cellX, cellY, dir) {
-    return canMove(cellX + dir.x, cellY + dir.y);
-  }
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function cellToPxX(cx) { return cx * CELL_SIZE + CELL_SIZE / 2 + mazeOffsetX; }
-  function cellToPxY(cy) { return cy * CELL_SIZE + CELL_SIZE / 2 + mazeOffsetY; }
-
-  // ---------- Pellets ----------
-  let pelletsLeft = 0;
-  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
-    if (cells[r][c] === '.' || cells[r][c] === 'o') pelletsLeft++;
-  }
-  function eatDotAt(cellX, cellY) {
-    if (!inBounds(cellY, cellX)) return;
-    const ch = cells[cellY][cellX];
-    if (ch === '.') {
-      cells[cellY][cellX] = ' '; score++; pelletsLeft--;
-      beep(440, 0.025, 'square', 0.06);
-      setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
-    } else if (ch === 'o') {
-      cells[cellY][cellX] = ' '; score += 10; pelletsLeft--;
-      vulnTime = 8000; sfxConfirm();
-      setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
-    }
-  }
-
-  // ====================================================================
-  // REWRITE 1 — Game loop primitives
-  // ====================================================================
-  let pacmanRafId = null;
-  let pacmanLastTime = null;
-  let pacmanRunning = false;
-
-  function pacmanLoop(timestamp) {
-    if (!pacmanRunning) return;
-    if (pacmanLastTime === null) pacmanLastTime = timestamp;
-    const dt = Math.min((timestamp - pacmanLastTime) / 1000, 0.05);
-    pacmanLastTime = timestamp;
-    pacmanUpdate(dt);
-    pacmanDraw();
-    pacmanRafId = requestAnimationFrame(pacmanLoop);
-  }
-  function startPacmanLoop() {
-    pacmanRunning = true;
-    pacmanLastTime = null;
-    if (pacmanRafId) cancelAnimationFrame(pacmanRafId);
-    pacmanRafId = requestAnimationFrame(pacmanLoop);
-  }
-  function stopPacmanLoop() {
-    pacmanRunning = false;
-    if (pacmanRafId) {
-      cancelAnimationFrame(pacmanRafId);
-      pacmanRafId = null;
-    }
-    pacmanLastTime = null;
-  }
-
-  function pacmanVisibilityHandler() {
-    if (!document.hidden && currentGame === 'pacman' && !overlayOpen) {
-      startPacmanLoop();
-    } else {
-      stopPacmanLoop();
-    }
-  }
-  document.addEventListener('visibilitychange', pacmanVisibilityHandler);
-
-  // ====================================================================
-  // REWRITE 2 — Input
-  // ====================================================================
-  let pacmanDir = { x: 0, y: 0 };
-  let pacmanInputBuffer = null;
-  let pacmanInputBufferTime = 0;
-
-  function pacmanKeyHandler(e) {
-    const map = {
-      'ArrowUp':    {x: 0, y: -1}, 'w': {x: 0, y: -1}, 'W': {x: 0, y: -1},
-      'ArrowDown':  {x: 0, y:  1}, 's': {x: 0, y:  1}, 'S': {x: 0, y:  1},
-      'ArrowLeft':  {x:-1, y:  0}, 'a': {x:-1, y:  0}, 'A': {x:-1, y:  0},
-      'ArrowRight': {x: 1, y:  0}, 'd': {x: 1, y:  0}, 'D': {x: 1, y:  0},
-    };
-    const dir = map[e.key];
-    if (dir) {
-      e.preventDefault();
-      pacmanInputBuffer = dir;
-      pacmanInputBufferTime = performance.now();
-    }
-  }
-  window.addEventListener('keydown', pacmanKeyHandler);
-
-  // Touch d-pad — same buffer system
-  const dpadButtons = document.querySelectorAll('#touch-dpad .dp');
-  const dpadHandlers = [];
-  dpadButtons.forEach(b => {
-    const h = () => {
-      const map = { up: {x:0,y:-1}, down: {x:0,y:1}, left: {x:-1,y:0}, right: {x:1,y:0} };
-      pacmanInputBuffer = map[b.dataset.dir];
-      pacmanInputBufferTime = performance.now();
-    };
-    b.addEventListener('touchstart', h);
-    dpadHandlers.push({ el: b, h });
-  });
-
-  // ====================================================================
-  // REWRITE 3 — Pac-Man cell-based state
-  // ====================================================================
-  const pacman = {
-    cellX: START_CELL_X,
-    cellY: START_CELL_Y,
-    targetCellX: START_CELL_X,
-    targetCellY: START_CELL_Y,
-    x: cellToPxX(START_CELL_X),
-    y: cellToPxY(START_CELL_Y),
-    speed: 5,      // cells per second
-    progress: 0,   // 0..1 toward target cell
-    mouth: 0,
-  };
-
-  // ---------- Score / lives state ----------
-  let score = 0, lives = 3, vulnTime = 0;
-  let paused = false;
-
-  // ====================================================================
-  // REWRITE 4 — Ghosts (cell-based) with frame-driven exit timer
-  // ====================================================================
-  const projects = QUESTS.filter(q => q.kind === 'project');
-  const ghosts = [];
-
-  function makeGhost(opts) {
-    const g = Object.assign({
-      cellX: 9, cellY: 9,
-      targetCellX: 9, targetCellY: 9,
-      x: 0, y: 0,
-      progress: 0,
-      speed: 4,                  // cells/sec
-      dir: { x: -1, y: 0 },
-      alive: true,
-      exiting: false,
-      exited: false,
-      respawnAt: null,
-      size: CELL_SIZE * 0.42,
-    }, opts);
-    g.x = cellToPxX(g.cellX);
-    g.y = cellToPxY(g.cellY);
-    return g;
-  }
-
-  projects.forEach((p, i) => {
-    ghosts.push(makeGhost({
-      project: p,
-      isProject: true,
-      color: ['#ff6b9d','#00ffff','#ffb852'][i % 3],
-      cellX: 8 + i, cellY: 9,
-      targetCellX: 8 + i, targetCellY: 9,
-      size: CELL_SIZE * 0.55,
-    }));
-  });
-  ['#FF0000','#FFB8FF','#00FFFF'].forEach((col, i) => {
-    ghosts.push(makeGhost({
-      project: null,
-      isProject: false,
-      color: col,
-      cellX: 8 + (i % 3), cellY: 9,
-      targetCellX: 8 + (i % 3), targetCellY: 9,
-    }));
-  });
-
-  const ghostExitSchedule = [0, 3, 6, 9, 12, 15]; // seconds
-  let gameTime = 0;
-  let nextGhostToExit = 0;
-
-  setHUD({ left: 'SCORE 0000', center: 'LEVEL 1', right: lives });
-
-  // ====================================================================
-  // UPDATE
-  // ====================================================================
-  function pacmanUpdate(dt) {
-    if (paused) return;
-    gameTime += dt;
-    if (vulnTime > 0) vulnTime -= dt * 1000;
-
-    // ---------- REWRITE 3 — Pac-Man cell-based movement ----------
-    // Try to commit buffered input each frame (lets pre-corner presses register)
-    if (pacmanInputBuffer) {
-      const age = performance.now() - pacmanInputBufferTime;
-      if (age >= 500) {
-        pacmanInputBuffer = null;
-      } else {
-        const stationary = (pacman.cellX === pacman.targetCellX && pacman.cellY === pacman.targetCellY);
-        const isReverse  = (pacmanInputBuffer.x === -pacmanDir.x && pacmanInputBuffer.y === -pacmanDir.y) &&
-                           (pacmanDir.x !== 0 || pacmanDir.y !== 0);
-        if (stationary && canMoveInDir(pacman.cellX, pacman.cellY, pacmanInputBuffer)) {
-          // Start moving immediately from a standstill
-          pacmanDir = pacmanInputBuffer;
-          pacmanInputBuffer = null;
-          pacman.targetCellX = pacman.cellX + pacmanDir.x;
-          pacman.targetCellY = pacman.cellY + pacmanDir.y;
-          pacman.progress = 0;
-        } else if (isReverse) {
-          // Flip direction mid-cell without teleporting: swap current/target, mirror progress
-          const tcx = pacman.targetCellX, tcy = pacman.targetCellY;
-          pacman.targetCellX = pacman.cellX;
-          pacman.targetCellY = pacman.cellY;
-          pacman.cellX = tcx;
-          pacman.cellY = tcy;
-          pacman.progress = 1 - pacman.progress;
-          pacmanDir = pacmanInputBuffer;
-          pacmanInputBuffer = null;
-        }
-        // Otherwise leave buffered — will be applied at the next cell arrival.
-      }
-    }
-
-    if (pacmanDir.x !== 0 || pacmanDir.y !== 0 ||
-        pacman.targetCellX !== pacman.cellX || pacman.targetCellY !== pacman.cellY) {
-      pacman.progress += pacman.speed * dt;
-    }
-
-    if (pacman.progress >= 1) {
-      pacman.progress -= 1;
-      pacman.cellX = pacman.targetCellX;
-      pacman.cellY = pacman.targetCellY;
-      pacman.x = cellToPxX(pacman.cellX);
-      pacman.y = cellToPxY(pacman.cellY);
-
-      eatDotAt(pacman.cellX, pacman.cellY);
-
-      // Try buffered direction on cell arrival
-      if (pacmanInputBuffer) {
-        const age = performance.now() - pacmanInputBufferTime;
-        if (age < 500) {
-          if (canMoveInDir(pacman.cellX, pacman.cellY, pacmanInputBuffer)) {
-            pacmanDir = pacmanInputBuffer;
-            pacmanInputBuffer = null;
-          }
-        } else {
-          pacmanInputBuffer = null;
-        }
-      }
-
-      const nx = pacman.cellX + pacmanDir.x;
-      const ny = pacman.cellY + pacmanDir.y;
-      if (canMove(nx, ny)) {
-        pacman.targetCellX = nx;
-        pacman.targetCellY = ny;
-      } else {
-        pacman.targetCellX = pacman.cellX;
-        pacman.targetCellY = pacman.cellY;
-        pacman.progress = 0;
-      }
-    }
-
-    // Interpolate pixel position
-    pacman.x = lerp(cellToPxX(pacman.cellX), cellToPxX(pacman.targetCellX), pacman.progress);
-    pacman.y = lerp(cellToPxY(pacman.cellY), cellToPxY(pacman.targetCellY), pacman.progress);
-    pacman.mouth = (Math.sin(performance.now() / 120) + 1) / 2;
-
-    // ---------- REWRITE 4 — Ghost exit schedule (frame-driven) ----------
-    while (nextGhostToExit < ghosts.length && gameTime >= ghostExitSchedule[nextGhostToExit]) {
-      ghosts[nextGhostToExit].exiting = true;
-      nextGhostToExit++;
-    }
-
-    // ---------- Ghost respawn (frame-driven, replaces setTimeout) ----------
-    for (const g of ghosts) {
-      if (!g.alive && g.respawnAt !== null && gameTime >= g.respawnAt) {
-        g.alive = true;
-        g.cellX = 9; g.cellY = 9;
-        g.targetCellX = 9; g.targetCellY = 9;
-        g.progress = 0;
-        g.x = cellToPxX(g.cellX);
-        g.y = cellToPxY(g.cellY);
-        g.exiting = true;
-        g.exited = false;
-        g.respawnAt = null;
-      }
-    }
-
-    // ---------- Ghost movement ----------
-    for (const g of ghosts) {
-      if (!g.alive) continue;
-
-      // House / exit phase
-      if (g.exiting && !g.exited) {
-        g.progress += g.speed * dt;
-        if (g.progress >= 1) {
-          g.progress -= 1;
-          g.cellX = g.targetCellX;
-          g.cellY = g.targetCellY;
-
-          if (g.cellY <= EXIT_R && g.cellX === EXIT_C) {
-            // Reached the exit cell — begin roaming
-            g.exited = true;
-            g.exiting = false;
-            g.dir = Math.random() < 0.5 ? { x: -1, y: 0 } : { x: 1, y: 0 };
-            const nx = g.cellX + g.dir.x, ny = g.cellY + g.dir.y;
-            if (canMove(nx, ny)) {
-              g.targetCellX = nx; g.targetCellY = ny;
-            } else {
-              g.dir = { x: -g.dir.x, y: 0 };
-              const nx2 = g.cellX + g.dir.x, ny2 = g.cellY + g.dir.y;
-              if (canMove(nx2, ny2)) { g.targetCellX = nx2; g.targetCellY = ny2; }
-              else { g.targetCellX = g.cellX; g.targetCellY = g.cellY; g.progress = 0; }
-            }
-          } else {
-            // Scripted exit path: align to EXIT_C first, then walk up.
-            if (g.cellX !== EXIT_C) g.dir = { x: g.cellX < EXIT_C ? 1 : -1, y: 0 };
-            else                    g.dir = { x: 0, y: -1 };
-            g.targetCellX = g.cellX + g.dir.x;
-            g.targetCellY = g.cellY + g.dir.y;
-          }
-        }
-        g.x = lerp(cellToPxX(g.cellX), cellToPxX(g.targetCellX), g.progress);
-        g.y = lerp(cellToPxY(g.cellY), cellToPxY(g.targetCellY), g.progress);
-        continue;
-      }
-
-      if (!g.exited) continue; // still waiting in house (not yet exiting)
-
-      // Roaming phase — cell-based with progress
-      const ghostSpeed = (vulnTime > 0 ? g.speed * 0.6 : g.speed);
-      g.progress += ghostSpeed * dt;
-      if (g.progress >= 1) {
-        g.progress -= 1;
-        g.cellX = g.targetCellX;
-        g.cellY = g.targetCellY;
-
-        // Pick a new direction at this intersection — random, no reverse
-        const options = [{x:1,y:0},{x:-1,y:0},{x:0,y:1},{x:0,y:-1}].filter(d => {
-          if (d.x === -g.dir.x && d.y === -g.dir.y) return false;
-          return canMove(g.cellX + d.x, g.cellY + d.y);
-        });
-        if (options.length > 0) {
-          g.dir = options[Math.floor(Math.random() * options.length)];
-        } else {
-          g.dir = { x: -g.dir.x, y: -g.dir.y };
-        }
-        const nx = g.cellX + g.dir.x, ny = g.cellY + g.dir.y;
-        if (canMove(nx, ny)) {
-          g.targetCellX = nx; g.targetCellY = ny;
-        } else {
-          g.targetCellX = g.cellX; g.targetCellY = g.cellY; g.progress = 0;
-        }
-      }
-      g.x = lerp(cellToPxX(g.cellX), cellToPxX(g.targetCellX), g.progress);
-      g.y = lerp(cellToPxY(g.cellY), cellToPxY(g.targetCellY), g.progress);
-
-      // ---------- Collision with pac-man ----------
-      const ddx = g.x - pacman.x, ddy = g.y - pacman.y;
-      if (ddx * ddx + ddy * ddy < (CELL_SIZE * 0.5) ** 2) {
-        if (g.isProject) {
-          if (vulnTime > 0) {
-            g.alive = false;
-            score += 500;
-            setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
-            openProjectFromGame(g.project.id);
-          } else {
-            // Bump back to current cell
-            pacman.targetCellX = pacman.cellX;
-            pacman.targetCellY = pacman.cellY;
-            pacman.progress = 0;
-            pacmanDir = { x: 0, y: 0 };
-            beep(120, 0.05, 'square', 0.06);
-          }
-        } else {
-          if (vulnTime > 0) {
-            g.alive = false;
-            score += 200;
-            setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
-            g.respawnAt = gameTime + 8;
-          } else {
-            lives--;
-            setHUD({ right: Math.max(0, lives) });
-            pacman.cellX = START_CELL_X;
-            pacman.cellY = START_CELL_Y;
-            pacman.targetCellX = START_CELL_X;
-            pacman.targetCellY = START_CELL_Y;
-            pacman.progress = 0;
-            pacmanDir = { x: 0, y: 0 };
-            pacman.x = cellToPxX(pacman.cellX);
-            pacman.y = cellToPxY(pacman.cellY);
-            const notes = [880, 770, 660, 550, 440, 350, 280, 220];
-            notes.forEach((f, i) => beep(f, 0.05, 'square', 0.08, i * 0.08));
-            if (lives <= 0) {
-              paused = true;
-              showGameOver(() => {
-                if (currentGameAPI && currentGameAPI.teardown) currentGameAPI.teardown();
-                startGame('pacman');
-              });
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // ====================================================================
-  // DRAW (visuals kept exactly as before)
-  // ====================================================================
-  function pacmanDraw() {
-    ctx.fillStyle = '#000';
-    ctx.fillRect(0, 0, W, H);
-
-    // Maze
-    for (let r = 0; r < ROWS; r++) {
-      for (let c = 0; c < COLS; c++) {
-        const x = mazeOffsetX + c * CELL_SIZE, y = mazeOffsetY + r * CELL_SIZE;
-        const ch = cells[r][c];
-        if (ch === '#') {
-          ctx.fillStyle = '#0040c0';
-          ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-          ctx.strokeStyle = '#00b4ff';
-          ctx.lineWidth = 2;
-          ctx.strokeRect(x + 1, y + 1, CELL_SIZE - 2, CELL_SIZE - 2);
-        } else if (ch === '=') {
-          ctx.fillStyle = '#ffb8ff';
-          ctx.fillRect(x, y + CELL_SIZE * 0.4, CELL_SIZE, 3);
-        } else if (ch === '.') {
-          ctx.fillStyle = '#fff';
-          ctx.fillRect(x + CELL_SIZE/2 - 1, y + CELL_SIZE/2 - 1, 3, 3);
-        } else if (ch === 'o') {
-          ctx.fillStyle = '#fff';
-          ctx.beginPath();
-          ctx.arc(x + CELL_SIZE/2, y + CELL_SIZE/2, 5, 0, Math.PI * 2);
-          ctx.fill();
-        }
-      }
-    }
-
-    // Pac-Man
-    const angle = (pacman.mouth * 0.6 + 0.1) * Math.PI;
-    let facing = 0;
-    if (pacmanDir.x > 0) facing = 0;
-    else if (pacmanDir.x < 0) facing = Math.PI;
-    else if (pacmanDir.y < 0) facing = -Math.PI/2;
-    else if (pacmanDir.y > 0) facing = Math.PI/2;
-    ctx.save();
-    ctx.translate(pacman.x, pacman.y);
-    ctx.rotate(facing);
-    ctx.fillStyle = '#FFE000';
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.arc(0, 0, CELL_SIZE * 0.45, angle, Math.PI * 2 - angle);
-    ctx.closePath();
-    ctx.fill();
-    ctx.restore();
-
-    // Ghosts
-    for (const g of ghosts) {
-      if (!g.alive) continue;
-      const col = vulnTime > 0
-        ? (vulnTime < 2000 && Math.floor(performance.now()/200) % 2 === 0 ? '#fff' : '#0040c0')
-        : g.color;
-      drawGhost(ctx, g.x, g.y, g.size, col, g.dir.x, g.dir.y);
-      if (g.isProject) {
-        ctx.fillStyle = '#fff';
-        ctx.font = '9px "Press Start 2P", monospace';
-        ctx.textAlign = 'center';
-        ctx.fillText(g.project.name, g.x, g.y + g.size + 10);
-      }
-    }
-  }
-  function drawGhost(ctx, x, y, sz, color, dx, dy) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y - sz * 0.1, sz, Math.PI, 0);
-    ctx.lineTo(x + sz, y + sz * 0.7);
-    const waves = 4;
-    for (let i = 0; i < waves; i++) {
-      const px = x + sz - (i + 1) * (sz * 2 / waves);
-      const py = y + sz * 0.7 + (i % 2 === 0 ? -sz * 0.2 : 0);
-      ctx.lineTo(px, py);
-    }
-    ctx.lineTo(x - sz, y - sz * 0.1);
-    ctx.closePath();
-    ctx.fill();
-    ctx.fillStyle = '#fff';
-    ctx.beginPath(); ctx.arc(x - sz * 0.35, y - sz * 0.1, sz * 0.22, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + sz * 0.35, y - sz * 0.1, sz * 0.22, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#0040c0';
-    ctx.beginPath(); ctx.arc(x - sz * 0.35 + dx * 3, y - sz * 0.1 + dy * 3, sz * 0.12, 0, Math.PI * 2); ctx.fill();
-    ctx.beginPath(); ctx.arc(x + sz * 0.35 + dx * 3, y - sz * 0.1 + dy * 3, sz * 0.12, 0, Math.PI * 2); ctx.fill();
-  }
-
-  // Ensure focus before the first frame so keys fire immediately
-  try { window.focus(); } catch (e) {}
-  try { document.body.focus && document.body.focus(); } catch (e) {}
-
-  startPacmanLoop();
-
-  return {
-    pause:  () => { paused = true;  stopPacmanLoop(); },
-    resume: () => { paused = false; startPacmanLoop(); },
-    teardown: () => {
-      stopPacmanLoop();
-      window.removeEventListener('keydown', pacmanKeyHandler);
-      window.removeEventListener('resize', resize);
-      document.removeEventListener('visibilitychange', pacmanVisibilityHandler);
-      dpadHandlers.forEach(({ el, h }) => el.removeEventListener('touchstart', h));
-    },
-  };
 });
 
 /* ============================================================
