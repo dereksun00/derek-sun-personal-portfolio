@@ -1063,6 +1063,43 @@
      PER-GAME THEME OVERRIDES (body class scoped)
      ============================================================ */
 
+  /* SPACE INVADERS — skill popup card */
+  .inv-skill-popup {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.85);
+    background: rgba(8, 6, 16, 0.92);
+    border: 2px solid rgba(255,255,255,0.18);
+    padding: 18px 28px;
+    z-index: 8;
+    pointer-events: none;
+    text-align: center;
+    box-shadow: 0 0 22px rgba(0,0,0,0.7), 0 0 0 4px rgba(8,6,16,0.92);
+    opacity: 0;
+    transition: opacity 0.18s ease-out, transform 0.18s ease-out;
+    font-family: 'Press Start 2P', monospace;
+  }
+  .inv-skill-popup.in {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  .inv-skill-popup.out {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(1.04);
+  }
+  .inv-skill-popup .inv-skill-name {
+    font-size: 14px;
+    letter-spacing: 0.18em;
+    margin-bottom: 8px;
+    text-shadow: 0 0 8px currentColor;
+  }
+  .inv-skill-popup .inv-skill-cat {
+    font-size: 9px;
+    letter-spacing: 0.28em;
+    color: #fff;
+    opacity: 0.7;
+  }
+
   /* STREET FIGHTER */
   body.game-fighter {
     --green: #ff3300;
@@ -4431,7 +4468,28 @@ registerGame('invaders', function initInvaders() {
   resize();
   window.addEventListener('resize', resize);
 
-  const projects = QUESTS.filter(q => q.kind === 'project');
+  // Skill formation: each row carries a category color + named skills
+  // (which trigger the skill popup card) plus optional decorative padding
+  // aliens of the same color (no name, no popup).
+  const CATEGORY_COLOR = {
+    language:  '#39ff85',
+    framework: '#4cf2ff',
+    library:   '#ff5cc8',
+    tool:      '#ffcf52',
+  };
+  const CATEGORY_LABEL = {
+    language:  'LANGUAGE',
+    framework: 'FRAMEWORK',
+    library:   'LIBRARY',
+    tool:      'TOOL',
+  };
+  const SKILL_ROWS = [
+    { category: 'language',  names: ['Python','TypeScript','JavaScript','SQL','R','Java','HTML/CSS'], decoratives: 0 },
+    { category: 'framework', names: ['React','Node.js','Express','FastAPI'],                          decoratives: 1 },
+    { category: 'library',   names: ['pandas','NumPy','scikit-learn'],                                decoratives: 2 },
+    { category: 'tool',      names: ['AWS','Docker','Git','GitHub'],                                  decoratives: 1 },
+  ];
+
   const ship = { x: W/2, y: H - 70, w: 40, h: 24, speed: 320, invul: 0 };
   let score = 0, lives = 3, paused = false, dead = false;
   const bullets = [];        // player bullets
@@ -4446,35 +4504,29 @@ registerGame('invaders', function initInvaders() {
     stars.push({ x: Math.random() * W, y: Math.random() * H, a: 0.2 + Math.random() * 0.5 });
   }
 
-  // Build aliens: 5 cols × 4 rows = 20. Three "project" slots:
-  const projectSlots = [
-    { r: 0, c: 2 }, { r: 1, c: 3 }, { r: 2, c: 4 },
-  ];
-  let pi = 0;
-  const ALIEN_W = 30, ALIEN_H = 22, GAP_X = 36, GAP_Y = 30;
-  const ROWS = 4, COLS = 5;
-  const formationW = COLS * ALIEN_W + (COLS - 1) * GAP_X;
-  const startX = (W - formationW) / 2;
-  const startY = 90;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
-      const slot = projectSlots.find(s => s.r === r && s.c === c);
-      const isProj = !!slot && pi < projects.length;
-      const a = {
-        x: startX + c * (ALIEN_W + GAP_X),
+  // Build aliens — each row centered independently. Same-size aliens; only
+  // color (category) and presence-of-name differ across rows.
+  const ALIEN_W = 30, ALIEN_H = 22, GAP_X = 30, GAP_Y = 36;
+  const startY = 80;
+  SKILL_ROWS.forEach((row, r) => {
+    const cols = row.names.length + row.decoratives;
+    const rowFormationW = cols * ALIEN_W + (cols - 1) * GAP_X;
+    const rowStartX = (W - rowFormationW) / 2;
+    for (let c = 0; c < cols; c++) {
+      const isNamed = c < row.names.length;
+      aliens.push({
+        x: rowStartX + c * (ALIEN_W + GAP_X),
         y: startY + r * (ALIEN_H + GAP_Y),
-        w: isProj ? ALIEN_W * 1.4 : ALIEN_W,
-        h: isProj ? ALIEN_H * 1.4 : ALIEN_H,
+        w: ALIEN_W, h: ALIEN_H,
         row: r, col: c,
         frame: 0,
         alive: true,
-        isProject: isProj,
-        project: isProj ? projects[pi++] : null,
+        category: row.category,
+        name: isNamed ? row.names[c] : null,
         type: r < 2 ? 'small' : 'big',
-      };
-      aliens.push(a);
+      });
     }
-  }
+  });
   let formationDir = 1;
   let formationSpeed = 30; // px/s
   let frameTimer = 0;
@@ -4538,26 +4590,43 @@ registerGame('invaders', function initInvaders() {
     o.start(t0); o.stop(t0 + 0.12);
   }
 
-  function explosionAt(x, y, isProject) {
-    const n = isProject ? 14 : 8;
+  function explosionAt(x, y, color) {
+    const n = 8;
     for (let i = 0; i < n; i++) {
       const a = (i / n) * Math.PI * 2;
       particles.push({
         x, y,
         vx: Math.cos(a) * (60 + Math.random() * 60),
         vy: Math.sin(a) * (60 + Math.random() * 60),
-        life: isProject ? 0.4 : 0.3,
+        life: 0.3,
         age: 0,
-        color: isProject ? '#ffd166' : '#39ff85',
-        size: isProject ? 4 : 3,
+        color: color || '#39ff85',
+        size: 3,
       });
     }
+  }
+
+  function showSkillPopup(name, category) {
+    const popup = document.createElement('div');
+    popup.className = 'inv-skill-popup';
+    const color = CATEGORY_COLOR[category] || '#fff';
+    popup.innerHTML = `
+      <div class="inv-skill-name" style="color:${color}">${name}</div>
+      <div class="inv-skill-cat">${CATEGORY_LABEL[category] || ''}</div>
+    `;
+    document.body.appendChild(popup);
+    requestAnimationFrame(() => popup.classList.add('in'));
+    setTimeout(() => {
+      popup.classList.remove('in');
+      popup.classList.add('out');
+      setTimeout(() => popup.remove(), 200);
+    }, 1300);
   }
 
   // Enemy shooting timer
   let enemyShootTimer = 2000;
   let lastTime = performance.now();
-  setHUD({ left: 'SCORE 0000', center: '', right: lives });
+  setHUD({ left: 'SCORE 0000', center: '', right: 'LIVES: ' + lives });
 
   function update(dt) {
     if (paused || dead) return;
@@ -4576,11 +4645,7 @@ registerGame('invaders', function initInvaders() {
 
     // Alien formation
     const aliveAliens = aliens.filter(a => a.alive);
-    const decoAlive = aliveAliens.filter(a => !a.isProject);
-    const projAlive = aliveAliens.filter(a => a.isProject);
-    // Speed up when only project aliens left
-    const speedMult = (decoAlive.length === 0 && projAlive.length > 0) ? 2.5 : 1;
-    const moveDelta = formationDir * formationSpeed * speedMult * dt;
+    const moveDelta = formationDir * formationSpeed * dt;
     aliveAliens.forEach(a => { a.x += moveDelta; });
 
     // Recompute bounds AFTER move and clamp the whole formation back if
@@ -4607,8 +4672,8 @@ registerGame('invaders', function initInvaders() {
 
     // Enemy shooting
     enemyShootTimer -= dt * 1000;
-    if (enemyShootTimer < 0 && decoAlive.length > 0) {
-      const a = decoAlive[Math.floor(Math.random() * decoAlive.length)];
+    if (enemyShootTimer < 0 && aliveAliens.length > 0) {
+      const a = aliveAliens[Math.floor(Math.random() * aliveAliens.length)];
       fireEnemy(a);
       enemyShootTimer = 1800 + Math.random() * 1200;
     }
@@ -4625,41 +4690,21 @@ registerGame('invaders', function initInvaders() {
         if (b.x > a.x && b.x < a.x + a.w && b.y > a.y && b.y < a.y + a.h) {
           a.alive = false;
           bullets.splice(i, 1);
-          if (a.isProject) {
-            score += 100;
-            explosionAt(a.x + a.w/2, a.y + a.h/2, true);
-            sfxOpen();
-            // White noise burst
-            const ctxA = ensureAudio();
-            if (ctxA) {
-              const dur = 0.08;
-              const buf = ctxA.createBuffer(1, Math.max(1, ctxA.sampleRate * dur), ctxA.sampleRate);
-              const d = buf.getChannelData(0);
-              for (let k = 0; k < d.length; k++) d[k] = Math.random()*2 - 1;
-              const n = ctxA.createBufferSource(); n.buffer = buf;
-              const ng = ctxA.createGain();
-              ng.gain.setValueAtTime(0.18, ctxA.currentTime);
-              ng.gain.exponentialRampToValueAtTime(0.0001, ctxA.currentTime + dur);
-              n.connect(ng).connect(ctxA.destination);
-              n.start();
-            }
-            openProjectFromGame(a.project.id);
-          } else {
-            score += 10;
-            explosionAt(a.x + a.w/2, a.y + a.h/2, false);
-            // Mid descending noise
-            const ctxA = ensureAudio();
-            if (ctxA) {
-              const o = ctxA.createOscillator(); const g = ctxA.createGain();
-              o.type = 'sawtooth';
-              o.frequency.setValueAtTime(660, ctxA.currentTime);
-              o.frequency.exponentialRampToValueAtTime(200, ctxA.currentTime + 0.15);
-              g.gain.setValueAtTime(0.08, ctxA.currentTime);
-              g.gain.exponentialRampToValueAtTime(0.0001, ctxA.currentTime + 0.15);
-              o.connect(g).connect(ctxA.destination);
-              o.start(); o.stop(ctxA.currentTime + 0.16);
-            }
+          score += 10;
+          explosionAt(a.x + a.w/2, a.y + a.h/2, CATEGORY_COLOR[a.category]);
+          // Mid descending noise
+          const ctxA = ensureAudio();
+          if (ctxA) {
+            const o = ctxA.createOscillator(); const g = ctxA.createGain();
+            o.type = 'sawtooth';
+            o.frequency.setValueAtTime(660, ctxA.currentTime);
+            o.frequency.exponentialRampToValueAtTime(200, ctxA.currentTime + 0.15);
+            g.gain.setValueAtTime(0.08, ctxA.currentTime);
+            g.gain.exponentialRampToValueAtTime(0.0001, ctxA.currentTime + 0.15);
+            o.connect(g).connect(ctxA.destination);
+            o.start(); o.stop(ctxA.currentTime + 0.16);
           }
+          if (a.name) showSkillPopup(a.name, a.category);
           setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
           hit = true;
           break;
@@ -4708,7 +4753,7 @@ registerGame('invaders', function initInvaders() {
         enemyBullets.splice(i, 1);
         lives--;
         ship.invul = 2000;
-        setHUD({ right: Math.max(0, lives) });
+        setHUD({ right: 'LIVES: ' + Math.max(0, lives) });
         // Hurt sound — low buzz with tremolo
         const ctxA = ensureAudio();
         if (ctxA) {
@@ -4755,17 +4800,21 @@ registerGame('invaders', function initInvaders() {
     }
     ctx.globalAlpha = 1;
 
-    // Aliens
+    // Aliens (and per-alien skill name labels)
     for (const a of aliens) {
       if (!a.alive) continue;
       drawAlien(ctx, a);
-      if (a.isProject) {
-        ctx.fillStyle = '#ffcf52';
-        ctx.font = '9px "Press Start 2P", monospace';
+      if (a.name) {
+        ctx.fillStyle = CATEGORY_COLOR[a.category];
+        ctx.font = '8px "Press Start 2P", monospace';
         ctx.textAlign = 'center';
-        ctx.fillText(a.project.name, a.x + a.w / 2, a.y + a.h + 14);
+        ctx.textBaseline = 'top';
+        ctx.fillText(a.name, a.x + a.w / 2, a.y + a.h + 4);
       }
     }
+
+    // Color legend (bottom-left, above the leftmost bunker)
+    drawLegend(ctx);
 
     // Bunkers
     ctx.fillStyle = '#39ff85';
@@ -4806,10 +4855,9 @@ registerGame('invaders', function initInvaders() {
   }
 
   function drawAlien(ctx, a) {
-    const scale = a.isProject ? 1.4 : 1;
-    ctx.fillStyle = a.isProject ? '#ffd700' : (a.type === 'small' ? '#39ff85' : '#88ffaa');
+    ctx.fillStyle = CATEGORY_COLOR[a.category] || '#39ff85';
     const f = a.frame;
-    // Simple 8x6 pixel art
+    // Simple 8x6 pixel art (small / big sprite variants kept for visual variety)
     const sprite = a.type === 'small'
       ? (f === 0
         ? ['..XXXX..','.XXXXXX.','XX.XX.XX','XXXXXXXX','.X.XX.X.','X.X..X.X']
@@ -4824,6 +4872,27 @@ registerGame('invaders', function initInvaders() {
         if (sprite[py][px] === 'X') ctx.fillRect(a.x + px * pw, a.y + py * ph, pw, ph);
       }
     }
+  }
+
+  function drawLegend(ctx) {
+    const rows = [
+      { color: '#39ff85', label: 'LANGUAGES' },
+      { color: '#4cf2ff', label: 'FRAMEWORKS' },
+      { color: '#ff5cc8', label: 'LIBRARIES' },
+      { color: '#ffcf52', label: 'TOOLS' },
+    ];
+    const x = 24;
+    const baseY = H - 160; // sits above the leftmost bunker (bunkers are at H-130)
+    ctx.font = '8px "Press Start 2P", monospace';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    rows.forEach((row, i) => {
+      const y = baseY + i * 14;
+      ctx.fillStyle = row.color;
+      ctx.fillRect(x, y - 3, 7, 7);
+      ctx.fillStyle = '#fff';
+      ctx.fillText(row.label, x + 14, y);
+    });
   }
 
   function loop(t) {
