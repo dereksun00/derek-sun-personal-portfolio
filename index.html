@@ -2549,8 +2549,7 @@ const QUESTS = [
       { text: '1ST PLACE', cls: 'gold' },
     ],
     status: 'COMPLETED — 1ST PLACE',
-    location: 'HACK THE STUDENT LIFE',
-    body: 'T-Care is a campus support navigator built for UofT students. You describe a need in plain language — losing a TCard, needing exam accommodations, looking for counselling — and T-Care routes you to the exact campus office or resource. It uses Amazon Bedrock with optional Amazon Kendra context to resolve natural-language queries into specific campus destinations with addresses, or plain-language answers with support links.',
+    body: 'T-Care is a campus support navigator built for UofT students. Describe a need in plain language, losing a TCard, needing exam accommodations, looking for counselling, and T-Care routes you to the exact campus office or resource. It uses Amazon Bedrock with optional Amazon Kendra context to resolve natural-language queries into specific campus destinations with addresses, or plain-language answers with support links.',
     tech: 'NODE.JS · EXPRESS · AMAZON BEDROCK · AMAZON KENDRA · REACT · TYPESCRIPT · VITE · GOOGLE MAPS API',
     url: 'https://github.com/dereksun00/T-Care',
   },
@@ -2560,8 +2559,7 @@ const QUESTS = [
     name: 'TORETTO',
     tags: [{ text: 'COMPLETED', cls: '' }],
     status: 'COMPLETED',
-    location: 'MACHACKS 2026',
-    body: 'Toretto is a mobile fall-detection system for families with elderly members. The phone streams accelerometer data in real time — acceleration magnitude, jerk, orientation — into a Random Forest classifier trained to distinguish falls from normal movement. When a fall is detected, every registered family member gets an immediate alert.',
+    body: 'Toretto is a mobile fall-detection system for families with elderly members. The phone streams accelerometer data in real time, acceleration magnitude, jerk, and orientation, into a Random Forest classifier trained to distinguish falls from normal movement. When a fall is detected every registered family member gets an immediate alert.',
     tech: 'REACT NATIVE · FASTAPI · RANDOM FOREST · PYTHON',
     url: 'https://github.com/twitocode/machacks-2026',
   },
@@ -2571,8 +2569,7 @@ const QUESTS = [
     name: 'ENVORA',
     tags: [{ text: 'COMPLETED', cls: '' }],
     status: 'COMPLETED',
-    location: 'PERSONAL PROJECT',
-    body: 'Envora provisions isolated demo environments on demand. You describe a scenario in natural language, and Envora generates realistic synthetic seed data using Claude, spins up a fresh Postgres database and Docker container, and hands you a shareable URL. Built for teams that need realistic demo environments without touching production data.',
+    body: 'Envora provisions isolated demo environments on demand. Describe a scenario in natural language and Envora generates realistic synthetic seed data using Claude, spins up a fresh Postgres database and Docker container, and hands you a shareable URL. Built for teams that need realistic demo environments without touching production data.',
     tech: 'NEXT.JS · EXPRESS · TYPESCRIPT · POSTGRESQL · DOCKER · SQLITE · PRISMA · CLAUDE API',
     url: 'https://github.com/dereksun00/envora',
   },
@@ -2662,7 +2659,6 @@ function _renderDetailInner() {
     <div class="detail-content" key="${q.id}">
       <div class="quest-head">QUEST: ${q.name}</div>
       <div class="status-line">STATUS: ${q.status}</div>
-      <div class="loc-line">LOCATION: ${q.location}</div>
       <div class="body">${q.body}</div>
       <div class="tech"><span class="lbl">TECH:</span>${q.tech}</div>
     </div>
@@ -2736,7 +2732,7 @@ function openProjectOverlay(q, opts) {
   ovTitleEl.textContent = '';
   ovTitleEl.setAttribute('data-text', '');
   ovStatusEl.textContent = 'STATUS: ' + q.status;
-  ovLocEl.textContent = 'LOCATION: ' + q.location;
+  ovLocEl.textContent = '';
   ovLoreEl.innerHTML = '';
 
   const techParts = q.tech.split('·').map(s => s.trim()).filter(Boolean);
