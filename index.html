@@ -908,12 +908,43 @@
   }
   .game-grid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(220px, 290px));
-    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(3, minmax(200px, 260px));
     gap: 22px;
+    justify-content: center;
   }
   @media (max-width: 720px) {
     .game-grid { grid-template-columns: 1fr; }
+  }
+  .contact-divider {
+    width: min(600px, 80vw);
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--amber), transparent);
+    opacity: 0.65;
+    margin-top: 6px;
+  }
+  .contact-btn {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    letter-spacing: 0.28em;
+    color: var(--amber);
+    background: rgba(0,0,0,0.5);
+    border: 1px solid var(--amber);
+    padding: 10px 22px;
+    cursor: pointer;
+    text-shadow: 0 0 8px rgba(255,207,82,0.5);
+    transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
+  }
+  .contact-btn:hover {
+    background: rgba(255,207,82,0.18);
+    color: #fff;
+    box-shadow: 0 0 14px rgba(255,207,82,0.45);
+  }
+  .contact-placeholder {
+    color: var(--amber);
+    font-size: 12px;
+    letter-spacing: 0.22em;
+    text-align: center;
+    margin-top: 40vh;
   }
   .game-card {
     background: #0c0820;
@@ -2061,8 +2092,8 @@
 
   /* Larger game-select cabinet cards */
   .game-grid {
-    grid-template-columns: repeat(2, 220px);
-    grid-template-rows: repeat(2, 280px);
+    grid-template-columns: repeat(3, 220px);
+    grid-auto-rows: 280px;
     gap: 28px;
   }
   @media (max-width: 720px) { .game-grid { grid-template-columns: 220px; } }
@@ -2157,9 +2188,9 @@
   <div class="select-back" id="select-back">← BACK</div>
   <div class="select-title">— SELECT YOUR GAME —</div>
   <div class="game-grid">
-    <div class="game-card" data-game="invaders">
-      <div class="gc-preview"><div class="preview-invader"></div></div>
-      <div class="gc-title">SPACE INVADERS</div>
+    <div class="game-card" data-game="mario">
+      <div class="gc-preview"><div class="preview-mario">?</div></div>
+      <div class="gc-title">MARIO</div>
       <div class="gc-coin">INSERT COIN</div>
     </div>
     <div class="game-card" data-game="fighter">
@@ -2167,12 +2198,20 @@
       <div class="gc-title">STREET FIGHTER</div>
       <div class="gc-coin">INSERT COIN</div>
     </div>
-    <div class="game-card" data-game="mario">
-      <div class="gc-preview"><div class="preview-mario">?</div></div>
-      <div class="gc-title">MARIO</div>
+    <div class="game-card" data-game="invaders">
+      <div class="gc-preview"><div class="preview-invader"></div></div>
+      <div class="gc-title">SPACE INVADERS</div>
       <div class="gc-coin">INSERT COIN</div>
     </div>
   </div>
+  <div class="contact-divider"></div>
+  <button class="contact-btn" id="contact-btn" type="button">[ CONTACT ]</button>
+</section>
+
+<!-- ===== SCREEN: CONTACT (slot machine — built in phase 6) ===== -->
+<section id="screen-contact" class="screen">
+  <div class="select-back" id="contact-back">← BACK</div>
+  <div class="contact-placeholder">CONTACT SCREEN — COMING IN PHASE 6</div>
 </section>
 
 <!-- ===== MAIN SCREEN: QUEST LOG ===== -->
@@ -2360,10 +2399,11 @@ function sfxBootBlip() { beep(220, 0.03, 'square', 0.04); }
 
 /* ---------- Screen routing ---------- */
 const screens = {
-  boot:   document.getElementById('screen-boot'),
-  title:  document.getElementById('screen-title'),
-  select: document.getElementById('screen-select'),
-  quest:  document.getElementById('screen-quest'),
+  boot:    document.getElementById('screen-boot'),
+  title:   document.getElementById('screen-title'),
+  select:  document.getElementById('screen-select'),
+  quest:   document.getElementById('screen-quest'),
+  contact: document.getElementById('screen-contact'),
 };
 let currentScreen = 'boot';
 
@@ -3617,6 +3657,20 @@ document.querySelectorAll('.game-card').forEach(card => {
 document.getElementById('select-back').addEventListener('click', () => {
   ensureAudio();
   wipeTo(() => show('title'));
+  sfxBack();
+});
+
+/* Contact button on game select — transitions to the slot machine screen */
+document.getElementById('contact-btn').addEventListener('click', () => {
+  ensureAudio();
+  sfxConfirm();
+  wipeTo(() => show('contact'));
+});
+
+/* Contact screen BACK */
+document.getElementById('contact-back').addEventListener('click', () => {
+  ensureAudio();
+  wipeTo(() => show('select'));
   sfxBack();
 });
 
