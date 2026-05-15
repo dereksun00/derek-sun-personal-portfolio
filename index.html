@@ -944,184 +944,405 @@
      ============================================================ */
   #screen-contact {
     flex-direction: column;
-    gap: 18px;
+    justify-content: center;
+    background: #050310;
     padding: 60px 4vmin 40px;
   }
-  .slot-wrap {
+  .slot-stage {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
-    max-width: 640px;
+    gap: 8px;
     width: 100%;
     position: relative;
+    z-index: 1;
   }
+  .slot-heading { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-bottom: 14px; }
   .slot-title {
     color: var(--amber);
-    font-size: clamp(18px, 3vw, 26px);
-    letter-spacing: 0.36em;
-    text-shadow: 0 0 12px rgba(255,207,82,0.45);
+    font-size: 24px;
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 12px rgba(255,207,82,0.55);
   }
-  .slot-subtitle {
-    color: var(--green);
-    font-size: 10px;
-    letter-spacing: 0.32em;
-    text-shadow: 0 0 6px rgba(107,255,138,0.45);
-    margin-bottom: 8px;
-  }
-  .slot-machine {
-    display: flex;
-    align-items: center;
-    gap: 18px;
-    padding: 18px;
-    background: rgba(10, 6, 20, 0.85);
-    border: 2px solid var(--green);
-    box-shadow: 0 0 0 4px #0c0820, 0 0 22px rgba(107,255,138,0.25);
-    position: relative;
-  }
-  .slot-reels {
-    display: flex;
-    gap: 10px;
-  }
-  .slot-reel {
-    width: 80px;
-    height: 80px;
-    border: 2px solid var(--green);
-    background: #050310;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--green);
-    font-family: 'Press Start 2P', monospace;
-    font-size: 32px;
-    text-shadow: 0 0 8px rgba(107,255,138,0.5);
-    overflow: hidden;
-    transition: box-shadow 0.18s ease-out, border-color 0.18s ease-out;
-  }
-  .slot-reel.locked {
-    border-color: var(--amber);
-    color: var(--amber);
-    text-shadow: 0 0 10px rgba(255,207,82,0.6);
-  }
-  .slot-reel.spinning .slot-symbol {
-    animation: slot-spin-blur 0.06s steps(1) infinite;
-  }
-  @keyframes slot-spin-blur {
-    0%, 100% { transform: translateY(-2px); }
-    50%      { transform: translateY(2px); }
-  }
-  .slot-reel.flash-gold {
-    border-color: #ffd700;
-    color: #ffd700;
-    box-shadow: 0 0 18px rgba(255,215,0,0.8), inset 0 0 12px rgba(255,215,0,0.4);
-    animation: slot-gold-flash 0.6s ease-out;
-  }
-  @keyframes slot-gold-flash {
-    0%, 100% { filter: brightness(1); }
-    50%      { filter: brightness(1.8); }
-  }
-  .slot-lever {
-    position: relative;
-    width: 22px;
-    height: 100px;
-    background: transparent;
-    border: none;
-    padding: 0;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    transition: transform 0.15s ease-out;
-  }
-  .slot-lever:disabled { cursor: not-allowed; opacity: 0.4; }
-  .slot-lever.pulling { transform: translateY(20px); }
-  .slot-lever-ball {
-    width: 18px;
-    height: 18px;
-    background: radial-gradient(circle at 35% 30%, #ff8a8a, #c52020 60%, #5a0a0a);
-    border-radius: 50%;
-    box-shadow: 0 0 8px rgba(220,30,30,0.5);
-    flex-shrink: 0;
-  }
-  .slot-lever-stick {
-    width: 4px;
-    flex: 1;
-    background: linear-gradient(to right, #b0b0b0, #e8e8e8, #888);
-    border-radius: 0 0 2px 2px;
+  .slot-title-divider {
+    width: 200px;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--amber), transparent);
+    opacity: 0.7;
   }
   .slot-jackpot {
     color: var(--amber);
     font-family: 'Press Start 2P', monospace;
-    font-size: clamp(20px, 4vw, 32px);
-    letter-spacing: 0.32em;
-    text-shadow: 0 0 14px rgba(255,207,82,0.7), 0 0 28px rgba(255,207,82,0.45);
+    font-size: 24px;
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 14px rgba(255,207,82,0.8), 0 0 28px rgba(255,207,82,0.5);
     opacity: 0;
-    transform: scale(0.8);
+    transform: scale(0);
     pointer-events: none;
     height: 0;
     margin: 0;
-    transition: none;
   }
   .slot-jackpot.show {
-    opacity: 1;
     height: auto;
-    margin: 6px 0;
-    animation: slot-jackpot-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    margin-top: 6px;
+    animation: slot-jackpot-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   @keyframes slot-jackpot-in {
-    0%   { opacity: 0; transform: scale(0.8); }
-    60%  { opacity: 1; transform: scale(1.1); }
-    100% { opacity: 1; transform: scale(1.0); }
+    0%   { opacity: 0; transform: scale(0); }
+    60%  { opacity: 1; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
   }
+  /* Machine body */
+  .slot-machine {
+    position: relative;
+    width: 400px;
+    height: 320px;
+    background: linear-gradient(to bottom, #1f1f3a, #1a1a2e 30%, #14142a);
+    border: 3px solid #ffd700;
+    border-radius: 14px;
+    box-shadow:
+      inset 0 0 0 2px #ff6b00,
+      inset 0 0 24px rgba(255,107,0,0.25),
+      0 0 0 4px #050310,
+      0 14px 28px rgba(0,0,0,0.7),
+      0 0 28px rgba(255,107,0,0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: border-color 0.18s ease-out;
+  }
+  .slot-machine.jackpot-pulse { animation: machine-pulse 0.6s steps(2) 3; }
+  @keyframes machine-pulse {
+    0%, 100% { border-color: #ffd700; box-shadow: inset 0 0 0 2px #ff6b00, inset 0 0 24px rgba(255,107,0,0.25), 0 0 0 4px #050310, 0 14px 28px rgba(0,0,0,0.7), 0 0 28px rgba(255,107,0,0.25); }
+    50%      { border-color: #fff; box-shadow: inset 0 0 0 2px #fff, inset 0 0 24px rgba(255,255,255,0.45), 0 0 0 4px #050310, 0 14px 28px rgba(0,0,0,0.7), 0 0 36px rgba(255,255,255,0.55); }
+  }
+  /* Marquee strip top */
+  .slot-marquee {
+    position: relative;
+    height: 38px;
+    background: linear-gradient(to bottom, #2a2a4a, #181830);
+    border-bottom: 2px solid #ffd700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+  .slot-marquee-text {
+    color: var(--amber);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    letter-spacing: 0.32em;
+    text-shadow: 0 0 8px rgba(255,207,82,0.7);
+  }
+  .slot-marquee-lights {
+    position: absolute;
+    left: 0; right: 0;
+    height: 4px;
+    top: 4px;
+    background-image: radial-gradient(circle, #ffd700 1.4px, transparent 2px);
+    background-size: 14px 4px;
+    background-position: 0 0;
+    animation: marquee-scroll 1.4s linear infinite;
+    opacity: 0.85;
+  }
+  .slot-marquee-lights.bottom {
+    top: auto;
+    bottom: 4px;
+    animation-direction: reverse;
+  }
+  @keyframes marquee-scroll {
+    0%   { background-position: 0 0; }
+    100% { background-position: 14px 0; }
+  }
+  .slot-body {
+    position: relative;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    padding: 14px 56px 14px 16px;
+  }
+  .slot-reels {
+    position: relative;
+    display: flex;
+    gap: 6px;
+    margin: 0 auto;
+  }
+  .slot-reel {
+    width: 90px;
+    height: 90px;
+    background: #000;
+    border: 3px solid #ffd700;
+    border-radius: 6px;
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.85), 0 0 6px rgba(255,215,0,0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 28px;
+    text-shadow: 0 0 8px rgba(107,255,138,0.6);
+    overflow: hidden;
+    position: relative;
+    transition: box-shadow 0.18s ease-out, border-color 0.18s ease-out, color 0.18s ease-out;
+  }
+  .slot-reel + .slot-reel {
+    box-shadow: inset 0 0 12px rgba(0,0,0,0.85), 0 0 6px rgba(255,215,0,0.18);
+  }
+  .slot-reel + .slot-reel::before {
+    content: '';
+    position: absolute;
+    left: -4px; top: 6px; bottom: 6px;
+    width: 1px;
+    background: linear-gradient(to bottom, transparent, #ffd700 30%, #ffd700 70%, transparent);
+    opacity: 0.65;
+  }
+  .slot-reel .slot-symbol {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+  }
+  .slot-reel.spinning .slot-symbol {
+    animation: slot-spin-blur 0.1s steps(2) infinite;
+  }
+  @keyframes slot-spin-blur {
+    0%, 100% { transform: translateY(-3px); filter: blur(0.5px); }
+    50%      { transform: translateY(3px);  filter: blur(0.5px); }
+  }
+  .slot-reel.locked {
+    color: var(--amber);
+    text-shadow: 0 0 10px rgba(255,207,82,0.7);
+  }
+  .slot-reel.flash-gold {
+    border-color: #fffbcc;
+    box-shadow: 0 0 18px rgba(255,215,0,0.9), inset 0 0 16px rgba(255,215,0,0.5);
+    color: #fff8b0;
+    animation: slot-gold-flash 0.6s ease-out;
+  }
+  @keyframes slot-gold-flash {
+    0%, 100% { filter: brightness(1); }
+    50%      { filter: brightness(1.9); }
+  }
+  /* Payline */
+  .slot-payline {
+    position: absolute;
+    left: 4px; right: 4px;
+    top: 50%;
+    height: 1px;
+    background: #ff3344;
+    box-shadow: 0 0 6px rgba(255,51,68,0.7);
+    pointer-events: none;
+    transform: translateY(-0.5px);
+  }
+  .slot-payline-label {
+    position: absolute;
+    left: -42px;
+    top: calc(50% - 4px);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px;
+    color: #ff5566;
+    letter-spacing: 0.14em;
+    text-shadow: 0 0 4px rgba(255,51,68,0.5);
+    pointer-events: none;
+  }
+  /* Lever — right side */
+  .slot-lever {
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 30px;
+    height: 110px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .slot-lever:disabled { cursor: not-allowed; opacity: 0.55; }
+  .slot-lever-track {
+    position: absolute;
+    left: 11px;
+    top: 14px;
+    width: 8px;
+    height: 86px;
+    background: linear-gradient(to right, #1a1a1a, #4a4a4a 30%, #6a6a6a 50%, #4a4a4a 70%, #1a1a1a);
+    border-radius: 4px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.8);
+  }
+  .slot-lever-handle {
+    position: absolute;
+    left: 3px;
+    top: 0;
+    width: 24px;
+    height: 24px;
+    background: radial-gradient(circle at 35% 30%, #ff8e8e, #d12626 55%, #5a0a0a 95%);
+    border: 2px solid #ffd700;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(220,30,30,0.55), inset 0 -3px 6px rgba(0,0,0,0.4);
+    transition: transform 0.15s ease-in;
+  }
+  .slot-lever.pulling .slot-lever-handle {
+    animation: lever-pull 0.35s cubic-bezier(0.45, 0, 0.55, 1.6);
+  }
+  @keyframes lever-pull {
+    0%   { transform: translateY(0); }
+    43%  { transform: translateY(40px); }
+    70%  { transform: translateY(-4px); }
+    100% { transform: translateY(0); }
+  }
+  /* Coin slot */
+  .slot-coin-slot {
+    height: 32px;
+    background: linear-gradient(to bottom, #14142a, #050310);
+    border-top: 2px solid rgba(255,215,0,0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+  .slot-coin-rect {
+    width: 48px;
+    height: 5px;
+    background: #000;
+    border: 1px solid #5a5a5a;
+    border-radius: 2px;
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.95);
+  }
+  .slot-coin-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 6px;
+    color: var(--amber);
+    letter-spacing: 0.22em;
+    opacity: 0.6;
+  }
+  /* Pedestal base */
+  .slot-base {
+    width: 440px;
+    height: 20px;
+    background: linear-gradient(to bottom, #1a1a2e, #050310);
+    border: 3px solid #ffd700;
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    margin-top: -3px;
+    box-shadow: 0 12px 22px rgba(0,0,0,0.65);
+  }
+  /* Octocat pixel-art (16x16 div, 2px pixels = 8x8 grid) */
+  .octocat {
+    position: relative;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+  }
+  .octocat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 2px;
+    height: 2px;
+    background: #fff;
+    box-shadow:
+      2px 0 0 0 #fff, 12px 0 0 0 #fff, 14px 0 0 0 #fff,
+      0 2px 0 0 #fff, 2px 2px 0 0 #fff, 4px 2px 0 0 #fff, 6px 2px 0 0 #fff, 8px 2px 0 0 #fff, 10px 2px 0 0 #fff, 12px 2px 0 0 #fff, 14px 2px 0 0 #fff,
+      0 4px 0 0 #fff, 2px 4px 0 0 #fff, 6px 4px 0 0 #fff, 8px 4px 0 0 #fff, 12px 4px 0 0 #fff, 14px 4px 0 0 #fff,
+      0 6px 0 0 #fff, 2px 6px 0 0 #fff, 4px 6px 0 0 #fff, 6px 6px 0 0 #fff, 8px 6px 0 0 #fff, 10px 6px 0 0 #fff, 12px 6px 0 0 #fff, 14px 6px 0 0 #fff,
+      0 8px 0 0 #fff, 2px 8px 0 0 #fff, 4px 8px 0 0 #fff, 10px 8px 0 0 #fff, 12px 8px 0 0 #fff, 14px 8px 0 0 #fff,
+      0 10px 0 0 #fff, 2px 10px 0 0 #fff, 4px 10px 0 0 #fff, 6px 10px 0 0 #fff, 8px 10px 0 0 #fff, 10px 10px 0 0 #fff, 12px 10px 0 0 #fff, 14px 10px 0 0 #fff,
+      2px 12px 0 0 #fff, 4px 12px 0 0 #fff, 6px 12px 0 0 #fff, 8px 12px 0 0 #fff, 10px 12px 0 0 #fff, 12px 12px 0 0 #fff,
+      0 14px 0 0 #fff, 2px 14px 0 0 #fff, 6px 14px 0 0 #fff, 8px 14px 0 0 #fff, 12px 14px 0 0 #fff, 14px 14px 0 0 #fff;
+  }
+  /* Larger octocat for the reel display (scale up the same shape) */
+  .slot-reel .octocat { transform: scale(2.4); transform-origin: center; }
+  .slot-reel.locked .octocat::before,
+  .slot-reel.spinning .octocat::before {
+    /* shadows already white — keep as-is on locked + spinning */
+  }
+  /* Contact result rows */
   .slot-results {
     display: flex;
     flex-direction: column;
-    gap: 10px;
-    width: 100%;
-    max-width: 480px;
-    margin-top: 12px;
+    gap: 8px;
+    width: 400px;
+    margin-top: 18px;
   }
   .slot-row {
     display: flex;
     align-items: center;
-    gap: 10px;
-    justify-content: center;
+    gap: 12px;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid var(--amber);
+    border-radius: 4px;
     font-family: 'Press Start 2P', monospace;
     font-size: 10px;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     opacity: 0;
     transform: translateY(8px);
     animation: slot-row-in 0.4s ease-out forwards;
+    transition: background 0.18s ease, border-color 0.18s ease;
   }
+  .slot-row:hover { background: rgba(255,215,0,0.08); }
+  .slot-row:hover .slot-arrow { opacity: 1; transform: translateX(0); }
   @keyframes slot-row-in {
     to { opacity: 1; transform: translateY(0); }
   }
-  .slot-row .slot-label { color: var(--amber); }
-  .slot-row .slot-dot   { color: var(--amber); opacity: 0.55; }
+  .slot-row .slot-row-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    color: var(--amber);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .slot-row .slot-row-icon .octocat { transform: scale(1.25); }
+  .slot-row .slot-label { color: var(--amber); flex-shrink: 0; }
+  .slot-row .slot-value-wrap { margin-left: auto; display: flex; align-items: center; gap: 8px; }
   .slot-row a.slot-value {
     color: var(--green);
     text-decoration: none;
     text-shadow: 0 0 6px rgba(107,255,138,0.35);
-    transition: text-shadow 0.18s ease, text-decoration-color 0.18s ease;
+    transition: color 0.18s ease, text-shadow 0.18s ease;
   }
   .slot-row a.slot-value:hover {
+    color: #fff;
     text-decoration: underline;
-    text-decoration-color: var(--green);
-    text-shadow: 0 0 10px rgba(107,255,138,0.7);
+    text-shadow: 0 0 10px rgba(255,255,255,0.65);
   }
+  .slot-arrow {
+    color: var(--amber);
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: opacity 0.18s ease, transform 0.18s ease;
+  }
+  /* "Let's build something." CTA */
+  .slot-cta {
+    margin-top: 14px;
+    color: var(--amber);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    letter-spacing: 0.22em;
+    opacity: 0;
+    transition: opacity 0.6s ease-out;
+  }
+  .slot-cta.show { opacity: 1; }
+  /* Confetti */
   .confetti-pixel {
     position: fixed;
     top: -12px;
-    width: 8px;
-    height: 8px;
+    width: 4px;
+    height: 4px;
     pointer-events: none;
     z-index: 9;
-    animation: confetti-fall var(--dur, 2s) linear forwards;
+    animation: confetti-fall var(--dur, 3s) linear forwards;
   }
   @keyframes confetti-fall {
     0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
-    80%  { opacity: 1; }
+    70%  { opacity: 1; }
     100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
   }
   .game-card {
@@ -2091,9 +2312,17 @@
   .sf-name {
     color: #ffd700;
     text-align: center;
-    font-size: 11px;
+    font-size: 10px;
     letter-spacing: 0.18em;
-    padding: 4px 0 8px;
+    padding: 4px 0 2px;
+  }
+  .sf-role {
+    color: #ffd700;
+    text-align: center;
+    font-size: 8px;
+    letter-spacing: 0.22em;
+    padding: 0 0 6px;
+    opacity: 0.85;
     border-bottom: 1px solid rgba(255,215,0,0.4);
   }
   .sf-portrait {
@@ -2458,17 +2687,17 @@
     <div class="game-card" data-game="mario">
       <div class="gc-preview"><div class="preview-mario">?</div></div>
       <div class="gc-title">MARIO</div>
-      <div class="gc-coin">INSERT COIN</div>
+      <div class="gc-coin">PROJECTS</div>
     </div>
     <div class="game-card" data-game="fighter">
       <div class="gc-preview"><div class="preview-fight"></div></div>
       <div class="gc-title">STREET FIGHTER</div>
-      <div class="gc-coin">INSERT COIN</div>
+      <div class="gc-coin">EXPERIENCE</div>
     </div>
     <div class="game-card" data-game="invaders">
       <div class="gc-preview"><div class="preview-invader"></div></div>
       <div class="gc-title">SPACE INVADERS</div>
-      <div class="gc-coin">INSERT COIN</div>
+      <div class="gc-coin">SKILLS</div>
     </div>
   </div>
   <div class="contact-divider"></div>
@@ -2478,22 +2707,39 @@
 <!-- ===== SCREEN: CONTACT (slot machine) ===== -->
 <section id="screen-contact" class="screen">
   <div class="select-back" id="contact-back">← BACK</div>
-  <div class="slot-wrap">
-    <div class="slot-title">CONTACT</div>
-    <div class="slot-subtitle">PULL THE LEVER</div>
-    <div class="slot-machine">
-      <div class="slot-reels">
-        <div class="slot-reel" data-idx="0"><span class="slot-symbol">?</span></div>
-        <div class="slot-reel" data-idx="1"><span class="slot-symbol">?</span></div>
-        <div class="slot-reel" data-idx="2"><span class="slot-symbol">?</span></div>
-      </div>
-      <button class="slot-lever" id="slot-lever" type="button" aria-label="Pull lever">
-        <span class="slot-lever-ball"></span>
-        <span class="slot-lever-stick"></span>
-      </button>
+  <div class="slot-stage">
+    <div class="slot-heading">
+      <div class="slot-title">CONTACT</div>
+      <div class="slot-title-divider"></div>
+      <div class="slot-jackpot" id="slot-jackpot">JACKPOT</div>
     </div>
-    <div class="slot-jackpot" id="slot-jackpot">JACKPOT</div>
+    <div class="slot-machine" id="slot-machine">
+      <div class="slot-marquee">
+        <div class="slot-marquee-lights"></div>
+        <div class="slot-marquee-text">DEREK SUN</div>
+        <div class="slot-marquee-lights bottom"></div>
+      </div>
+      <div class="slot-body">
+        <div class="slot-reels">
+          <div class="slot-reel" data-idx="0"><span class="slot-symbol">?</span></div>
+          <div class="slot-reel" data-idx="1"><span class="slot-symbol">?</span></div>
+          <div class="slot-reel" data-idx="2"><span class="slot-symbol">?</span></div>
+          <div class="slot-payline" aria-hidden="true"></div>
+          <div class="slot-payline-label" aria-hidden="true">PAYLINE</div>
+        </div>
+        <button class="slot-lever" id="slot-lever" type="button" aria-label="Pull lever">
+          <span class="slot-lever-track"></span>
+          <span class="slot-lever-handle"></span>
+        </button>
+      </div>
+      <div class="slot-coin-slot">
+        <span class="slot-coin-rect"></span>
+        <span class="slot-coin-label">INSERT COIN</span>
+      </div>
+    </div>
+    <div class="slot-base"></div>
     <div class="slot-results" id="slot-results"></div>
+    <div class="slot-cta" id="slot-cta">Let's build something.</div>
   </div>
 </section>
 
@@ -4005,64 +4251,101 @@ document.getElementById('contact-back').addEventListener('click', () => {
    CONTACT SLOT MACHINE
    ============================================================ */
 const SLOT_REVEALS = [
-  { symbol: 'in', label: 'LINKEDIN', value: 'linkedin.com/in/derek-sun',  href: 'https://www.linkedin.com/in/derek-sun/' },
-  { symbol: '@',  label: 'EMAIL',    value: 'sunderek3602@gmail.com',     href: 'mailto:sunderek3602@gmail.com' },
-  { symbol: 'gh', label: 'GITHUB',   value: 'github.com/dereksun00',      href: 'https://github.com/dereksun00' },
+  { symbol: 'in',      label: 'LINKEDIN', value: 'linkedin.com/in/derek-sun', href: 'https://www.linkedin.com/in/derek-sun/' },
+  { symbol: '@',       label: 'EMAIL',    value: 'sunderek3602@gmail.com',    href: 'mailto:sunderek3602@gmail.com' },
+  { symbol: 'octocat', label: 'GITHUB',   value: 'github.com/dereksun00',     href: 'https://github.com/dereksun00' },
 ];
-const SLOT_SPIN_GLYPHS = ['?','#','%','&','*','+','=','$','@','in','gh'];
+const SLOT_SPIN_GLYPHS = ['in', '@', 'octocat', '★', '◆', '♥'];
+// Per-pull total spin time (ms). 1st pull locks first, 3rd locks last.
+const SLOT_PULL_DURATIONS = [600, 800, 1000];
+// Slowdown interval sequence (sums to 500 ms — the tail of each spin).
+const SLOT_SLOWDOWN = [100, 150, 250];
 let slotPull = 0;
 let slotSpinning = false;
+
+function setReelSymbol(symEl, sym) {
+  if (sym === 'octocat') {
+    symEl.innerHTML = '<span class="octocat"></span>';
+  } else {
+    symEl.textContent = sym;
+  }
+}
 
 function resetSlotMachine() {
   slotPull = 0;
   slotSpinning = false;
-  const reels = document.querySelectorAll('.slot-reel');
-  reels.forEach(r => {
+  document.querySelectorAll('.slot-reel').forEach(r => {
     r.classList.remove('locked', 'spinning', 'flash-gold');
     const sym = r.querySelector('.slot-symbol');
-    if (sym) sym.textContent = '?';
+    if (sym) { sym.innerHTML = ''; sym.textContent = '?'; }
   });
   const lever = document.getElementById('slot-lever');
   lever.disabled = false;
   lever.classList.remove('pulling');
-  const jackpot = document.getElementById('slot-jackpot');
-  jackpot.classList.remove('show');
+  const machine = document.getElementById('slot-machine');
+  machine.classList.remove('jackpot-pulse');
+  document.getElementById('slot-jackpot').classList.remove('show');
   document.getElementById('slot-results').innerHTML = '';
+  document.getElementById('slot-cta').classList.remove('show');
 }
 
-function spinReel(reel, finalSymbol, done) {
+function spinReel(reel, finalSymbol, totalMs, done) {
   const sym = reel.querySelector('.slot-symbol');
+  reel.classList.remove('locked');
   reel.classList.add('spinning');
-  const SPIN_MS = 600;
-  const FRAME_MS = 50;
+  const slowSum = SLOT_SLOWDOWN.reduce((a, b) => a + b, 0);
+  const fastDuration = Math.max(0, totalMs - slowSum);
+  const FAST_INTERVAL = 60;
   const t0 = performance.now();
+  let slowIdx = 0;
+  let phase = 'fast';
+  function randomGlyph() {
+    return SLOT_SPIN_GLYPHS[Math.floor(Math.random() * SLOT_SPIN_GLYPHS.length)];
+  }
   function tick() {
-    const elapsed = performance.now() - t0;
-    if (elapsed >= SPIN_MS) {
-      reel.classList.remove('spinning');
-      sym.textContent = finalSymbol;
-      reel.classList.add('locked');
-      done && done();
-      return;
+    if (phase === 'fast') {
+      const elapsed = performance.now() - t0;
+      if (elapsed >= fastDuration) { phase = 'slow'; setTimeout(tick, 0); return; }
+      setReelSymbol(sym, randomGlyph());
+      setTimeout(tick, FAST_INTERVAL);
+    } else {
+      if (slowIdx >= SLOT_SLOWDOWN.length) {
+        reel.classList.remove('spinning');
+        setReelSymbol(sym, finalSymbol);
+        reel.classList.add('locked');
+        done && done();
+        return;
+      }
+      setReelSymbol(sym, randomGlyph());
+      setTimeout(tick, SLOT_SLOWDOWN[slowIdx++]);
     }
-    sym.textContent = SLOT_SPIN_GLYPHS[Math.floor(Math.random() * SLOT_SPIN_GLYPHS.length)];
-    setTimeout(tick, FRAME_MS);
   }
   tick();
+}
+
+function reelSymbolHTML(sym) {
+  return sym === 'octocat' ? '<span class="octocat"></span>' : sym;
 }
 
 function revealContactRow(reveal) {
   const row = document.createElement('div');
   row.className = 'slot-row';
   row.innerHTML = `
+    <span class="slot-row-icon">${reelSymbolHTML(reveal.symbol)}</span>
     <span class="slot-label">${reveal.label}</span>
-    <span class="slot-dot">·</span>
-    <a class="slot-value" href="${reveal.href}" target="_blank" rel="noopener noreferrer">${reveal.value}</a>
+    <span class="slot-value-wrap">
+      <a class="slot-value" href="${reveal.href}" target="_blank" rel="noopener noreferrer">${reveal.value}</a>
+      <span class="slot-arrow">→</span>
+    </span>
   `;
   document.getElementById('slot-results').appendChild(row);
 }
 
 function runJackpot() {
+  const machine = document.getElementById('slot-machine');
+  machine.classList.remove('jackpot-pulse');
+  void machine.offsetWidth;
+  machine.classList.add('jackpot-pulse');
   const reels = document.querySelectorAll('.slot-reel');
   reels.forEach((r, i) => setTimeout(() => r.classList.add('flash-gold'), i * 80));
   const jackpot = document.getElementById('slot-jackpot');
@@ -4070,32 +4353,38 @@ function runJackpot() {
   void jackpot.offsetWidth;
   jackpot.classList.add('show');
   sfxFanfare();
-  // Confetti
-  const colors = ['#ffd166', '#39ff85', '#4cf2ff', '#ff5cc8', '#ffcf52', '#ff6b9d'];
-  for (let i = 0; i < 30; i++) {
+  // Confetti — 40 pixels, 4x4, random palette, 2-4s falls
+  const colors = ['#39ff85', '#ffcf52', '#ff5cc8', '#4cf2ff', '#ffd700', '#ff6b9d'];
+  for (let i = 0; i < 40; i++) {
     const c = document.createElement('div');
     c.className = 'confetti-pixel';
     c.style.left = (Math.random() * 100) + 'vw';
     c.style.background = colors[Math.floor(Math.random() * colors.length)];
-    c.style.setProperty('--dur', (1.6 + Math.random() * 1.4) + 's');
-    c.style.animationDelay = (Math.random() * 0.25) + 's';
+    c.style.setProperty('--dur', (2 + Math.random() * 2) + 's');
+    c.style.animationDelay = (Math.random() * 0.4) + 's';
     document.body.appendChild(c);
-    setTimeout(() => c.remove(), 3500);
+    setTimeout(() => c.remove(), 4500);
   }
+  setTimeout(() => {
+    document.getElementById('slot-cta').classList.add('show');
+  }, 800);
 }
 
 document.getElementById('slot-lever').addEventListener('click', () => {
   if (slotSpinning || slotPull >= SLOT_REVEALS.length) return;
   ensureAudio();
   const lever = document.getElementById('slot-lever');
+  lever.classList.remove('pulling');
+  void lever.offsetWidth;
   lever.classList.add('pulling');
-  setTimeout(() => lever.classList.remove('pulling'), 150);
+  setTimeout(() => lever.classList.remove('pulling'), 360);
 
   const idx = slotPull;
   const reveal = SLOT_REVEALS[idx];
   const reel = document.querySelector(`.slot-reel[data-idx="${idx}"]`);
+  const total = SLOT_PULL_DURATIONS[idx] || 800;
   slotSpinning = true;
-  spinReel(reel, reveal.symbol, () => {
+  spinReel(reel, reveal.symbol, total, () => {
     sfxConfirm();
     revealContactRow(reveal);
     slotPull++;
@@ -5267,6 +5556,7 @@ registerGame('fighter', function initFighter() {
       const exp = EXPERIENCES.find(e => e.id === f.id);
       card.innerHTML = `
         <div class="sf-name">${f.name}</div>
+        <div class="sf-role">SWE INTERN</div>
         <div class="sf-portrait"></div>
         <div class="sf-stats">
           <div class="barbox">PWR ${'█'.repeat(f.power)}${'░'.repeat(5-f.power)}</div>
