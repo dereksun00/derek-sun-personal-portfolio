@@ -1907,34 +1907,86 @@
     background: #d4a070;
     border-radius: 50%;
   }
-  /* T-CARE: medic — white cross + blue trim */
-  .sf-card[data-fid="tcare"] .sf-portrait {
-    background: linear-gradient(to bottom, rgba(0,180,216,0.08), rgba(255,51,0,0.04));
+  /* NOVA VACATION HOMES: blue/teal */
+  .sf-card[data-fid="nova"] .sf-portrait {
+    background: linear-gradient(to bottom, rgba(0,180,216,0.10), rgba(0,100,140,0.05));
   }
-  .sf-card[data-fid="tcare"] .sf-portrait::before {
-    background:
-      linear-gradient(#0fa, #0fa) center/12px 4px no-repeat,
-      linear-gradient(#0fa, #0fa) center/4px 16px no-repeat,
-      #2a5680;
-    box-shadow: 0 -32px 0 -10px #2a5680;
+  .sf-card[data-fid="nova"] .sf-portrait::before {
+    background: #0ea5b7;
+    box-shadow: 0 -32px 0 -10px #0ea5b7;
   }
-  /* TORETTO: brawler — orange/brown */
-  .sf-card[data-fid="toretto"] .sf-portrait::before {
-    background: #b8540c;
-    transform: translateX(-50%) rotate(-6deg);
-    box-shadow: 0 -32px 0 -10px #b8540c, -12px -22px 0 -8px #b8540c;
+  .sf-card[data-fid="nova"] .sf-portrait::after {
+    background: linear-gradient(#a8e6f0, #6cbcd0);
   }
-  .sf-card[data-fid="toretto"] .sf-portrait::after {
-    background: #d4a070;
-    box-shadow: 0 -2px 0 1px #2a1004;
+  /* MAYBOLE: purple */
+  .sf-card[data-fid="maybole"] .sf-portrait {
+    background: linear-gradient(to bottom, rgba(153,102,204,0.10), rgba(80,40,140,0.05));
   }
-  /* ENVORA: tech — teal/green */
-  .sf-card[data-fid="envora"] .sf-portrait::before {
-    background: #146060;
-    box-shadow: 0 -32px 0 -10px #146060;
+  .sf-card[data-fid="maybole"] .sf-portrait::before {
+    background: #7a3fbf;
+    box-shadow: 0 -32px 0 -10px #7a3fbf;
   }
-  .sf-card[data-fid="envora"] .sf-portrait::after {
-    background: linear-gradient(#cbe, #88b);
+  .sf-card[data-fid="maybole"] .sf-portrait::after {
+    background: linear-gradient(#d9c1f0, #a886c8);
+  }
+  /* LOCKED: grayed, no silhouette, no stats */
+  .sf-card.sf-locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+  }
+  .sf-card.sf-locked:hover {
+    transform: none;
+    border-color: #ffd700;
+    box-shadow: 0 0 16px rgba(255,51,0,0.4);
+  }
+  .sf-card.sf-locked .sf-name { color: #888; }
+  .sf-card.sf-locked .sf-portrait-locked {
+    flex: 1;
+    margin: 10px 0;
+    background: rgba(120,120,120,0.06);
+    border: 1px dashed rgba(180,180,180,0.4);
+    display: flex; align-items: center; justify-content: center;
+    color: #888;
+    font-size: 28px;
+    letter-spacing: 0.2em;
+  }
+  .sf-card.sf-locked .sf-portrait-locked::before { content: '🔒'; }
+  .sf-card.sf-locked .sf-locked-role {
+    text-align: center;
+    color: #888;
+    font-size: 9px;
+    letter-spacing: 0.22em;
+    margin-top: 6px;
+  }
+  .sf-card.sf-locked-flash {
+    animation: sf-locked-pulse 0.5s ease-out;
+  }
+  @keyframes sf-locked-pulse {
+    0%   { box-shadow: 0 0 0 0 rgba(255, 80, 80, 0.55); transform: translateX(0); }
+    20%  { transform: translateX(-4px); }
+    40%  { transform: translateX(4px); }
+    60%  { transform: translateX(-2px); }
+    80%  { transform: translateX(2px); }
+    100% { box-shadow: 0 0 0 12px rgba(255, 80, 80, 0); transform: translateX(0); }
+  }
+  .sf-card.sf-locked-flash::after {
+    content: 'LOCKED';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    color: #ff5050;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 14px;
+    letter-spacing: 0.3em;
+    text-shadow: 0 0 8px rgba(255,80,80,0.8);
+    pointer-events: none;
+    animation: sf-locked-fade 0.5s ease-out forwards;
+  }
+  @keyframes sf-locked-fade {
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0.7); }
+    25%  { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+    100% { opacity: 0; transform: translate(-50%, -50%) scale(1); }
   }
   .sf-card.attacking .sf-portrait::before {
     transform: translateX(-30%) rotate(8deg);
@@ -2221,7 +2273,7 @@
   <!-- =========== FULL GAME ROOTS =========== -->
   <div class="game-root" id="game-invaders"><canvas id="canvas-invaders"></canvas></div>
   <div class="game-root" id="game-fighter">
-    <div class="sf-title">SELECT OPPONENT</div>
+    <div class="sf-title">SELECT EXPERIENCE</div>
     <div class="sf-grid" id="sf-grid"></div>
     <div class="sf-vs" id="sf-vs">
       <div class="sf-vs-inner">
@@ -2247,7 +2299,7 @@
     <div class="center" id="hud-mario-coins">🪙 x 0</div>
     <div class="right" id="hud-mario-score">SCORE: 000</div>
   </div>
-  <div id="hud-wins">WINS: 0</div>
+  <div id="hud-wins">REVIEWED: 0</div>
   <div id="hud-change-game">[ CHANGE GAME ]</div>
 
   <!-- Per-game HUD overlay (drawn over canvas, controlled by JS) -->
@@ -2588,6 +2640,35 @@ const CONTACTS = [
   { label: 'GITHUB',   val: 'github.com/dereksun00',         url: 'https://github.com/dereksun00' },
 ];
 
+const EXPERIENCES = [
+  {
+    id: 'nova',
+    kind: 'experience',
+    name: 'NOVA VACATION HOMES',
+    role: 'Software Engineer Intern',
+    dates: 'May 2026 – Aug 2026',
+    bullets: [
+      'Sole engineer on a voice AI receptionist POC, reducing front desk handling time by 70% by automating appointment scheduling and reservation management via natural language calls',
+      'Integrated Vapi AI with a React + FastAPI stack and Google Calendar API, cutting booking confirmation latency to under 2 seconds end to end',
+      'Implemented a RAG pipeline using pgvector and sentence-transformers to ground the voice agent in business-specific knowledge, resolving 90% of FAQ queries accurately without escalation',
+    ],
+    tech: 'VAPI AI · REACT · FASTAPI · GOOGLE CALENDAR API · PGVECTOR · SENTENCE-TRANSFORMERS · POSTGRESQL',
+  },
+  {
+    id: 'maybole',
+    kind: 'experience',
+    name: 'MAYBOLE',
+    role: 'Software Engineer Intern',
+    dates: 'May 2026 – Aug 2026',
+    bullets: [
+      'Building AI agents simulating realistic consumer behavior across 1,000+ synthetic profiles generated from demographic, behavioral, and psychographic data for product and pricing evaluations',
+      'Designing prompt architectures that improved agent decision-making fidelity by 40%, replicating human reasoning patterns across diverse consumer segments',
+      'Developing RAG pipelines and vector database infrastructure, reducing agent hallucination rate by grounding responses in real consumer data',
+    ],
+    tech: 'PYTHON · RAG PIPELINES · VECTOR DATABASES · PROMPT ENGINEERING · SYNTHETIC DATA',
+  },
+];
+
 let selectedIndex = 0;
 
 /* ---------- Render quest list + detail ---------- */
@@ -2726,19 +2807,32 @@ function sfxTagPop() { beep(660, 0.03, 'square', 0.025); }
 function openProjectOverlay(q, opts) {
   opts = opts || {};
   const clickMode = !!opts.clickMode;
+  const isExperience = q.kind === 'experience';
 
   clearOverlayTimers();
-  activeQuestUrl = q.url;
+  activeQuestUrl = isExperience ? null : q.url;
   ovTitleEl.textContent = '';
   ovTitleEl.setAttribute('data-text', '');
-  ovStatusEl.textContent = 'STATUS: ' + q.status;
-  ovLocEl.textContent = '';
+  if (isExperience) {
+    ovStatusEl.textContent = 'ROLE: ' + q.role;
+    ovLocEl.textContent = 'DATES: ' + q.dates;
+  } else {
+    ovStatusEl.textContent = 'STATUS: ' + q.status;
+    ovLocEl.textContent = '';
+  }
   ovLoreEl.innerHTML = '';
 
   const techParts = q.tech.split('·').map(s => s.trim()).filter(Boolean);
   ovTechEl.innerHTML = techParts.map(t =>
     `<span class="tech-tag-pixel">${t}</span>`
   ).join('');
+
+  // Experience overlays hide the visual log row and the GitHub CTA;
+  // project overlays restore both.
+  ovCrtEl.style.display = isExperience ? 'none' : '';
+  const vlogTitleEl = document.querySelector('.visual-log-title');
+  if (vlogTitleEl) vlogTitleEl.style.display = isExperience ? 'none' : '';
+  ovGithubEl.style.display = isExperience ? 'none' : '';
 
   const vlogTitle = document.querySelector('.visual-log-title');
   ovCrtEl.classList.remove('in', 'flicker');
@@ -2776,8 +2870,12 @@ function openProjectOverlay(q, opts) {
 
 function runOverlayContentReveal(q) {
   const vlogTitle = document.querySelector('.visual-log-title');
+  const isExperience = q.kind === 'experience';
+  const loreText = isExperience
+    ? q.bullets.map(b => '• ' + b).join('\n\n')
+    : q.body;
   typewriteTitle(q.name, () => {
-    typewriteLore(q.body, () => {
+    typewriteLore(loreText, () => {
       const tags = ovTechEl.querySelectorAll('.tech-tag-pixel');
       tags.forEach((t, i) => {
         const id = setTimeout(() => {
@@ -2786,10 +2884,12 @@ function runOverlayContentReveal(q) {
         }, i * 50);
         techTimers.push(id);
       });
-      crtTimer = setTimeout(() => {
-        vlogTitle.classList.add('flicker');
-        ovCrtEl.classList.add('flicker', 'in');
-      }, tags.length * 50 + 240);
+      if (!isExperience) {
+        crtTimer = setTimeout(() => {
+          vlogTitle.classList.add('flicker');
+          ovCrtEl.classList.add('flicker', 'in');
+        }, tags.length * 50 + 240);
+      }
     });
   });
 }
@@ -3941,7 +4041,7 @@ function updateWinsDisplay() {
   // and always overwrite (never append) so the count can't get garbled.
   el.style.fontFamily = "'Press Start 2P', monospace";
   el.style.fontSize = '10px';
-  el.textContent = 'WINS: ' + fighterWins;
+  el.textContent = 'REVIEWED: ' + fighterWins;
 }
 // Back-compat alias for any existing call sites.
 const updateWinsHUD = updateWinsDisplay;
@@ -4756,16 +4856,15 @@ registerGame('fighter', function initFighter() {
   const grid = document.getElementById('sf-grid');
   const vs = document.getElementById('sf-vs');
   const sfTitle = document.querySelector('#game-fighter .sf-title');
-  const projects = QUESTS.filter(q => q.kind === 'project');
   // Clear all three slots of the per-game HUD bar so it can't render a stale
-  // "WINS:" string that overlaps the dedicated #hud-wins element.
+  // "REVIEWED:" string that overlaps the dedicated #hud-wins element.
   setHUD({ left: '', center: '', right: '' });
   updateWinsDisplay();
 
   const fighters = [
-    { id: 'tcare',   name: 'T-CARE',   power: 3, speed: 4, defense: 5, special: '"Triage Shield"' },
-    { id: 'toretto', name: 'TORETTO',  power: 5, speed: 4, defense: 2, special: '"Fender Smash"' },
-    { id: 'envora',  name: 'ENVORA',   power: 3, speed: 5, defense: 4, special: '"Shadow Schema"' },
+    { id: 'nova',    name: 'NOVA VACATION HOMES', power: 4, speed: 5, defense: 3, special: '"Voice Stack"' },
+    { id: 'maybole', name: 'MAYBOLE',             power: 5, speed: 4, defense: 2, special: '"Prompt Architect"' },
+    { id: 'locked',  name: '?????', locked: true, role: 'COMING SOON' },
   ];
 
   // ---------- Per-fighter state machine ----------
@@ -4773,9 +4872,10 @@ registerGame('fighter', function initFighter() {
   // VS+FIGHT done → 'fight' (clicks now punch)
   // 4 punches → KO + overlay → state stays 'fight' until overlay closes → 'defeated'
   // 'defeated' → click plays sfxBack + "ALREADY DEFEATED" flash
+  // locked fighters never enter the state machine — clicks just flash "LOCKED".
   const fighterState = {};
   const health = {};
-  fighters.forEach(f => { fighterState[f.id] = 'idle'; health[f.id] = 100; });
+  fighters.forEach(f => { if (!f.locked) { fighterState[f.id] = 'idle'; health[f.id] = 100; } });
   let vsLocked = false;             // global lock during any VS/FIGHT/KO sequence
   let pendingFighterId = null;      // fighter whose overlay is currently open
   const fightOverlays = new Set();
@@ -4784,28 +4884,46 @@ registerGame('fighter', function initFighter() {
   grid.innerHTML = '';
   const cards = {};
   fighters.forEach(f => {
-    const q = projects.find(p => p.id === f.id);
     const card = document.createElement('div');
-    card.className = 'sf-card';
+    card.className = 'sf-card' + (f.locked ? ' sf-locked' : '');
     card.dataset.fid = f.id;
-    card.innerHTML = `
-      <div class="sf-name">${f.name}</div>
-      <div class="sf-portrait"></div>
-      <div class="sf-stats">
-        <div class="barbox">PWR ${'█'.repeat(f.power)}${'░'.repeat(5-f.power)}</div>
-        <div class="barbox">SPD ${'█'.repeat(f.speed)}${'░'.repeat(5-f.speed)}</div>
-        <div class="barbox">DEF ${'█'.repeat(f.defense)}${'░'.repeat(5-f.defense)}</div>
-      </div>
-      <div class="sf-hp-row"><div class="sf-hp-track"><div class="sf-hp-fill"></div></div></div>
-      <div class="sf-attack-prompt">CLICK TO ATTACK</div>
-      <div class="sf-special">${f.special}</div>
-    `;
-    card.addEventListener('mouseenter', () => { ensureAudio(); sfxCursor(); card.classList.add('attacking'); });
-    card.addEventListener('mouseleave', () => { card.classList.remove('attacking'); });
-    card.addEventListener('click', () => onFighterClick(f, q, card));
+    if (f.locked) {
+      card.innerHTML = `
+        <div class="sf-name">${f.name}</div>
+        <div class="sf-portrait sf-portrait-locked"></div>
+        <div class="sf-locked-role">${f.role}</div>
+      `;
+      card.addEventListener('click', () => onLockedClick(card));
+    } else {
+      const exp = EXPERIENCES.find(e => e.id === f.id);
+      card.innerHTML = `
+        <div class="sf-name">${f.name}</div>
+        <div class="sf-portrait"></div>
+        <div class="sf-stats">
+          <div class="barbox">PWR ${'█'.repeat(f.power)}${'░'.repeat(5-f.power)}</div>
+          <div class="barbox">SPD ${'█'.repeat(f.speed)}${'░'.repeat(5-f.speed)}</div>
+          <div class="barbox">DEF ${'█'.repeat(f.defense)}${'░'.repeat(5-f.defense)}</div>
+        </div>
+        <div class="sf-hp-row"><div class="sf-hp-track"><div class="sf-hp-fill"></div></div></div>
+        <div class="sf-attack-prompt">CLICK TO ATTACK</div>
+        <div class="sf-special">${f.special}</div>
+      `;
+      card.addEventListener('mouseenter', () => { ensureAudio(); sfxCursor(); card.classList.add('attacking'); });
+      card.addEventListener('mouseleave', () => { card.classList.remove('attacking'); });
+      card.addEventListener('click', () => onFighterClick(f, exp, card));
+    }
     grid.appendChild(card);
     cards[f.id] = card;
   });
+
+  function onLockedClick(card) {
+    ensureAudio();
+    sfxBack();
+    card.classList.remove('sf-locked-flash');
+    void card.offsetWidth;
+    card.classList.add('sf-locked-flash');
+    setTimeout(() => card.classList.remove('sf-locked-flash'), 520);
+  }
 
   function setState(fid, state) {
     fighterState[fid] = state;
@@ -4813,7 +4931,7 @@ registerGame('fighter', function initFighter() {
     card.classList.remove('sf-state-idle','sf-state-vs','sf-state-fight','sf-state-defeated');
     card.classList.add('sf-state-' + state);
   }
-  fighters.forEach(f => setState(f.id, 'idle'));
+  fighters.forEach(f => { if (!f.locked) setState(f.id, 'idle'); });
 
   function updateHpFill(fid) {
     const card = cards[fid]; if (!card) return;
