@@ -1462,6 +1462,180 @@
      PER-GAME THEME OVERRIDES (body class scoped)
      ============================================================ */
 
+  /* ============================================================
+     GAME COMPLETION OVERLAYS (shared structure)
+     ============================================================ */
+  .game-complete {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    background: rgba(0,0,0,0.92);
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    text-align: center;
+  }
+  .game-complete.show { display: flex; }
+  .gc-prompt {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px;
+    color: var(--amber);
+    letter-spacing: 0.22em;
+    margin-top: 28px;
+    opacity: 0;
+    animation: gc-prompt-blink 1.2s ease-in-out 0s infinite;
+  }
+  @keyframes gc-prompt-blink {
+    0%, 100% { opacity: 0.25; }
+    50%      { opacity: 1; }
+  }
+  /* FIGHTER champion */
+  .fc-overlay { animation: gc-slam 0.2s ease-in forwards; }
+  @keyframes gc-slam { from { opacity: 0; } to { opacity: 1; } }
+  .fc-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(36px, 6vw, 56px);
+    color: #ffd700;
+    letter-spacing: 0.18em;
+    text-shadow: 4px 4px 0 #c52020, 0 0 24px rgba(255,215,0,0.55);
+    animation: fc-slam-in 0.2s ease-out;
+  }
+  @keyframes fc-slam-in {
+    0%   { transform: scale(3); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .fc-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 18px;
+    color: #ffcf52;
+    letter-spacing: 0.24em;
+    opacity: 0;
+    animation: gc-fade 0.6s ease-out 0.4s forwards;
+    text-shadow: 0 0 10px rgba(255,207,82,0.5);
+  }
+  .fc-count {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #39ff85;
+    letter-spacing: 0.22em;
+    opacity: 0;
+    animation: gc-fade 0.6s ease-out 0.6s forwards;
+  }
+  @keyframes gc-fade { to { opacity: 1; } }
+  .fc-trophy {
+    width: 64px;
+    height: 80px;
+    position: relative;
+    margin-top: 12px;
+    opacity: 0;
+    animation: gc-fade 0.6s ease-out 0.9s forwards, fc-trophy-glow 1.6s ease-in-out 0.9s infinite alternate;
+  }
+  .fc-trophy::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 14px;
+    width: 36px; height: 40px;
+    background: linear-gradient(to bottom, #ffe85c 0 30%, #ffd700 30% 70%, #c89400 70% 100%);
+    border-radius: 4px 4px 18px 18px;
+    box-shadow: inset -3px -3px 0 #b88a00, inset 3px 3px 0 #fff6c0;
+  }
+  .fc-trophy::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 10px;
+    width: 44px; height: 14px;
+    background: linear-gradient(to bottom, #ffd700, #c89400);
+    border-radius: 2px;
+    box-shadow: 0 -10px 0 -6px #ffd700;
+  }
+  .fc-trophy-handle-l, .fc-trophy-handle-r {
+    position: absolute;
+    top: 10px; width: 10px; height: 22px;
+    border: 4px solid #ffd700;
+    border-radius: 8px;
+  }
+  .fc-trophy-handle-l { left: 2px;  border-right: none;  border-radius: 8px 0 0 8px; }
+  .fc-trophy-handle-r { right: 2px; border-left: none;   border-radius: 0 8px 8px 0; }
+  @keyframes fc-trophy-glow {
+    from { filter: drop-shadow(0 0 4px rgba(255,215,0,0.4)); }
+    to   { filter: drop-shadow(0 0 16px rgba(255,215,0,0.95)); }
+  }
+  /* INVADERS victory */
+  .iv-overlay {
+    background: rgba(0,5,15,0.95);
+    transition: opacity 0.3s ease-out;
+    opacity: 0;
+  }
+  .iv-overlay.show { opacity: 1; }
+  .iv-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 20px;
+    color: #39ff85;
+    letter-spacing: 0.24em;
+    text-shadow: 0 0 14px rgba(57,255,133,0.6);
+    position: relative;
+  }
+  .iv-title::before, .iv-title::after {
+    content: attr(data-text);
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%;
+    pointer-events: none;
+  }
+  .iv-title::before { color: #ff5cc8; transform: translate(-2px, 0); opacity: 0.55; animation: iv-glitch 2.2s steps(2) infinite; }
+  .iv-title::after  { color: #4cf2ff; transform: translate(2px, 0);  opacity: 0.55; animation: iv-glitch 2.2s steps(2) infinite reverse; }
+  @keyframes iv-glitch {
+    0%, 92%, 100% { transform: translate(0, 0); }
+    93%           { transform: translate(-3px, 1px); }
+    95%           { transform: translate(2px, -1px); }
+    97%           { transform: translate(-1px, 2px); }
+  }
+  .iv-subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 12px;
+    color: #ffcf52;
+    letter-spacing: 0.24em;
+    opacity: 0;
+    animation: gc-fade 0.6s ease-out 0.3s forwards;
+  }
+  .iv-grid {
+    margin-top: 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    letter-spacing: 0.16em;
+    max-width: 88vw;
+  }
+  .iv-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    justify-content: flex-start;
+  }
+  .iv-cat-label {
+    width: 110px;
+    color: #fff;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .iv-skills {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .iv-skill {
+    opacity: 0;
+    transform: translateY(4px);
+    animation: iv-skill-in 0.3s ease-out forwards;
+  }
+  @keyframes iv-skill-in { to { opacity: 1; transform: translateY(0); } }
+  .iv-sep { color: #fff; opacity: 0.35; padding: 0 2px; }
+
   /* SPACE INVADERS — skill popup card */
   .inv-skill-popup {
     position: fixed;
@@ -2867,6 +3041,25 @@
 <div id="ko-overlay"><div class="ko-text" id="ko-text">K.O.</div></div>
 <div id="pipe-warp"></div>
 
+<!-- Game-completion overlays -->
+<div class="game-complete fc-overlay" id="fighter-champion">
+  <div class="fc-title">CHAMPION!</div>
+  <div class="fc-name">DEREK SUN</div>
+  <div class="fc-count">2 / 2 OPPONENTS DEFEATED</div>
+  <div class="fc-trophy" aria-hidden="true">
+    <span class="fc-trophy-handle-l"></span>
+    <span class="fc-trophy-handle-r"></span>
+  </div>
+  <div class="gc-prompt" id="fc-prompt">PRESS ENTER OR CLICK TO CONTINUE</div>
+</div>
+
+<div class="game-complete iv-overlay" id="invaders-victory">
+  <div class="iv-title" data-text="ALL SKILLS LOADED">ALL SKILLS LOADED</div>
+  <div class="iv-subtitle">SYSTEMS OPERATIONAL</div>
+  <div class="iv-grid" id="iv-grid"></div>
+  <div class="gc-prompt" id="iv-prompt">PRESS ENTER OR CLICK TO CONTINUE</div>
+</div>
+
 <!-- Cursor + crack overlays -->
 <svg id="crack-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
 <canvas id="cursor-canvas" aria-hidden="true" style="display:none"></canvas>
@@ -4164,6 +4357,19 @@ let marioScore = 0;
 let marioCoins = 0;
 let fighterWins = 0;
 let _fighterOnOverlayClose = null;
+let _marioOnOverlayClose = null;
+
+/* Shared exit used by completion sequences: teardown current game and
+   wipe back to game select. */
+function exitGameToSelect() {
+  if (typeof currentGameAPI !== 'undefined' && currentGameAPI && currentGameAPI.teardown) {
+    currentGameAPI.teardown();
+    currentGameAPI = null;
+  }
+  resetCursorState();
+  wipeTo(() => show('select'));
+  sfxBack();
+}
 
 function setGameTheme(name) {
   currentGame = name;
@@ -4820,6 +5026,7 @@ closeOverlay = function() {
       pipe.style.top = '0';
       pipe.style.bottom = '';
       pipe.style.height = '0';
+      if (typeof _marioOnOverlayClose === 'function') _marioOnOverlayClose();
     }, 350);
     return;
   }
@@ -5212,6 +5419,85 @@ registerGame('invaders', function initInvaders() {
     }, 1300);
   }
 
+  // ---------- Victory sequence ----------
+  let invadersVictoryActive = false;
+  let invadersVictoryKeyHandler = null;
+  const finalBursts = []; // { x, y, age, life }
+  function triggerInvadersVictory(cx, cy, delayMs) {
+    if (invadersVictoryActive) return;
+    invadersVictoryActive = true;
+    paused = true; // freeze gameplay during sequence
+    // Phase 1 — final expanding-ring burst at the formation
+    finalBursts.push({ x: cx, y: cy, age: 0, life: 0.4 });
+    setTimeout(() => showInvadersVictoryOverlay(), delayMs);
+  }
+  function showInvadersVictoryOverlay() {
+    const overlay = document.getElementById('invaders-victory');
+    const gridEl = document.getElementById('iv-grid');
+    gridEl.innerHTML = '';
+    let stagger = 0;
+    SKILL_ROWS.forEach(row => {
+      const rowEl = document.createElement('div');
+      rowEl.className = 'iv-row';
+      const label = document.createElement('div');
+      label.className = 'iv-cat-label';
+      label.textContent = CATEGORY_LABEL[row.category] + 'S';
+      const skillsWrap = document.createElement('div');
+      skillsWrap.className = 'iv-skills';
+      const color = CATEGORY_COLOR[row.category];
+      row.names.forEach((name, i) => {
+        const skill = document.createElement('span');
+        skill.className = 'iv-skill';
+        skill.style.color = color;
+        skill.style.animationDelay = (stagger * 0.05) + 's';
+        skill.textContent = name;
+        skillsWrap.appendChild(skill);
+        if (i < row.names.length - 1) {
+          const sep = document.createElement('span');
+          sep.className = 'iv-sep';
+          sep.textContent = '·';
+          skillsWrap.appendChild(sep);
+        }
+        stagger++;
+      });
+      rowEl.appendChild(label);
+      rowEl.appendChild(skillsWrap);
+      gridEl.appendChild(rowEl);
+    });
+    overlay.classList.add('show');
+    sfxFanfare();
+    invadersVictoryKeyHandler = (e) => {
+      const isClick = e.type === 'click';
+      const isEnter = e.type === 'keydown' && e.key === 'Enter';
+      const isEsc   = e.type === 'keydown' && e.key === 'Escape';
+      if (!(isClick || isEnter || isEsc)) return;
+      e.preventDefault && e.preventDefault();
+      window.removeEventListener('keydown', invadersVictoryKeyHandler);
+      window.removeEventListener('click',   invadersVictoryKeyHandler);
+      invadersVictoryKeyHandler = null;
+      overlay.classList.remove('show');
+      exitGameToSelect();
+    };
+    // ESC works immediately; Enter/click after grid finishes loading (~1.5s)
+    const escEarly = (e) => {
+      if (e.key === 'Escape') {
+        window.removeEventListener('keydown', escEarly);
+        if (invadersVictoryKeyHandler) {
+          window.removeEventListener('keydown', invadersVictoryKeyHandler);
+          window.removeEventListener('click',   invadersVictoryKeyHandler);
+          invadersVictoryKeyHandler = null;
+        }
+        overlay.classList.remove('show');
+        exitGameToSelect();
+      }
+    };
+    window.addEventListener('keydown', escEarly);
+    setTimeout(() => {
+      window.addEventListener('keydown', invadersVictoryKeyHandler);
+      window.addEventListener('click',   invadersVictoryKeyHandler);
+    }, Math.max(900, stagger * 50 + 200));
+  }
+
   // Enemy shooting timer
   let enemyShootTimer = 2000;
   let lastTime = performance.now();
@@ -5295,6 +5581,11 @@ registerGame('invaders', function initInvaders() {
           }
           if (a.name) showSkillPopup(a.name, a.category);
           setHUD({ left: 'SCORE ' + String(score).padStart(4,'0') });
+          // Check for victory: was this the last alien?
+          if (!aliens.some(other => other.alive)) {
+            const delay = a.name ? 1600 : 50;
+            triggerInvadersVictory(a.x + a.w / 2, a.y + a.h / 2, delay);
+          }
           hit = true;
           break;
         }
@@ -5380,6 +5671,12 @@ registerGame('invaders', function initInvaders() {
   }
 
   function draw() {
+    // Burst aging — happens every frame (still animates while paused)
+    const burstNow = performance.now();
+    if (!draw._lastBurstT) draw._lastBurstT = burstNow;
+    const burstDt = Math.min(0.05, (burstNow - draw._lastBurstT) / 1000);
+    draw._lastBurstT = burstNow;
+    for (const fb of finalBursts) fb.age += burstDt;
     ctx.clearRect(0, 0, W, H);
     // Stars
     ctx.fillStyle = '#fff';
@@ -5440,6 +5737,33 @@ registerGame('invaders', function initInvaders() {
       ctx.fill();
       // Cannon
       ctx.fillRect(ship.x - 2, ship.y - 16, 4, 6);
+    }
+
+    // Final victory burst (expanding ring + radiating lines)
+    for (let i = finalBursts.length - 1; i >= 0; i--) {
+      const fb = finalBursts[i];
+      const k = fb.age / fb.life;
+      if (k >= 1) { finalBursts.splice(i, 1); continue; }
+      const radius = k * 200;
+      ctx.strokeStyle = 'rgba(57,255,133,' + (1 - k) + ')';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(fb.x, fb.y, radius, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.fillStyle = 'rgba(57,255,133,' + (0.35 * (1 - k)) + ')';
+      ctx.beginPath();
+      ctx.arc(fb.x, fb.y, radius, 0, Math.PI * 2);
+      ctx.fill();
+      for (let r = 0; r < 16; r++) {
+        const ang = (r / 16) * Math.PI * 2;
+        const rx = Math.cos(ang), ry = Math.sin(ang);
+        ctx.strokeStyle = 'rgba(255,255,255,' + (1 - k) + ')';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(fb.x + rx * radius * 0.65, fb.y + ry * radius * 0.65);
+        ctx.lineTo(fb.x + rx * radius * 1.0,  fb.y + ry * radius * 1.0);
+        ctx.stroke();
+      }
     }
   }
 
@@ -5502,6 +5826,14 @@ registerGame('invaders', function initInvaders() {
       window.removeEventListener('keydown', onKeyDown);
       window.removeEventListener('keyup', onKeyUp);
       window.removeEventListener('resize', resize);
+      // Hide victory overlay if still showing
+      const iv = document.getElementById('invaders-victory');
+      if (iv) iv.classList.remove('show');
+      if (invadersVictoryKeyHandler) {
+        window.removeEventListener('keydown', invadersVictoryKeyHandler);
+        window.removeEventListener('click',   invadersVictoryKeyHandler);
+        invadersVictoryKeyHandler = null;
+      }
     },
   };
   return api;
@@ -5838,7 +6170,65 @@ registerGame('fighter', function initFighter() {
       card.appendChild(lbl);
     }
     vsLocked = false;
+    // Trigger CHAMPION sequence when all non-locked fighters defeated
+    const nonLocked = fighters.filter(f => !f.locked);
+    const allDefeated = nonLocked.length > 0 && nonLocked.every(f => fighterState[f.id] === 'defeated');
+    if (allDefeated) {
+      setTimeout(runFighterChampion, 250);
+    }
   };
+
+  let championKeyHandler = null;
+  function runFighterChampion() {
+    const overlay = document.getElementById('fighter-champion');
+    overlay.classList.remove('show');
+    void overlay.offsetWidth;
+    overlay.classList.add('show');
+    sfxFanfare();
+    // Red + gold confetti (50)
+    const colors = ['#ff3300', '#ffd700', '#ff6b35', '#ffcf52'];
+    for (let i = 0; i < 50; i++) {
+      const c = document.createElement('div');
+      c.className = 'confetti-pixel';
+      c.style.left = (Math.random() * 100) + 'vw';
+      c.style.background = colors[Math.floor(Math.random() * colors.length)];
+      c.style.setProperty('--dur', (2 + Math.random() * 2) + 's');
+      c.style.animationDelay = (Math.random() * 0.4) + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 4500);
+    }
+    championKeyHandler = (e) => {
+      const isClick = e.type === 'click';
+      const isEnter = e.type === 'keydown' && e.key === 'Enter';
+      const isEsc   = e.type === 'keydown' && e.key === 'Escape';
+      if (!(isClick || isEnter || isEsc)) return;
+      e.preventDefault && e.preventDefault();
+      window.removeEventListener('keydown', championKeyHandler);
+      window.removeEventListener('click',   championKeyHandler);
+      championKeyHandler = null;
+      overlay.classList.remove('show');
+      exitGameToSelect();
+    };
+    // ESC works immediately; Enter/click activated after 2s
+    setTimeout(() => {
+      window.addEventListener('keydown', championKeyHandler);
+      window.addEventListener('click',   championKeyHandler);
+    }, 2000);
+    // ESC always available
+    const escEarly = (e) => {
+      if (e.key === 'Escape') {
+        window.removeEventListener('keydown', escEarly);
+        if (championKeyHandler) {
+          window.removeEventListener('keydown', championKeyHandler);
+          window.removeEventListener('click',   championKeyHandler);
+          championKeyHandler = null;
+        }
+        overlay.classList.remove('show');
+        exitGameToSelect();
+      }
+    };
+    window.addEventListener('keydown', escEarly);
+  }
 
   return {
     pause:  () => {},
@@ -5854,6 +6244,14 @@ registerGame('fighter', function initFighter() {
       vs.style.display = '';
       vs.style.opacity = '';
       fightOverlays.forEach(el => el.remove());
+      // Clean up CHAMPION overlay + handlers
+      const champ = document.getElementById('fighter-champion');
+      if (champ) champ.classList.remove('show');
+      if (championKeyHandler) {
+        window.removeEventListener('keydown', championKeyHandler);
+        window.removeEventListener('click',   championKeyHandler);
+        championKeyHandler = null;
+      }
       fightOverlays.clear();
     },
   };
@@ -5958,6 +6356,7 @@ registerGame('mario', function initMario() {
 
   const keys = {};
   function onKey(e) {
+    if (marioCompletion) return; // completion-sequence input is handled separately
     const k = e.key.toLowerCase();
     if (['w','a','s','d',' ','arrowup','arrowleft','arrowright','arrowdown'].includes(k)) e.preventDefault();
     keys[k] = e.type === 'keydown';
@@ -5978,6 +6377,7 @@ registerGame('mario', function initMario() {
   // Touch d-pad for Mario
   document.querySelectorAll('#touch-dpad .dp').forEach(b => {
     b.addEventListener('touchstart', () => {
+      if (marioCompletion) return;
       const d = b.dataset.dir;
       if (d === 'left')  keys['arrowleft'] = true;
       if (d === 'right') keys['arrowright'] = true;
@@ -5987,6 +6387,7 @@ registerGame('mario', function initMario() {
       }
     });
     b.addEventListener('touchend', () => {
+      if (marioCompletion) return;
       const d = b.dataset.dir;
       if (d === 'left')  keys['arrowleft'] = false;
       if (d === 'right') keys['arrowright'] = false;
@@ -5996,8 +6397,206 @@ registerGame('mario', function initMario() {
   let lastTime = performance.now();
   updateMarioHUD();
 
+  // ---------- Level-complete sequence state ----------
+  let marioCompletion = null;
+  let marioCompletionExitHandler = null;
+  function startMarioCompletion() {
+    if (marioCompletion) return;
+    marioCompletion = {
+      phase: 'running',
+      t: 0,
+      flagpoleX: VW * 0.90,
+      flagpoleTopY: (H - GROUND_H) - 240,
+      flagWave: 0,
+      slideStartY: 0,
+      slideT: 0,
+      bannerT: 0,
+      fireworksT: 0,
+      fireworksSpawned: 0,
+      fireworks: [],
+      promptT: 0,
+      promptVisible: false,
+      coinSounds: 0,
+    };
+    marioCompletionExitHandler = (e) => {
+      if (!marioCompletion) return;
+      const isClick = e.type === 'click';
+      const isEnter = e.type === 'keydown' && e.key === 'Enter';
+      const isEsc   = e.type === 'keydown' && e.key === 'Escape';
+      if (isEsc || ((isClick || isEnter) && marioCompletion.phase === 'prompt')) {
+        e.preventDefault && e.preventDefault();
+        cleanupMarioCompletion();
+        exitGameToSelect();
+      }
+    };
+    window.addEventListener('keydown', marioCompletionExitHandler);
+    window.addEventListener('click',   marioCompletionExitHandler);
+  }
+  function cleanupMarioCompletion() {
+    if (marioCompletionExitHandler) {
+      window.removeEventListener('keydown', marioCompletionExitHandler);
+      window.removeEventListener('click',   marioCompletionExitHandler);
+      marioCompletionExitHandler = null;
+    }
+    marioCompletion = null;
+  }
+  _marioOnOverlayClose = function() {
+    if (usedBlocks.size >= 3 && !marioCompletion) {
+      startMarioCompletion();
+    }
+  };
+
+  function updateMarioCompletion(dt) {
+    const c = marioCompletion;
+    c.t += dt;
+    c.flagWave += dt;
+    const groundY = H - GROUND_H;
+    if (c.phase === 'running') {
+      const targetX = c.flagpoleX - mario.w - 2;
+      mario.facing = 1;
+      mario.walking = true;
+      const runSpeed = 400; // 2x normal max
+      mario.x += runSpeed * dt;
+      // gravity + ground collision while running
+      mario.vy += 1400 * dt;
+      mario.y += mario.vy * dt;
+      if (mario.y + mario.h > groundY) {
+        mario.y = groundY - mario.h;
+        mario.vy = 0;
+        mario.onGround = true;
+      }
+      // Walk-cycle frames
+      mario.frameTime += dt;
+      if (mario.frameTime > 0.08) { mario.frameTime = 0; mario.frame = (mario.frame + 1) % 4; }
+      if (mario.x >= targetX) {
+        mario.x = targetX;
+        c.slideStartY = mario.y;
+        c.phase = 'sliding';
+        c.slideT = 0;
+      }
+    } else if (c.phase === 'sliding') {
+      c.slideT += dt;
+      const dur = 0.6;
+      const k = Math.min(c.slideT / dur, 1);
+      mario.y = c.slideStartY + ((groundY - mario.h) - c.slideStartY) * k;
+      mario.walking = false;
+      // Coin sound chain
+      if (c.coinSounds === 0 && c.slideT > 0.05) { sfxMarioCoin(); c.coinSounds++; }
+      if (c.coinSounds === 1 && c.slideT > 0.20) { sfxMarioCoin(); c.coinSounds++; }
+      if (c.coinSounds === 2 && c.slideT > 0.35) { sfxMarioCoin(); c.coinSounds++; }
+      if (k >= 1) {
+        mario.y = groundY - mario.h;
+        score += 1000; marioScore = score; updateMarioHUD();
+        c.phase = 'banner';
+        c.bannerT = 0;
+        sfxFanfare();
+      }
+    } else if (c.phase === 'banner') {
+      c.bannerT += dt;
+      if (c.bannerT >= 0.4) {
+        c.phase = 'fireworks';
+        c.fireworksT = 0;
+      }
+    } else if (c.phase === 'fireworks') {
+      c.fireworksT += dt;
+      const colors = ['#39ff85','#ffd700','#ff5cc8','#4cf2ff'];
+      const due = Math.floor(c.fireworksT / 0.3);
+      while (c.fireworksSpawned < Math.min(due + 1, 6)) {
+        c.fireworks.push({
+          x: 80 + Math.random() * (VW - 160),
+          y: 80 + Math.random() * (H * 0.35),
+          age: 0,
+          life: 0.8,
+          color: colors[c.fireworksSpawned % colors.length],
+        });
+        c.fireworksSpawned++;
+      }
+      c.fireworks.forEach(fw => fw.age += dt);
+      c.fireworks = c.fireworks.filter(fw => fw.age < fw.life);
+      // Transition to prompt ~3s after banner appeared
+      if (c.fireworksSpawned >= 6 && c.fireworks.length === 0) {
+        c.phase = 'prompt';
+        c.promptT = 0;
+      }
+    } else if (c.phase === 'prompt') {
+      c.promptT += dt;
+      c.promptVisible = Math.floor(c.promptT * 1.6) % 2 === 0;
+    }
+  }
+
+  function drawMarioCompletion() {
+    const c = marioCompletion;
+    if (!c) return;
+    const groundY = H - GROUND_H;
+    // Flagpole
+    ctx.fillStyle = '#ffd700';
+    ctx.fillRect(c.flagpoleX - 2, c.flagpoleTopY, 4, groundY - c.flagpoleTopY);
+    // Ball on top
+    ctx.beginPath();
+    ctx.arc(c.flagpoleX, c.flagpoleTopY - 4, 5, 0, Math.PI * 2);
+    ctx.fill();
+    // Waving red flag
+    const wave = Math.sin(c.flagWave * 6) * 3;
+    ctx.fillStyle = '#e52521';
+    ctx.beginPath();
+    ctx.moveTo(c.flagpoleX + 2, c.flagpoleTopY + 2);
+    ctx.lineTo(c.flagpoleX + 28 + wave, c.flagpoleTopY + 12);
+    ctx.lineTo(c.flagpoleX + 2, c.flagpoleTopY + 22);
+    ctx.closePath();
+    ctx.fill();
+    // Fireworks
+    for (const fw of c.fireworks) {
+      const k = fw.age / fw.life;
+      const radius = 20 + k * 80;
+      ctx.strokeStyle = fw.color;
+      ctx.globalAlpha = 1 - k;
+      ctx.lineWidth = 2;
+      for (let i = 0; i < 12; i++) {
+        const ang = (i / 12) * Math.PI * 2;
+        const rx = Math.cos(ang), ry = Math.sin(ang);
+        ctx.beginPath();
+        ctx.moveTo(fw.x + rx * radius * 0.5, fw.y + ry * radius * 0.5);
+        ctx.lineTo(fw.x + rx * radius,       fw.y + ry * radius);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // Banner
+    if (c.phase === 'banner' || c.phase === 'fireworks' || c.phase === 'prompt') {
+      let yPos;
+      if (c.phase === 'banner') {
+        const k = Math.min(c.bannerT / 0.4, 1);
+        const ease = 1 - Math.pow(1 - k, 3);
+        yPos = -100 + (H / 2 - 50 + 100) * ease;
+      } else {
+        yPos = H / 2 - 50;
+      }
+      const bw = 440, bh = 110;
+      const bx = VW / 2 - bw / 2;
+      ctx.fillStyle = 'rgba(10, 6, 20, 0.92)';
+      ctx.fillRect(bx, yPos, bw, bh);
+      ctx.strokeStyle = '#ffd700';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(bx, yPos, bw, bh);
+      ctx.fillStyle = '#ffd700';
+      ctx.font = '20px "Press Start 2P", monospace';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('LEVEL COMPLETE', VW / 2, yPos + 24);
+      ctx.fillStyle = '#fff';
+      ctx.font = '11px "Press Start 2P", monospace';
+      ctx.fillText('SCORE: ' + String(score).padStart(6, '0'), VW / 2, yPos + 64);
+      if (c.phase === 'prompt' && c.promptVisible) {
+        ctx.fillStyle = '#ffd700';
+        ctx.font = '10px "Press Start 2P", monospace';
+        ctx.fillText('PRESS ENTER OR CLICK TO CONTINUE', VW / 2, yPos + bh + 24);
+      }
+    }
+  }
+
   function update(dt) {
     if (paused) return;
+    if (marioCompletion) { updateMarioCompletion(dt); return; }
     if (mario.hurt > 0) mario.hurt -= dt * 1000;
 
     // Input
@@ -6473,6 +7072,8 @@ registerGame('mario', function initMario() {
 
     // ----- Mario -----
     drawMario();
+    // ----- Completion overlay -----
+    if (marioCompletion) drawMarioCompletion();
   }
 
   function drawMario() {
@@ -6574,6 +7175,8 @@ registerGame('mario', function initMario() {
       window.removeEventListener('keydown', onKey);
       window.removeEventListener('keyup', onKey);
       window.removeEventListener('resize', resize);
+      cleanupMarioCompletion();
+      _marioOnOverlayClose = null;
     },
   };
   return api;
