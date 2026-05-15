@@ -1947,7 +1947,7 @@
   .game-hud .ghud-center { color: var(--amber); }
   body.game-pacman .game-hud  { color: #FFE000; }
   body.game-fighter .game-hud { color: #ffd700; }
-  body.game-mario  .game-hud  { color: #fff; text-shadow: 1px 1px 0 #000; }
+  body.game-mario  .game-hud  { display: none; }
 
   .lives-row { display: flex; gap: 6px; align-items: center; }
   .life-ship {
@@ -6060,13 +6060,12 @@ registerGame('mario', function initMario() {
   const canvas = document.getElementById('canvas-mario');
   const ctx = canvas.getContext('2d');
   let VW, H;     // viewport width / height
-  let W;         // world width = 1.4 * VW (slight scrolling)
-  let cameraX = 0;
+  let W;         // world width = viewport width (no scrolling)
 
   function resize() {
     const dpr = window.devicePixelRatio || 1;
     VW = window.innerWidth; H = window.innerHeight;
-    W = VW * 1.4;
+    W = VW;
     canvas.width = VW * dpr; canvas.height = H * dpr;
     canvas.style.width = VW + 'px'; canvas.style.height = H + 'px';
     ctx.setTransform(1,0,0,1,0,0); ctx.scale(dpr, dpr);
@@ -6076,7 +6075,7 @@ registerGame('mario', function initMario() {
   const GROUND_H = 80;
   const projects = QUESTS.filter(q => q.kind === 'project');
   const projectLabels = ['T-CARE', 'TORETTO', 'ENVORA'];
-  const mario = { x: 80, y: 0, w: 24, h: 32, vx: 0, vy: 0, onGround: false, facing: 1, frame: 0, frameTime: 0, walking: false, hurt: 0, jumping: false };
+  const mario = { x: 80, y: 0, w: 24, h: 32, vx: 0, vy: 0, onGround: false, facing: 1, frame: 0, frameTime: 0, walking: false, hurt: 0, jumping: false, dropThrough: 0, onFloatPlatform: false };
   let score = 0, coins = 0, lives = 3, paused = false;
   marioScore = 0; marioCoins = 0; updateMarioHUD();
   const platforms = [];
@@ -6090,26 +6089,38 @@ registerGame('mario', function initMario() {
   const popups = [];
   let contactPipe = null;
   const usedBlocks = new Set();
+  usedBlocks.clear(); // every Mario init starts with all ? blocks active (gold)
 
   function setupLevel() {
     platforms.length = 0; blocks.length = 0; goombas.length = 0; koopas.length = 0;
     clouds.length = 0; hills.length = 0;
-    // Ground spans the full smaller world
-    platforms.push({ x: 0, y: H - GROUND_H, w: W, h: GROUND_H, ground: true });
-    // Three brick platforms — one directly below each ? block so Mario can jump up
-    const blockY1 = H - GROUND_H - 150;   // low (~150 above ground)
-    const blockY2 = H - GROUND_H - 200;   // higher
-    const blockY3 = H - GROUND_H - 170;
-    const xs = [W * 0.25, W * 0.50, W * 0.75];
-    const blockYs = [blockY1, blockY2, blockY3];
-    // Platforms below each block (drop ~70 px from block bottom, leaving room to jump)
-    for (let i = 0; i < 3; i++) {
-      platforms.push({ x: xs[i] - 70, y: blockYs[i] + 100, w: 140, h: 18 });
-    }
-    // ? blocks
+    // Ground spans the full viewport
+    platforms.push({ x: 0, y: H - GROUND_H, w: VW, h: GROUND_H, ground: true });
+    // Derive vertical layout from actual Mario physics so blocks/platforms
+    // are always reachable regardless of physics tuning.
+    const jumpVelocity = 500;   // matches mario.vy = -500 on jump
+    const gravity = 1400;       // matches mario.vy += 1400 * dt
+    const jumpHeight = (jumpVelocity * jumpVelocity) / (2 * gravity);
+    const groundY = H - GROUND_H;
+    const pw = 140;
+    const p1x = VW * 0.22, p1y = groundY - jumpHeight * 0.70;
+    const p2x = VW * 0.50, p2y = groundY - jumpHeight * 0.75;
+    const p3x = VW * 0.78, p3y = groundY - jumpHeight * 0.65;
+    platforms.push({ x: p1x, y: p1y, w: pw, h: 18 });
+    platforms.push({ x: p2x, y: p2y, w: pw, h: 18 });
+    platforms.push({ x: p3x, y: p3y, w: pw, h: 18 });
+    // ? blocks: floating ~60px above each platform, centered horizontally
+    const platDefs = [
+      { px: p1x, py: p1y },
+      { px: p2x, py: p2y },
+      { px: p3x, py: p3y },
+    ];
     for (let i = 0; i < 3 && projects[i]; i++) {
+      const bw = 48, bh = 48;
+      const bx = platDefs[i].px + pw / 2 - bw / 2;
+      const by = platDefs[i].py - 60;
       blocks.push({
-        x: xs[i] - 24, y: blockYs[i], w: 48, h: 48,
+        x: bx, y: by, w: bw, h: bh,
         used: usedBlocks.has(projects[i].id),
         project: projects[i],
         label: projectLabels[i] || projects[i].name,
@@ -6117,23 +6128,24 @@ registerGame('mario', function initMario() {
         squish: 0,
       });
     }
-    // Enemies — max 2 goombas, 1 koopa
-    goombas.push({ x: W * 0.35, y: H - GROUND_H - 24, w: 26, h: 24, dx: -1, alive: true, frame: 0, frameTime: 0, squish: 0 });
-    goombas.push({ x: W * 0.62, y: H - GROUND_H - 24, w: 26, h: 24, dx: 1,  alive: true, frame: 0, frameTime: 0, squish: 0 });
-    // Koopa on the middle platform
-    const midP = platforms[2]; // second floating platform (idx 0=ground, 1=below b1, 2=below b2)
-    koopas.push({ x: midP.x + 20, y: midP.y - 32, w: 24, h: 32, dx: -1, alive: true, shell: false, frame: 0, frameTime: 0,
-                  patrolMin: midP.x + 4, patrolMax: midP.x + midP.w - 28 });
-    // Clouds (across the wider world)
+    // Mario starting position
+    mario.x = VW * 0.08; mario.y = 0; mario.vx = 0; mario.vy = 0;
+    // Enemies — 2 goombas on ground, 1 koopa on ground
+    goombas.push({ x: VW * 0.30, y: H - GROUND_H - 24, w: 26, h: 24, dx: -1, alive: true, frame: 0, frameTime: 0, squish: 0 });
+    goombas.push({ x: VW * 0.60, y: H - GROUND_H - 24, w: 26, h: 24, dx: 1,  alive: true, frame: 0, frameTime: 0, squish: 0 });
+    // Koopa on ground at 50%
+    koopas.push({ x: VW * 0.50, y: H - GROUND_H - 32, w: 24, h: 32, dx: -1, alive: true, shell: false, frame: 0, frameTime: 0,
+                  patrolMin: VW * 0.10, patrolMax: VW * 0.90 - 24 });
+    // Clouds
     for (let i = 0; i < 5; i++) {
-      clouds.push({ x: (W / 5) * i + Math.random() * 60, y: 60 + Math.random() * 80, w: 70 + Math.random() * 50 });
+      clouds.push({ x: (VW / 5) * i + Math.random() * 60, y: 60 + Math.random() * 80, w: 70 + Math.random() * 50 });
     }
     // Distant hill silhouettes
     for (let i = 0; i < 4; i++) {
-      hills.push({ x: (W / 4) * i + Math.random() * 80, r: 110 + Math.random() * 80 });
+      hills.push({ x: (VW / 4) * i + Math.random() * 80, r: 110 + Math.random() * 80 });
     }
     // Contact pipe at far right — DECORATIVE ONLY (no collision)
-    contactPipe = { x: W - 90, y: H - GROUND_H - 80, w: 60, h: 80 };
+    contactPipe = { x: VW * 0.93, y: H - GROUND_H - 80, w: 60, h: 80 };
   }
   resize();
   window.addEventListener('resize', resize);
@@ -6147,6 +6159,11 @@ registerGame('mario', function initMario() {
       mario.vy = -500; mario.onGround = false;
       beep(523, 0.04, 'square', 0.08, 0);
       beep(659, 0.04, 'square', 0.08, 0.04);
+    }
+    if (e.type === 'keydown' && (k === 's' || k === 'arrowdown') && mario.onGround && mario.onFloatPlatform) {
+      mario.dropThrough = 200;
+      mario.onGround = false;
+      mario.onFloatPlatform = false;
     }
   }
   window.addEventListener('keydown', onKey);
@@ -6192,7 +6209,11 @@ registerGame('mario', function initMario() {
     mario.vy += 1400 * dt;
     if (mario.vy > 700) mario.vy = 700;
 
-    // Move
+    // Drop-through timer
+    if (mario.dropThrough > 0) mario.dropThrough -= dt * 1000;
+
+    // Move (capture previous bottom edge for swept one-way platform collision)
+    const prevBottomY = mario.y + mario.h;
     mario.x += mario.vx * dt;
     mario.y += mario.vy * dt;
 
@@ -6200,15 +6221,30 @@ registerGame('mario', function initMario() {
     if (mario.x < 0) { mario.x = 0; mario.vx = 0; }
     if (mario.x + mario.w > W) { mario.x = W - mario.w; mario.vx = 0; }
 
-    // Platform collision (axis-aligned)
+    // Platform collision
+    //   Ground:    solid from above (Mario can never fall through ground)
+    //   Floating:  one-way — only blocks when moving down AND bottom crossed the top
+    //              edge this frame, AND dropThrough is not active
     mario.onGround = false;
+    mario.onFloatPlatform = false;
     for (const p of platforms) {
-      if (mario.vy >= 0 &&
-          mario.x + mario.w > p.x && mario.x < p.x + p.w &&
-          mario.y + mario.h > p.y && mario.y + mario.h < p.y + 24 + Math.abs(mario.vy * dt)) {
-        mario.y = p.y - mario.h;
-        mario.vy = 0;
-        mario.onGround = true;
+      const overlapsX = mario.x + mario.w > p.x && mario.x < p.x + p.w;
+      if (!overlapsX) continue;
+      if (p.ground) {
+        if (mario.vy >= 0 &&
+            mario.y + mario.h > p.y && mario.y + mario.h < p.y + 24 + Math.abs(mario.vy * dt)) {
+          mario.y = p.y - mario.h;
+          mario.vy = 0;
+          mario.onGround = true;
+        }
+      } else {
+        if (mario.dropThrough > 0) continue;
+        if (mario.vy > 0 && prevBottomY <= p.y && mario.y + mario.h >= p.y) {
+          mario.y = p.y - mario.h;
+          mario.vy = 0;
+          mario.onGround = true;
+          mario.onFloatPlatform = true;
+        }
       }
     }
 
@@ -6258,7 +6294,7 @@ registerGame('mario', function initMario() {
       }
       if (!g.alive) continue;
       g.x += g.dx * 60 * dt;
-      if (g.x < 0 || g.x + g.w > W) g.dx *= -1;
+      if (g.x < VW * 0.10 || g.x + g.w > VW * 0.90) g.dx *= -1;
       g.frameTime += dt;
       if (g.frameTime > 1/6) { g.frameTime = 0; g.frame ^= 1; }
       if (mario.x + mario.w > g.x && mario.x < g.x + g.w &&
@@ -6348,7 +6384,7 @@ registerGame('mario', function initMario() {
           startGame('mario');
         });
       } else {
-        mario.x = 80; mario.y = 0; mario.vx = 0; mario.vy = 0;
+        mario.x = VW * 0.08; mario.y = 0; mario.vx = 0; mario.vy = 0;
       }
     }
 
@@ -6361,9 +6397,6 @@ registerGame('mario', function initMario() {
       if (mario.frameTime > 0.5) { mario.frameTime = 0; mario.frame ^= 1; }
     }
 
-    // Camera follow — keep Mario roughly centered, clamp to world bounds
-    const targetCam = mario.x + mario.w / 2 - VW / 2;
-    cameraX = Math.max(0, Math.min(W - VW, targetCam));
   }
 
   function roundRect(x, y, w, h, r) {
@@ -6415,10 +6448,6 @@ registerGame('mario', function initMario() {
     sky.addColorStop(1, '#90cbff');
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, VW, H);
-
-    // World rendering uses camera offset
-    ctx.save();
-    ctx.translate(-cameraX, 0);
 
     // ----- Distant hill silhouettes -----
     const horizonY = H - GROUND_H;
@@ -6638,8 +6667,6 @@ registerGame('mario', function initMario() {
 
     // ----- Mario -----
     drawMario();
-
-    ctx.restore(); // end camera transform
   }
 
   function drawMario() {
