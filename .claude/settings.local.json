@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(awk 'NR==5164,NR==5722' index.html)",
+      "PowerShell($lines = Get-Content -LiteralPath \"index.html\" -Encoding utf8; $start = 5164; $end = 5722; Write-Output \\(\"line 5163: \" + $lines[5162]\\); Write-Output \\(\"line 5164: \" + $lines[5163]\\); Write-Output \\(\"line 5720: \" + $lines[5719]\\); Write-Output \\(\"line 5721: \" + $lines[5720]\\); Write-Output \\(\"line 5722: \" + $lines[5721]\\); Write-Output \\(\"line 5723: \" + $lines[5722]\\))",
+      "Bash(node --check index.html)"
+    ]
+  }
+}

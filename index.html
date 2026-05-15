@@ -1124,28 +1124,6 @@
     0%, 100% { filter: brightness(1); }
     50%      { filter: brightness(1.9); }
   }
-  /* Payline */
-  .slot-payline {
-    position: absolute;
-    left: 4px; right: 4px;
-    top: 50%;
-    height: 1px;
-    background: #ff3344;
-    box-shadow: 0 0 6px rgba(255,51,68,0.7);
-    pointer-events: none;
-    transform: translateY(-0.5px);
-  }
-  .slot-payline-label {
-    position: absolute;
-    left: -42px;
-    top: calc(50% - 4px);
-    font-family: 'Press Start 2P', monospace;
-    font-size: 6px;
-    color: #ff5566;
-    letter-spacing: 0.14em;
-    text-shadow: 0 0 4px rgba(255,51,68,0.5);
-    pointer-events: none;
-  }
   /* Lever — right side */
   .slot-lever {
     position: absolute;
@@ -2898,8 +2876,6 @@
           <div class="slot-reel" data-idx="0"><span class="slot-symbol">?</span></div>
           <div class="slot-reel" data-idx="1"><span class="slot-symbol">?</span></div>
           <div class="slot-reel" data-idx="2"><span class="slot-symbol">?</span></div>
-          <div class="slot-payline" aria-hidden="true"></div>
-          <div class="slot-payline-label" aria-hidden="true">PAYLINE</div>
         </div>
         <button class="slot-lever" id="slot-lever" type="button" aria-label="Pull lever">
           <span class="slot-lever-track"></span>
