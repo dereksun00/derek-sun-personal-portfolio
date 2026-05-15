@@ -939,12 +939,190 @@
     color: #fff;
     box-shadow: 0 0 14px rgba(255,207,82,0.45);
   }
-  .contact-placeholder {
+  /* ============================================================
+     CONTACT SLOT MACHINE
+     ============================================================ */
+  #screen-contact {
+    flex-direction: column;
+    gap: 18px;
+    padding: 60px 4vmin 40px;
+  }
+  .slot-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    max-width: 640px;
+    width: 100%;
+    position: relative;
+  }
+  .slot-title {
     color: var(--amber);
-    font-size: 12px;
-    letter-spacing: 0.22em;
-    text-align: center;
-    margin-top: 40vh;
+    font-size: clamp(18px, 3vw, 26px);
+    letter-spacing: 0.36em;
+    text-shadow: 0 0 12px rgba(255,207,82,0.45);
+  }
+  .slot-subtitle {
+    color: var(--green);
+    font-size: 10px;
+    letter-spacing: 0.32em;
+    text-shadow: 0 0 6px rgba(107,255,138,0.45);
+    margin-bottom: 8px;
+  }
+  .slot-machine {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    padding: 18px;
+    background: rgba(10, 6, 20, 0.85);
+    border: 2px solid var(--green);
+    box-shadow: 0 0 0 4px #0c0820, 0 0 22px rgba(107,255,138,0.25);
+    position: relative;
+  }
+  .slot-reels {
+    display: flex;
+    gap: 10px;
+  }
+  .slot-reel {
+    width: 80px;
+    height: 80px;
+    border: 2px solid var(--green);
+    background: #050310;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--green);
+    font-family: 'Press Start 2P', monospace;
+    font-size: 32px;
+    text-shadow: 0 0 8px rgba(107,255,138,0.5);
+    overflow: hidden;
+    transition: box-shadow 0.18s ease-out, border-color 0.18s ease-out;
+  }
+  .slot-reel.locked {
+    border-color: var(--amber);
+    color: var(--amber);
+    text-shadow: 0 0 10px rgba(255,207,82,0.6);
+  }
+  .slot-reel.spinning .slot-symbol {
+    animation: slot-spin-blur 0.06s steps(1) infinite;
+  }
+  @keyframes slot-spin-blur {
+    0%, 100% { transform: translateY(-2px); }
+    50%      { transform: translateY(2px); }
+  }
+  .slot-reel.flash-gold {
+    border-color: #ffd700;
+    color: #ffd700;
+    box-shadow: 0 0 18px rgba(255,215,0,0.8), inset 0 0 12px rgba(255,215,0,0.4);
+    animation: slot-gold-flash 0.6s ease-out;
+  }
+  @keyframes slot-gold-flash {
+    0%, 100% { filter: brightness(1); }
+    50%      { filter: brightness(1.8); }
+  }
+  .slot-lever {
+    position: relative;
+    width: 22px;
+    height: 100px;
+    background: transparent;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    transition: transform 0.15s ease-out;
+  }
+  .slot-lever:disabled { cursor: not-allowed; opacity: 0.4; }
+  .slot-lever.pulling { transform: translateY(20px); }
+  .slot-lever-ball {
+    width: 18px;
+    height: 18px;
+    background: radial-gradient(circle at 35% 30%, #ff8a8a, #c52020 60%, #5a0a0a);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(220,30,30,0.5);
+    flex-shrink: 0;
+  }
+  .slot-lever-stick {
+    width: 4px;
+    flex: 1;
+    background: linear-gradient(to right, #b0b0b0, #e8e8e8, #888);
+    border-radius: 0 0 2px 2px;
+  }
+  .slot-jackpot {
+    color: var(--amber);
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(20px, 4vw, 32px);
+    letter-spacing: 0.32em;
+    text-shadow: 0 0 14px rgba(255,207,82,0.7), 0 0 28px rgba(255,207,82,0.45);
+    opacity: 0;
+    transform: scale(0.8);
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    transition: none;
+  }
+  .slot-jackpot.show {
+    opacity: 1;
+    height: auto;
+    margin: 6px 0;
+    animation: slot-jackpot-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+  }
+  @keyframes slot-jackpot-in {
+    0%   { opacity: 0; transform: scale(0.8); }
+    60%  { opacity: 1; transform: scale(1.1); }
+    100% { opacity: 1; transform: scale(1.0); }
+  }
+  .slot-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    max-width: 480px;
+    margin-top: 12px;
+  }
+  .slot-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    opacity: 0;
+    transform: translateY(8px);
+    animation: slot-row-in 0.4s ease-out forwards;
+  }
+  @keyframes slot-row-in {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .slot-row .slot-label { color: var(--amber); }
+  .slot-row .slot-dot   { color: var(--amber); opacity: 0.55; }
+  .slot-row a.slot-value {
+    color: var(--green);
+    text-decoration: none;
+    text-shadow: 0 0 6px rgba(107,255,138,0.35);
+    transition: text-shadow 0.18s ease, text-decoration-color 0.18s ease;
+  }
+  .slot-row a.slot-value:hover {
+    text-decoration: underline;
+    text-decoration-color: var(--green);
+    text-shadow: 0 0 10px rgba(107,255,138,0.7);
+  }
+  .confetti-pixel {
+    position: fixed;
+    top: -12px;
+    width: 8px;
+    height: 8px;
+    pointer-events: none;
+    z-index: 9;
+    animation: confetti-fall var(--dur, 2s) linear forwards;
+  }
+  @keyframes confetti-fall {
+    0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+    80%  { opacity: 1; }
+    100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
   }
   .game-card {
     background: #0c0820;
@@ -2297,10 +2475,26 @@
   <button class="contact-btn" id="contact-btn" type="button">[ CONTACT ]</button>
 </section>
 
-<!-- ===== SCREEN: CONTACT (slot machine — built in phase 6) ===== -->
+<!-- ===== SCREEN: CONTACT (slot machine) ===== -->
 <section id="screen-contact" class="screen">
   <div class="select-back" id="contact-back">← BACK</div>
-  <div class="contact-placeholder">CONTACT SCREEN — COMING IN PHASE 6</div>
+  <div class="slot-wrap">
+    <div class="slot-title">CONTACT</div>
+    <div class="slot-subtitle">PULL THE LEVER</div>
+    <div class="slot-machine">
+      <div class="slot-reels">
+        <div class="slot-reel" data-idx="0"><span class="slot-symbol">?</span></div>
+        <div class="slot-reel" data-idx="1"><span class="slot-symbol">?</span></div>
+        <div class="slot-reel" data-idx="2"><span class="slot-symbol">?</span></div>
+      </div>
+      <button class="slot-lever" id="slot-lever" type="button" aria-label="Pull lever">
+        <span class="slot-lever-ball"></span>
+        <span class="slot-lever-stick"></span>
+      </button>
+    </div>
+    <div class="slot-jackpot" id="slot-jackpot">JACKPOT</div>
+    <div class="slot-results" id="slot-results"></div>
+  </div>
 </section>
 
 <!-- ===== MAIN SCREEN: QUEST LOG ===== -->
@@ -3797,7 +3991,7 @@ document.getElementById('select-back').addEventListener('click', () => {
 document.getElementById('contact-btn').addEventListener('click', () => {
   ensureAudio();
   sfxConfirm();
-  wipeTo(() => show('contact'));
+  wipeTo(() => { show('contact'); resetSlotMachine(); });
 });
 
 /* Contact screen BACK */
@@ -3805,6 +3999,112 @@ document.getElementById('contact-back').addEventListener('click', () => {
   ensureAudio();
   wipeTo(() => show('select'));
   sfxBack();
+});
+
+/* ============================================================
+   CONTACT SLOT MACHINE
+   ============================================================ */
+const SLOT_REVEALS = [
+  { symbol: 'in', label: 'LINKEDIN', value: 'linkedin.com/in/derek-sun',  href: 'https://www.linkedin.com/in/derek-sun/' },
+  { symbol: '@',  label: 'EMAIL',    value: 'sunderek3602@gmail.com',     href: 'mailto:sunderek3602@gmail.com' },
+  { symbol: 'gh', label: 'GITHUB',   value: 'github.com/dereksun00',      href: 'https://github.com/dereksun00' },
+];
+const SLOT_SPIN_GLYPHS = ['?','#','%','&','*','+','=','$','@','in','gh'];
+let slotPull = 0;
+let slotSpinning = false;
+
+function resetSlotMachine() {
+  slotPull = 0;
+  slotSpinning = false;
+  const reels = document.querySelectorAll('.slot-reel');
+  reels.forEach(r => {
+    r.classList.remove('locked', 'spinning', 'flash-gold');
+    const sym = r.querySelector('.slot-symbol');
+    if (sym) sym.textContent = '?';
+  });
+  const lever = document.getElementById('slot-lever');
+  lever.disabled = false;
+  lever.classList.remove('pulling');
+  const jackpot = document.getElementById('slot-jackpot');
+  jackpot.classList.remove('show');
+  document.getElementById('slot-results').innerHTML = '';
+}
+
+function spinReel(reel, finalSymbol, done) {
+  const sym = reel.querySelector('.slot-symbol');
+  reel.classList.add('spinning');
+  const SPIN_MS = 600;
+  const FRAME_MS = 50;
+  const t0 = performance.now();
+  function tick() {
+    const elapsed = performance.now() - t0;
+    if (elapsed >= SPIN_MS) {
+      reel.classList.remove('spinning');
+      sym.textContent = finalSymbol;
+      reel.classList.add('locked');
+      done && done();
+      return;
+    }
+    sym.textContent = SLOT_SPIN_GLYPHS[Math.floor(Math.random() * SLOT_SPIN_GLYPHS.length)];
+    setTimeout(tick, FRAME_MS);
+  }
+  tick();
+}
+
+function revealContactRow(reveal) {
+  const row = document.createElement('div');
+  row.className = 'slot-row';
+  row.innerHTML = `
+    <span class="slot-label">${reveal.label}</span>
+    <span class="slot-dot">·</span>
+    <a class="slot-value" href="${reveal.href}" target="_blank" rel="noopener noreferrer">${reveal.value}</a>
+  `;
+  document.getElementById('slot-results').appendChild(row);
+}
+
+function runJackpot() {
+  const reels = document.querySelectorAll('.slot-reel');
+  reels.forEach((r, i) => setTimeout(() => r.classList.add('flash-gold'), i * 80));
+  const jackpot = document.getElementById('slot-jackpot');
+  jackpot.classList.remove('show');
+  void jackpot.offsetWidth;
+  jackpot.classList.add('show');
+  sfxFanfare();
+  // Confetti
+  const colors = ['#ffd166', '#39ff85', '#4cf2ff', '#ff5cc8', '#ffcf52', '#ff6b9d'];
+  for (let i = 0; i < 30; i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti-pixel';
+    c.style.left = (Math.random() * 100) + 'vw';
+    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+    c.style.setProperty('--dur', (1.6 + Math.random() * 1.4) + 's');
+    c.style.animationDelay = (Math.random() * 0.25) + 's';
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3500);
+  }
+}
+
+document.getElementById('slot-lever').addEventListener('click', () => {
+  if (slotSpinning || slotPull >= SLOT_REVEALS.length) return;
+  ensureAudio();
+  const lever = document.getElementById('slot-lever');
+  lever.classList.add('pulling');
+  setTimeout(() => lever.classList.remove('pulling'), 150);
+
+  const idx = slotPull;
+  const reveal = SLOT_REVEALS[idx];
+  const reel = document.querySelector(`.slot-reel[data-idx="${idx}"]`);
+  slotSpinning = true;
+  spinReel(reel, reveal.symbol, () => {
+    sfxConfirm();
+    revealContactRow(reveal);
+    slotPull++;
+    slotSpinning = false;
+    if (slotPull >= SLOT_REVEALS.length) {
+      lever.disabled = true;
+      setTimeout(runJackpot, 300);
+    }
+  });
 });
 
 /* CHANGE GAME button on quest screen */
