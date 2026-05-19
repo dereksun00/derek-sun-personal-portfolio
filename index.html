@@ -25,7 +25,7 @@
   html, body {
     width: 100%;
     height: 100%;
-    background: #000;
+    background: #050310;
     color: var(--text);
     font-family: 'Press Start 2P', monospace;
     overflow: hidden;
@@ -72,28 +72,39 @@
     align-items: center;
     justify-content: center;
     padding: 4vmin;
-    background: var(--bg);
+    background: transparent;
+    z-index: 1;
   }
   .screen.active { display: flex; }
+  /* Ensure body's solid background remains, but star canvas sits behind all UI. */
+  #bg-canvas { z-index: 0; }
 
   /* ===== SCREEN 1: BOOT ===== */
   #screen-boot {
-    background: #000;
-    align-items: flex-start;
-    justify-content: flex-start;
+    background: transparent;
+    align-items: center;
+    justify-content: center;
     padding: 5vmin 4vmin;
   }
   .console {
     width: 100%;
-    font-size: 14px;
-    line-height: 1.9;
-    color: var(--green);
-    text-shadow: 0 0 6px rgba(107,255,138,0.55);
+    font-size: 13px;
+    line-height: 2;
+    color: #a0c4e8;
+    text-shadow: 0 0 6px rgba(160,196,232,0.45);
     white-space: pre-wrap;
     word-break: break-word;
   }
-  .console .ok { color: var(--green); }
-  .console .ttl { color: var(--amber); }
+  .console .ok { color: #c8e6ff; text-shadow: 0 0 6px rgba(200,230,255,0.55); }
+  .console .ttl { color: #a0c4e8; }
+  .boot-watermark {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.1);
+    letter-spacing: 0.4em;
+    text-align: center;
+    margin-bottom: 28px;
+  }
   .blink {
     display: inline-block;
     animation: blink 1s steps(2) infinite;
@@ -102,19 +113,22 @@
     50% { opacity: 0; }
   }
   .press-enter-boot {
-    margin-top: 1.5em;
-    color: var(--amber);
-    font-size: 14px;
+    margin-top: 1.8em;
+    display: inline-block;
+    padding: 10px 18px;
+    color: #a0c4e8;
+    background: rgba(160,196,232,0.06);
+    border: 1px solid rgba(160,196,232,0.7);
+    box-shadow: 0 0 12px rgba(160,196,232,0.3);
+    font-size: 13px;
+    letter-spacing: 0.12em;
     opacity: 0;
   }
   .press-enter-boot.show { opacity: 1; }
 
   /* ===== SCREEN 2: TITLE ===== */
   #screen-title {
-    background:
-      radial-gradient(ellipse at 50% 40%, rgba(80, 20, 130, 0.55), transparent 60%),
-      radial-gradient(ellipse at 30% 80%, rgba(20, 90, 50, 0.35), transparent 60%),
-      var(--purple-deep);
+    background: transparent;
     flex-direction: column;
     text-align: center;
   }
@@ -176,19 +190,27 @@
   .subtitle {
     margin-top: 2.2em;
     font-size: clamp(10px, 1.6vw, 16px);
-    color: var(--green);
-    letter-spacing: 0.15em;
-    text-shadow: 0 0 6px rgba(107,255,138,0.5);
+    color: #a0c4e8;
+    letter-spacing: 0.2em;
+    text-shadow: 0 0 6px rgba(160,196,232,0.5);
   }
   .start-row {
     margin-top: 3em;
     font-size: clamp(10px, 1.6vw, 14px);
-    color: var(--amber);
-    text-shadow: 0 0 6px rgba(255,207,82,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 0.8em;
+  }
+  .title-start-btn {
+    display: inline-block;
+    padding: 10px 22px;
+    color: #a0c4e8;
+    background: rgba(160,196,232,0.06);
+    border: 1px solid rgba(160,196,232,0.7);
+    box-shadow: 0 0 12px rgba(160,196,232,0.3), 0 0 24px rgba(160,196,232,0.1);
+    letter-spacing: 0.18em;
+    animation: blink 1.4s steps(2) infinite;
   }
   .arrow-bounce {
     display: inline-block;
@@ -265,9 +287,7 @@
 
   /* ===== MAIN SCREEN: QUEST LOG ===== */
   #screen-quest {
-    background:
-      radial-gradient(ellipse at top, rgba(60,20,100,0.35), transparent 60%),
-      var(--purple-deep);
+    background: transparent;
     flex-direction: column;
     padding: 0;
   }
@@ -424,26 +444,7 @@
   }
   .hud-bottom .key { color: var(--amber); margin-right: 6px; }
 
-  /* Pixel curtain wipe */
-  .wipe {
-    position: fixed;
-    inset: 0;
-    z-index: 1000;
-    pointer-events: none;
-    display: grid;
-    grid-template-columns: repeat(16, 1fr);
-    grid-template-rows: repeat(10, 1fr);
-    gap: 0;
-  }
-  .wipe.active { pointer-events: all; }
-  .wipe .cell {
-    background: var(--green);
-    transform: scale(0);
-    transform-origin: center;
-    transition: transform 0.22s ease-in;
-  }
-  .wipe.in .cell { transform: scale(1.05); }
-  .wipe.out .cell { transform: scale(0); transition: transform 0.22s ease-out; }
+  /* Black-hole wipe canvas styling handled inline; no .wipe grid CSS. */
 
   /* Flash overlay */
   .flash {
@@ -576,8 +577,8 @@
     inset: 0;
     z-index: 900;
     background:
-      radial-gradient(ellipse at top, rgba(60,20,100,0.4), transparent 60%),
-      var(--purple-deep);
+      radial-gradient(ellipse at top, rgba(60,20,100,0.45), transparent 60%),
+      rgba(22,8,38,0.92);
     transform: translateY(100%);
     transition: transform 0.3s ease-out;
     overflow-y: auto;
@@ -892,19 +893,20 @@
      GAME SELECT SCREEN
      ============================================================ */
   #screen-select {
-    background:
-      radial-gradient(ellipse at 50% 40%, rgba(80,20,130,0.5), transparent 60%),
-      var(--purple-deep);
+    background: transparent;
     flex-direction: column;
     gap: 22px;
     padding: 60px 4vmin 40px;
     overflow-y: auto;
   }
   .select-title {
-    color: var(--amber);
-    font-size: clamp(14px, 2.2vw, 20px);
+    background: linear-gradient(180deg, #ffffff 0%, #c0c0ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
+    font-size: clamp(20px, 3vw, 28px);
     letter-spacing: 0.32em;
-    text-shadow: 0 0 12px rgba(255,207,82,0.4);
   }
   .game-grid {
     display: grid;
@@ -926,26 +928,27 @@
     font-family: 'Press Start 2P', monospace;
     font-size: 11px;
     letter-spacing: 0.28em;
-    color: var(--amber);
-    background: rgba(0,0,0,0.5);
-    border: 1px solid var(--amber);
+    color: #a0c4e8;
+    background: rgba(160,196,232,0.06);
+    border: 1px solid rgba(160,196,232,0.7);
+    box-shadow: 0 0 12px rgba(160,196,232,0.3);
     padding: 10px 22px;
     cursor: pointer;
-    text-shadow: 0 0 8px rgba(255,207,82,0.5);
     transition: background-color 0.18s ease, color 0.18s ease, box-shadow 0.18s ease;
   }
   .contact-btn:hover {
-    background: rgba(255,207,82,0.18);
+    background: rgba(160,196,232,0.18);
     color: #fff;
-    box-shadow: 0 0 14px rgba(255,207,82,0.45);
+    box-shadow: 0 0 16px rgba(160,196,232,0.5);
   }
+  .about-btn { margin-top: 6px; }
   /* ============================================================
      CONTACT SLOT MACHINE
      ============================================================ */
   #screen-contact {
     flex-direction: column;
     justify-content: center;
-    background: #050310;
+    background: transparent;
     padding: 60px 4vmin 40px;
   }
   .slot-stage {
@@ -971,26 +974,26 @@
     opacity: 0.7;
   }
   .slot-jackpot {
+    position: fixed;
+    top: 22%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0);
     color: var(--amber);
     font-family: 'Press Start 2P', monospace;
-    font-size: 24px;
+    font-size: 32px;
     letter-spacing: 0.3em;
     text-shadow: 0 0 14px rgba(255,207,82,0.8), 0 0 28px rgba(255,207,82,0.5);
     opacity: 0;
-    transform: scale(0);
     pointer-events: none;
-    height: 0;
-    margin: 0;
+    z-index: 20;
   }
   .slot-jackpot.show {
-    height: auto;
-    margin-top: 6px;
-    animation: slot-jackpot-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: slot-jackpot-in 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
   }
   @keyframes slot-jackpot-in {
-    0%   { opacity: 0; transform: scale(0); }
-    60%  { opacity: 1; transform: scale(1.2); }
-    100% { opacity: 1; transform: scale(1); }
+    0%   { opacity: 0; transform: translate(-50%, -50%) scale(0); }
+    60%  { opacity: 1; transform: translate(-50%, -50%) scale(1.2); }
+    100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
   }
   /* Machine body */
   .slot-machine {
@@ -1346,7 +1349,7 @@
     100% { transform: translateY(110vh) rotate(540deg); opacity: 0; }
   }
   .game-card {
-    background: #0c0820;
+    background: rgba(10,8,30,0.8);
     padding: 18px 18px 14px;
     cursor: pointer;
     position: relative;
@@ -1354,15 +1357,13 @@
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    box-shadow:
-      0 0 0 3px #0c0820,
-      0 0 0 6px var(--green),
-      0 0 0 9px #0c0820,
-      0 0 18px rgba(107,255,138,0.15);
-    transition: transform 0.18s ease-out, box-shadow 0.25s ease-out;
+    border: 1px solid rgba(255,215,0,0.4);
+    box-shadow: 0 0 20px rgba(255,215,0,0.1);
+    transition: transform 0.25s ease-out, border-color 0.25s ease-out, box-shadow 0.25s ease-out;
   }
   .game-card .gc-title {
-    color: #fff;
+    color: #ffffff;
+    font-family: 'Press Start 2P', monospace;
     font-size: clamp(10px, 1.4vw, 13px);
     letter-spacing: 0.18em;
     text-align: center;
@@ -1370,37 +1371,25 @@
   .game-card .gc-preview {
     width: 100%;
     aspect-ratio: 16 / 9;
-    background: #050310;
+    background: rgba(5,3,15,0.9);
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
     position: relative;
-    border: 2px solid rgba(107,255,138,0.35);
+    border: 1px solid rgba(255,215,0,0.25);
   }
   .game-card .gc-coin {
-    color: var(--green);
-    font-size: 9px;
+    color: #39ff85;
+    font-size: 10px;
     letter-spacing: 0.22em;
     animation: blink 0.9s steps(2) infinite;
   }
   .game-card:hover {
-    transform: translateY(-3px);
-    box-shadow:
-      0 0 0 3px #0c0820,
-      0 0 0 6px #f4ffac,
-      0 0 0 9px #0c0820,
-      0 0 28px rgba(107,255,138,0.45);
+    transform: translateY(-4px);
+    border-color: rgba(255,215,0,0.8);
+    box-shadow: 0 0 30px rgba(255,215,0,0.2);
   }
-  /* Per-card accent */
-  .game-card[data-game="fighter"] { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ff3300, 0 0 0 9px #0c0820, 0 0 18px rgba(255,51,0,0.25); }
-  .game-card[data-game="fighter"]:hover { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ff7a55, 0 0 0 9px #0c0820, 0 0 30px rgba(255,51,0,0.5); }
-  .game-card[data-game="fighter"] .gc-preview { border-color: rgba(255,51,0,0.5); background: #1a0000; }
-  .game-card[data-game="fighter"] .gc-coin { color: #ff7a55; }
-  .game-card[data-game="mario"] { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ffd700, 0 0 0 9px #0c0820, 0 0 18px rgba(255,215,0,0.25); }
-  .game-card[data-game="mario"]:hover { box-shadow: 0 0 0 3px #0c0820, 0 0 0 6px #ffe85c, 0 0 0 9px #0c0820, 0 0 30px rgba(255,215,0,0.5); }
-  .game-card[data-game="mario"] .gc-preview { border-color: rgba(255,215,0,0.5); background: #5c94fc; }
-  .game-card[data-game="mario"] .gc-coin { color: #ffd700; }
   .select-back {
     position: absolute;
     top: 22px;
@@ -1683,7 +1672,7 @@
   body.game-fighter #screen-quest {
     background:
       radial-gradient(ellipse at top, rgba(255,51,0,0.10), transparent 60%),
-      #1a0000;
+      rgba(26,0,0,0.55);
   }
   body.game-fighter .panel {
     background: rgba(30,5,5,0.92);
@@ -1931,7 +1920,6 @@
     bottom: 0; left: 0; right: 0;
     height: 0;
     background: #2ea432;
-    border-top: 6px solid #0c6b21;
     z-index: 968;
     pointer-events: none;
   }
@@ -2261,10 +2249,10 @@
      ============================================================ */
   #screen-boot {
     cursor: default !important;
-    background: #000;
+    background: transparent;
     padding: 6vmin 6vmin;
-    align-items: stretch;
-    justify-content: flex-start;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
   }
   #screen-boot * { cursor: default !important; }
@@ -2293,10 +2281,12 @@
     position: relative;
     z-index: 2;
     width: 100%;
-    max-width: 760px;
+    max-width: 620px;
     margin: 0 auto;
     color: var(--text);
+    text-align: center;
   }
+  .boot-inner .console { text-align: left; display: inline-block; min-width: 360px; }
   .boot-title {
     font-size: clamp(20px, 4vw, 36px);
     color: var(--amber);
@@ -2444,7 +2434,7 @@
   #game-fighter {
     background:
       radial-gradient(ellipse at center, rgba(255,51,0,0.18), transparent 60%),
-      linear-gradient(to bottom, #260202, #1a0000);
+      linear-gradient(to bottom, rgba(38,2,2,0.55), rgba(26,0,0,0.55));
     overflow: hidden;
   }
   .sf-title {
@@ -2452,9 +2442,12 @@
     top: 50px; left: 0; right: 0;
     text-align: center;
     font-size: clamp(14px, 2.4vw, 22px);
-    color: #ffd700;
+    background: linear-gradient(180deg, #ffffff 0%, #c0c0ff 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    color: transparent;
     letter-spacing: 0.32em;
-    text-shadow: 0 0 12px rgba(255,51,0,0.55);
   }
   .sf-grid {
     position: absolute;
@@ -2658,10 +2651,43 @@
   .sf-vs.down .sf-side.left  { transform: translateX(0); opacity: 1; }
   .sf-vs.down .sf-side.right { transform: translateX(0); opacity: 1; }
   .sf-side .sf-portrait {
-    width: 240px;
-    height: 280px;
+    width: 280px;
+    height: 200px;
     background: rgba(255,51,0,0.06);
     border: 2px solid #ffd700;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Reposition the silhouette/figure so it sits centered inside the portrait box
+     instead of being absolutely pinned to top/left. */
+  .sf-side .sf-portrait::before,
+  .sf-side .sf-portrait::after {
+    position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    margin: 0 auto;
+  }
+  .sf-side .sf-portrait::before {
+    width: 50px; height: 80px;
+    background: #333;
+    border-radius: 6px 6px 4px 4px;
+    box-shadow: 0 -32px 0 -10px #333;
+  }
+  .sf-side .sf-portrait::after {
+    display: none;
+  }
+  .sf-side .sf-portrait .sf-derek {
+    position: relative;
+    top: auto;
+    left: auto;
+    bottom: auto;
+    transform: none;
+    margin: 0 auto;
   }
   .sf-side .sf-name {
     color: #ffd700;
@@ -2821,22 +2847,12 @@
 </style>
 </head>
 <body>
+<canvas id="bg-canvas" style="position:fixed;inset:0;z-index:0;pointer-events:none;"></canvas>
 
 <!-- ===== SCREEN 1: BOOT ===== -->
 <section id="screen-boot" class="screen active">
-  <div class="boot-stars" id="boot-stars"></div>
-  <div class="boot-scan"></div>
   <div class="boot-inner">
-    <div class="boot-title" id="boot-title">DEREK OS v1.0</div>
-    <div class="boot-divider" id="boot-divider"></div>
-    <div class="boot-stats" id="boot-stats">
-      <div class="bstat" data-pct="98"><span class="bs-lbl">GPA</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">3.93 / 4.0</span></div>
-      <div class="bstat" data-pct="50"><span class="bs-lbl">YEAR</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">2 OF 4 · 2029</span></div>
-      <div class="bstat" data-pct="92"><span class="bs-lbl">MAJOR</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">COMPUTER SCIENCE</span></div>
-      <div class="bstat" data-pct="92"><span class="bs-lbl">MINOR</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">STATISTICS</span></div>
-      <div class="bstat" data-pct="20"><span class="bs-lbl">PROJECTS</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">3 COMPLETED</span></div>
-      <div class="bstat" data-pct="14"><span class="bs-lbl">HACKATHONS</span><span class="bs-bar"><span class="bs-fill"></span></span><span class="bs-val">1 WIN</span></div>
-    </div>
+    <div class="boot-watermark">ARCADE PORTFOLIO</div>
     <div class="console" id="console-out"></div>
   </div>
 </section>
@@ -2844,10 +2860,9 @@
 <!-- ===== SCREEN 2: TITLE ===== -->
 <section id="screen-title" class="screen">
   <div class="glitch" data-text="DEREK SUN">DEREK SUN</div>
-  <div class="subtitle">CS @ UNIVERSITY OF TORONTO</div>
+  <div class="subtitle">COMPUTER SCIENCE @ UNIVERSITY OF TORONTO</div>
   <div class="start-row">
-    <span class="arrow-bounce">▼</span>
-    <span class="blink">PRESS ENTER TO START</span>
+    <span class="title-start-btn">[ PRESS ENTER TO PLAY ]</span>
   </div>
 </section>
 
@@ -2876,6 +2891,7 @@
   </div>
   <div class="contact-divider"></div>
   <button class="contact-btn" id="contact-btn" type="button">[ CONTACT ]</button>
+  <button class="contact-btn about-btn" id="about-btn" type="button">[ ABOUT ME ]</button>
 </section>
 
 <!-- ===== SCREEN: CONTACT (slot machine) ===== -->
@@ -2885,8 +2901,8 @@
     <div class="slot-heading">
       <div class="slot-title">CONTACT</div>
       <div class="slot-title-divider"></div>
-      <div class="slot-jackpot" id="slot-jackpot">JACKPOT</div>
     </div>
+    <div class="slot-jackpot" id="slot-jackpot">JACKPOT</div>
     <div class="slot-machine" id="slot-machine">
       <div class="slot-marquee">
         <div class="slot-marquee-lights"></div>
@@ -3060,12 +3076,29 @@
   <div class="gc-prompt" id="iv-prompt">PRESS ENTER OR CLICK TO CONTINUE</div>
 </div>
 
+<!-- About overlay -->
+<div id="about-overlay" style="position:fixed;inset:0;z-index:800;display:none;align-items:center;justify-content:center;background:rgba(5,3,15,0.95);backdrop-filter:blur(8px);">
+  <div style="max-width:600px;width:90%;border:1px solid rgba(255,215,0,0.4);border-radius:8px;padding:40px;background:rgba(10,8,30,0.9);position:relative;">
+    <div id="about-close" style="position:absolute;top:16px;right:20px;cursor:pointer;color:#ffd700;font-family:'Press Start 2P';font-size:10px;">[ × ]</div>
+    <div style="font-family:'Press Start 2P';font-size:16px;background:linear-gradient(180deg,#fff,#c0c0ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:20px;">DEREK SUN</div>
+    <div style="border-top:1px solid rgba(255,215,0,0.25);margin-bottom:20px;"></div>
+    <div style="font-family:'Press Start 2P';font-size:10px;color:#a0a0b0;line-height:2.2;">
+      Computer Science @ University of Toronto<br>
+      Expected: 2029 &nbsp;·&nbsp; GPA: 3.93 &nbsp;·&nbsp; Minor: Statistics<br><br>
+      Builder and hackathon competitor. I focus on<br>
+      AI systems, full-stack development, and<br>
+      shipping things fast.
+    </div>
+    <div style="border-top:1px solid rgba(255,215,0,0.25);margin-top:20px;"></div>
+  </div>
+</div>
+
 <!-- Cursor + crack overlays -->
 <svg id="crack-overlay" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
 <canvas id="cursor-canvas" aria-hidden="true" style="display:none"></canvas>
 
-<!-- Pixel wipe -->
-<div class="wipe" id="wipe"></div>
+<!-- Black-hole wipe -->
+<canvas id="wipe-canvas" style="position:fixed;inset:0;z-index:990;display:none;pointer-events:all;"></canvas>
 <!-- Flash overlay -->
 <div class="flash" id="flash"></div>
 <!-- Cheat banner -->
@@ -3135,19 +3168,90 @@ function show(name) {
   currentScreen = name;
 }
 
-/* ---------- Pixel wipe + flash ---------- */
-const wipeEl = document.getElementById('wipe');
-function buildWipe() {
-  wipeEl.innerHTML = '';
-  for (let i = 0; i < 16 * 10; i++) {
-    const c = document.createElement('div');
-    c.className = 'cell';
-    c.style.transitionDelay = (Math.random() * 0.18).toFixed(3) + 's';
-    wipeEl.appendChild(c);
-  }
-}
-buildWipe();
+/* ---------- Persistent star background ---------- */
+(function initBgCanvas() {
+  const bg = document.getElementById('bg-canvas');
+  if (!bg) return;
+  const bctx = bg.getContext('2d');
+  let bw = 0, bh = 0;
+  const stars = [];
+  const orbs = [
+    { color: 'rgba(120,40,200,0.18)', r: 350, x: 0, y: 0, vx: 0, vy: 0 },
+    { color: 'rgba(20,150,120,0.12)', r: 320, x: 0, y: 0, vx: 0, vy: 0 },
+    { color: 'rgba(60,20,180,0.15)',  r: 380, x: 0, y: 0, vx: 0, vy: 0 },
+  ];
 
+  function buildStars() {
+    stars.length = 0;
+    for (let i = 0; i < 150; i++) {
+      stars.push({
+        x: Math.random() * bw,
+        y: Math.random() * bh,
+        r: 0.5 + Math.random() * 1.0,
+        baseA: 0.2 + Math.random() * 0.8,
+        phase: Math.random() * Math.PI * 2,
+        speed: 0.5 + Math.random() * 2.5, // seconds per cycle
+        blue: Math.random() < 0.35,
+      });
+    }
+  }
+
+  function resizeBg() {
+    bw = bg.width = window.innerWidth;
+    bh = bg.height = window.innerHeight;
+    buildStars();
+    // Random initial orb positions + slow velocities
+    orbs.forEach((o, i) => {
+      o.x = Math.random() * bw;
+      o.y = Math.random() * bh;
+      const cycle = 20 + Math.random() * 10; // 20–30s to cross the screen
+      const angle = Math.random() * Math.PI * 2;
+      const speed = (Math.max(bw, bh) / cycle) / 60; // px per frame at ~60fps
+      o.vx = Math.cos(angle) * speed;
+      o.vy = Math.sin(angle) * speed;
+    });
+  }
+  resizeBg();
+  window.addEventListener('resize', resizeBg);
+
+  let t0 = performance.now();
+  function tick(now) {
+    const tSec = (now - t0) / 1000;
+    bctx.clearRect(0, 0, bw, bh);
+    // Drifting orbs
+    for (const o of orbs) {
+      o.x += o.vx;
+      o.y += o.vy;
+      // Wrap at edges
+      if (o.x < -o.r) o.x = bw + o.r;
+      if (o.x > bw + o.r) o.x = -o.r;
+      if (o.y < -o.r) o.y = bh + o.r;
+      if (o.y > bh + o.r) o.y = -o.r;
+      const grad = bctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+      grad.addColorStop(0, o.color);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      bctx.fillStyle = grad;
+      bctx.beginPath();
+      bctx.arc(o.x, o.y, o.r, 0, Math.PI * 2);
+      bctx.fill();
+    }
+    // Stars with per-star sine twinkle
+    for (const s of stars) {
+      const tw = 0.5 + 0.5 * Math.sin((tSec / s.speed) * Math.PI * 2 + s.phase);
+      const a = Math.max(0.05, Math.min(1, s.baseA * tw));
+      bctx.fillStyle = s.blue
+        ? `rgba(200,220,255,${a})`
+        : `rgba(255,255,255,${a})`;
+      bctx.beginPath();
+      bctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+      bctx.fill();
+    }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* ---------- Black-hole wipe + flash ---------- */
 function flash() {
   const f = document.getElementById('flash');
   f.classList.remove('on');
@@ -3156,26 +3260,104 @@ function flash() {
 }
 
 function wipeTo(cb) {
-  wipeEl.classList.add('active', 'in');
-  wipeEl.classList.remove('out');
-  setTimeout(() => {
-    cb && cb();
-    requestAnimationFrame(() => {
-      wipeEl.classList.remove('in');
-      wipeEl.classList.add('out');
-      setTimeout(() => {
-        wipeEl.classList.remove('active', 'out');
-      }, 480);
-    });
-  }, 460);
+  const canvas = document.getElementById('wipe-canvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  canvas.style.display = 'block';
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const maxR = Math.sqrt(cx*cx + cy*cy) * 1.1;
+  let phase = 'suck';
+  let cbCalled = false;
+  const suckDur = 500;
+  const expandDur = 350;
+  let startTime = null;
+
+  function draw(phase, t) {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    if (phase === 'suck') {
+      const holeR = maxR * t * t * t;
+      for (let r = holeR + 60; r > holeR; r -= 8) {
+        const alpha = (1 - (r - holeR) / 60) * 0.4 * t;
+        ctx.beginPath();
+        ctx.arc(cx, cy, r, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(160,100,255,${alpha})`;
+        ctx.lineWidth = 3 + (holeR / maxR) * 8;
+        ctx.stroke();
+      }
+      const diskAlpha = Math.min(1, t * 3) * 0.8;
+      const grad = ctx.createRadialGradient(cx, cy, Math.max(0, holeR - 2), cx, cy, holeR + 20);
+      grad.addColorStop(0, `rgba(255,200,100,${diskAlpha})`);
+      grad.addColorStop(0.3, `rgba(160,60,255,${diskAlpha * 0.7})`);
+      grad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.beginPath(); ctx.arc(cx, cy, holeR + 20, 0, Math.PI * 2);
+      ctx.fillStyle = grad; ctx.fill();
+      ctx.beginPath(); ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+      ctx.fillStyle = '#000'; ctx.fill();
+      if (t > 0.2) {
+        for (let i = 0; i < 12; i++) {
+          const angle = (i / 12) * Math.PI * 2;
+          const sAlpha = (t - 0.2) / 0.8 * 0.35;
+          const sLen = 80 + Math.sin(i * 1.7) * 40;
+          ctx.beginPath();
+          ctx.moveTo(cx + Math.cos(angle) * (holeR + sLen), cy + Math.sin(angle) * (holeR + sLen));
+          ctx.lineTo(cx + Math.cos(angle) * (holeR + 4), cy + Math.sin(angle) * (holeR + 4));
+          ctx.strokeStyle = `rgba(200,150,255,${sAlpha})`;
+          ctx.lineWidth = 1.5; ctx.stroke();
+        }
+      }
+    } else {
+      const holeR = maxR * (1 - (1-(t))*(1-(t)));
+      ctx.fillStyle = '#000';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.globalCompositeOperation = 'destination-out';
+      ctx.beginPath(); ctx.arc(cx, cy, holeR, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(0,0,0,1)'; ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+      if (holeR > 10) {
+        const grad = ctx.createRadialGradient(cx, cy, Math.max(0, holeR-2), cx, cy, holeR+16);
+        grad.addColorStop(0, `rgba(160,100,255,${(1-t)*0.6})`);
+        grad.addColorStop(0.5, `rgba(100,60,200,${(1-t)*0.3})`);
+        grad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.beginPath(); ctx.arc(cx, cy, holeR+16, 0, Math.PI*2);
+        ctx.fillStyle = grad; ctx.fill();
+      }
+    }
+  }
+
+  function animate(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    if (phase === 'suck') {
+      const t = Math.min(elapsed / suckDur, 1);
+      draw('suck', t);
+      if (t >= 1) {
+        if (!cbCalled) { cbCalled = true; cb && cb(); }
+        phase = 'expand'; startTime = ts;
+        requestAnimationFrame(animate);
+      } else requestAnimationFrame(animate);
+    } else {
+      const t = Math.min(elapsed / expandDur, 1);
+      draw('expand', t);
+      if (t >= 1) {
+        canvas.style.display = 'none';
+        ctx.globalCompositeOperation = 'source-over';
+      } else requestAnimationFrame(animate);
+    }
+  }
+  requestAnimationFrame(animate);
 }
 
 /* ---------- Boot sequence (overhauled) ---------- */
 const bootLines = [
-  { text: "► checksum OK", cls: "ok" },
-  { text: "► modules loaded: 6/6", cls: "ok" },
-  { text: "► welcome, recruiter.", cls: "ok" },
-  { text: "► awaiting input...", cls: "ok" },
+  { text: "initializing...",            cls: "" },
+  { text: "► MARIO             OK",     cls: "ok" },
+  { text: "► STREET FIGHTER    OK",     cls: "ok" },
+  { text: "► SPACE INVADERS    OK",     cls: "ok" },
+  { text: "► CONTACT           OK",     cls: "ok" },
+  { text: "► all systems ready.",       cls: "ok" },
+  { text: "► welcome.",                 cls: "ok" },
 ];
 
 const consoleOut = document.getElementById('console-out');
@@ -3187,12 +3369,12 @@ async function typeLine(line, opts = {}) {
   consoleOut.appendChild(span);
   for (let i = 0; i < line.text.length; i++) {
     span.textContent += line.text[i];
-    await sleep(25);
+    await sleep(18);
   }
   if (opts.trailingCursor) {
     const cur = document.createElement('span');
     cur.className = 'blink';
-    cur.style.color = 'var(--green)';
+    cur.style.color = '#a0c4e8';
     cur.textContent = ' _';
     consoleOut.appendChild(cur);
   }
@@ -3200,58 +3382,17 @@ async function typeLine(line, opts = {}) {
 }
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-// Star-field for boot
-(function buildBootStars() {
-  const stars = document.getElementById('boot-stars');
-  if (!stars) return;
-  for (let i = 0; i < 40; i++) {
-    const s = document.createElement('div');
-    s.className = 'boot-star';
-    s.style.left = (Math.random() * 100) + '%';
-    s.style.top  = (Math.random() * 100) + '%';
-    s.style.opacity = (0.2 + Math.random() * 0.4).toFixed(2);
-    stars.appendChild(s);
-  }
-})();
-
 function sfxBarTick() { beep(880 + Math.random() * 200, 0.018, 'square', 0.04); }
 
 async function runBoot() {
-  const title = document.getElementById('boot-title');
-  const divider = document.getElementById('boot-divider');
-  const stats = Array.from(document.querySelectorAll('.bstat'));
-
-  // 1) Divider draws across center
-  await sleep(150);
-  divider.classList.add('in');
-  await sleep(620);
-  // 2) Title fades in
-  title.classList.add('in');
-  await sleep(420);
-
-  // 3) Stats load one by one with progress bar fill
-  for (let i = 0; i < stats.length; i++) {
-    const row = stats[i];
-    row.classList.add('in');
-    const fill = row.querySelector('.bs-fill');
-    const pct = row.dataset.pct + '%';
-    // Tick sound during fill
-    const ticks = setInterval(sfxBarTick, 60);
-    requestAnimationFrame(() => { fill.style.width = pct; });
-    await sleep(600);
-    clearInterval(ticks);
-    await sleep(200);
-  }
-
-  // 4) Pause then console lines (faster)
-  await sleep(400);
+  await sleep(220);
   for (let i = 0; i < bootLines.length; i++) {
     const line = bootLines[i];
     const trailing = (i === bootLines.length - 1);
     await typeLine(line, { trailingCursor: trailing });
-    await sleep(120);
+    await sleep(110);
   }
-  await sleep(220);
+  await sleep(260);
   const prompt = document.createElement('div');
   prompt.className = 'press-enter-boot show';
   prompt.innerHTML = '[ PRESS ENTER TO CONTINUE ]<span class="blink"> _</span>';
@@ -3667,23 +3808,6 @@ function pushKonami(k) {
 function triggerCheat() {
   if (cheatActive) return;
   cheatActive = true;
-  // Save screen GPA element no longer exists. Briefly flash the GPA stat bar
-  // on the boot screen to 4.00 / 4.0 with a gold glow instead.
-  const gpaRow = document.querySelector('.bstat[data-pct="98"]');
-  if (gpaRow) {
-    const fill = gpaRow.querySelector('.bs-fill');
-    const val  = gpaRow.querySelector('.bs-val');
-    if (fill) {
-      fill.style.width = '100%';
-      fill.style.background = 'linear-gradient(90deg, #ffd700, #fff2a0)';
-      fill.style.boxShadow = '0 0 18px rgba(255,215,0,0.9)';
-    }
-    if (val) {
-      val.textContent = '4.00 / 4.0';
-      val.style.color = '#ffd700';
-      val.style.textShadow = '0 0 10px rgba(255,215,0,0.9)';
-    }
-  }
   flash();
   const banner = document.getElementById('cheat-banner');
   banner.classList.remove('show');
@@ -4446,6 +4570,22 @@ document.getElementById('contact-btn').addEventListener('click', () => {
   wipeTo(() => { show('contact'); resetSlotMachine(); });
 });
 
+/* About Me overlay (game select) */
+document.getElementById('about-btn').addEventListener('click', () => {
+  ensureAudio();
+  sfxConfirm();
+  document.getElementById('about-overlay').style.display = 'flex';
+});
+document.getElementById('about-close').addEventListener('click', () => {
+  sfxBack();
+  document.getElementById('about-overlay').style.display = 'none';
+});
+document.getElementById('about-overlay').addEventListener('click', (e) => {
+  if (e.target.id === 'about-overlay') {
+    document.getElementById('about-overlay').style.display = 'none';
+  }
+});
+
 /* Contact screen BACK */
 document.getElementById('contact-back').addEventListener('click', () => {
   ensureAudio();
@@ -4604,15 +4744,36 @@ document.getElementById('slot-lever').addEventListener('click', () => {
 
 /* CHANGE GAME button on quest screen */
 document.getElementById('hud-change-game').addEventListener('click', (e) => {
+  // Force-close any open overlay synchronously, before tearing the game down,
+  // so the overlay can never flash back into view as the wipe begins.
+  overlayOpen = false;
+  if (overlayEl) {
+    overlayEl.classList.remove('open');
+    overlayEl.style.transform = 'translateY(100%)';
+    overlayEl.style.opacity = '0';
+    overlayEl.style.display = 'none';
+  }
+  if (typeof typewriterTimer !== 'undefined' && typewriterTimer) {
+    clearTimeout(typewriterTimer);
+    typewriterTimer = null;
+  }
+  if (typeof clearOverlayTimers === 'function') clearOverlayTimers();
   e.stopPropagation();
   ensureAudio();
-  if (overlayOpen) closeOverlay();
   if (typeof currentGameAPI !== 'undefined' && currentGameAPI && currentGameAPI.teardown) {
     currentGameAPI.teardown();
     currentGameAPI = null;
   }
   resetCursorState();
-  wipeTo(() => show('select'));
+  wipeTo(() => {
+    // Restore overlay element after wipe so the next quest open works normally.
+    if (overlayEl) {
+      overlayEl.style.display = '';
+      overlayEl.style.transform = '';
+      overlayEl.style.opacity = '';
+    }
+    show('select');
+  });
   sfxBack();
 });
 
@@ -5214,10 +5375,29 @@ function showGameOver(onRestart) {
     onRestart && onRestart();
   };
   document.getElementById('go-change').onclick = () => {
+    overlayOpen = false;
+    if (overlayEl) {
+      overlayEl.classList.remove('open');
+      overlayEl.style.transform = 'translateY(100%)';
+      overlayEl.style.opacity = '0';
+      overlayEl.style.display = 'none';
+    }
+    if (typeof typewriterTimer !== 'undefined' && typewriterTimer) {
+      clearTimeout(typewriterTimer);
+      typewriterTimer = null;
+    }
+    if (typeof clearOverlayTimers === 'function') clearOverlayTimers();
     go.classList.remove('show');
     if (currentGameAPI && currentGameAPI.teardown) { currentGameAPI.teardown(); currentGameAPI = null; }
     resetCursorState();
-    wipeTo(() => show('select'));
+    wipeTo(() => {
+      if (overlayEl) {
+        overlayEl.style.display = '';
+        overlayEl.style.transform = '';
+        overlayEl.style.opacity = '';
+      }
+      show('select');
+    });
     sfxBack();
   };
 }
@@ -5888,7 +6068,6 @@ registerGame('fighter', function initFighter() {
       const exp = EXPERIENCES.find(e => e.id === f.id);
       card.innerHTML = `
         <div class="sf-name">${f.name}</div>
-        <div class="sf-role">SWE INTERN</div>
         <div class="sf-portrait"></div>
         <div class="sf-stats">
           <div class="barbox">PWR ${'█'.repeat(f.power)}${'░'.repeat(5-f.power)}</div>
@@ -5995,6 +6174,13 @@ registerGame('fighter', function initFighter() {
     leftP.parentElement.setAttribute('data-fid', f.id);
     leftN.textContent = f.name;
 
+    // Hide the custom crosshair during the VS / FIGHT sequence so it doesn't
+    // sit on top of the portraits.
+    const cursorCanvas = document.getElementById('cursor-canvas');
+    if (cursorCanvas) cursorCanvas.style.display = 'none';
+    // Hide the fighter-select grid immediately so VS renders alone on top.
+    grid.style.display = 'none';
+
     vs.style.display = '';
     vs.style.opacity = '1';
     vs.classList.remove('up', 'fade-out');
@@ -6065,8 +6251,17 @@ registerGame('fighter', function initFighter() {
     updateHpFill(f.id);
     setState(f.id, 'fight');
 
+    // Restore custom crosshair now the VS sequence is finished.
+    const cursorCanvas = document.getElementById('cursor-canvas');
+    if (cursorCanvas && (currentGame === 'fighter' || currentGame === 'invaders')) {
+      cursorCanvas.style.display = 'block';
+    }
+
     // Hide the "SELECT OPPONENT" heading — the player is now committed to a bout
     if (sfTitle) sfTitle.style.display = 'none';
+
+    // Show the grid again now in fight-mode layout
+    grid.style.display = '';
 
     // Switch grid into single-fighter fight layout:
     // Hide the other two cards, scale the selected one up, show YOU silhouette + divider.
@@ -6159,6 +6354,7 @@ registerGame('fighter', function initFighter() {
     // Tear down the single-fighter fight layout — show all three cards again
     card.classList.remove('sf-fighting');
     grid.classList.remove('fight-mode');
+    grid.style.display = '';
     grid.querySelectorAll('.sf-you-side, .sf-fight-divider').forEach(el => el.remove());
     // Restore "SELECT OPPONENT" heading
     if (sfTitle) sfTitle.style.display = '';
@@ -6238,6 +6434,7 @@ registerGame('fighter', function initFighter() {
       pendingFighterId = null;
       vsLocked = false;
       grid.classList.remove('fight-mode');
+      grid.style.display = '';
       if (sfTitle) sfTitle.style.display = '';
       grid.innerHTML = '';
       vs.classList.remove('down', 'up', 'fade-out');
@@ -6294,6 +6491,7 @@ registerGame('mario', function initMario() {
   let contactPipe = null;
   const usedBlocks = new Set();
   usedBlocks.clear(); // every Mario init starts with all ? blocks active (gold)
+  let marioStars = null;
 
   function setupLevel() {
     platforms.length = 0; blocks.length = 0; goombas.length = 0; koopas.length = 0;
@@ -6654,6 +6852,7 @@ registerGame('mario', function initMario() {
     }
 
     // Block collisions (from below = head-bump)
+    if (currentGame !== 'mario') return;
     for (const b of blocks) {
       const intersect = mario.x + mario.w > b.x && mario.x < b.x + b.w &&
                         mario.y < b.y + b.h && mario.y + mario.h > b.y;
@@ -6847,12 +7046,30 @@ registerGame('mario', function initMario() {
   }
 
   function draw() {
-    // ----- Sky gradient -----
-    const sky = ctx.createLinearGradient(0, 0, 0, H);
-    sky.addColorStop(0, '#6ab4ff');
-    sky.addColorStop(1, '#90cbff');
-    ctx.fillStyle = sky;
-    ctx.fillRect(0, 0, VW, H);
+    // ----- Sky gradient (space) -----
+    const groundY = H - GROUND_H;
+    const skyGrad = ctx.createLinearGradient(0, 0, 0, groundY);
+    skyGrad.addColorStop(0, '#05030f');
+    skyGrad.addColorStop(0.4, '#0d0a2e');
+    skyGrad.addColorStop(0.8, '#1a0a3e');
+    skyGrad.addColorStop(1, '#2a1040');
+    ctx.fillStyle = skyGrad;
+    ctx.fillRect(0, 0, canvas.width, groundY);
+
+    // ----- Stars (init once, draw every frame) -----
+    if (!marioStars || marioStars._h !== H || marioStars._w !== VW) {
+      marioStars = Array.from({length: 60}, () => ({
+        x: Math.random() * VW,
+        y: Math.random() * groundY * 0.85,
+        size: Math.random() < 0.8 ? 1 : 2,
+        opacity: 0.3 + Math.random() * 0.6
+      }));
+      marioStars._h = H; marioStars._w = VW;
+    }
+    marioStars.forEach(star => {
+      ctx.fillStyle = `rgba(255,255,255,${star.opacity})`;
+      ctx.fillRect(star.x, star.y, star.size, star.size);
+    });
 
     // ----- Distant hill silhouettes -----
     const horizonY = H - GROUND_H;
@@ -6864,7 +7081,7 @@ registerGame('mario', function initMario() {
       ctx.fill();
     }
 
-    // ----- Clouds (fluffy, multi-circle, with shadow) -----
+    // ----- Clouds (nebula wisps) -----
     for (const c of clouds) {
       // Shadow ellipse beneath
       ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
@@ -6872,7 +7089,7 @@ registerGame('mario', function initMario() {
       ctx.ellipse(c.x + 32, c.y + 32, 36, 6, 0, 0, Math.PI * 2);
       ctx.fill();
       // Three overlapping puff circles
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = 'rgba(200,180,255,0.4)';
       ctx.beginPath(); ctx.arc(c.x + 16, c.y + 18, 16, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(c.x + 36, c.y + 10, 22, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(c.x + 58, c.y + 18, 18, 0, Math.PI * 2); ctx.fill();
