@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(\\(Get-Item \"index.html\"\\).Length; \\(Get-Content \"index.html\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(\\(Get-Item \"temp_latest.html\"\\).Length; \\(Get-Content \"temp_latest.html\" | Measure-Object -Line\\).Lines)",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"slot machine|invaders|mario|fighter|contact\" -SimpleMatch | Select-Object -First 10 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"mario|fighter|invader|slot\" | Select-Object -First 10 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"mario|fighter|invader\" | Select-Object -First 20 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Select-String -Path \"temp_latest.html\" -Pattern \"base64|data:image\" | Select-Object -First 3 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Substring\\(0, [Math]::Min\\(100, $_.Line.Length\\)\\)\\)\" })",
+      "PowerShell($bytes1 = [System.IO.File]::ReadAllBytes\\(\"index.html\"\\); $bytes2 = [System.IO.File]::ReadAllBytes\\(\"temp_latest.html\"\\); Write-Host \"index.html: $\\($bytes1.Length\\) bytes, BOM: $\\($bytes1[0]\\) $\\($bytes1[1]\\) $\\($bytes1[2]\\)\"; Write-Host \"temp_latest.html: $\\($bytes2.Length\\) bytes, BOM: $\\($bytes2[0]\\) $\\($bytes2[1]\\) $\\($bytes2[2]\\)\")",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"black.hole|wipeTo|galaxy|line-sweep|deep.space|cinematic\" | Select-Object -First 10 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Select-String *)",
+      "mcp__plugin_claude-mem_mcp-search__search",
+      "mcp__plugin_claude-mem_mcp-search__get_observations",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"wipe-canvas|accretion|suckDur|expandDur\" | Select-Object -First 5 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(git checkout *)",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"bg-canvas|wipe-canvas|about-overlay|about-btn|marioStars\" | Select-Object -First 12 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(Select-String -Path \"index.html\" -Pattern \"ARCADE PORTFOLIO|PRESS ENTER TO CONTINUE|all systems ready|SELECT EXPERIENCE\" | Select-Object -First 8 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
+      "PowerShell(git *)"
+    ]
+  }
+}
