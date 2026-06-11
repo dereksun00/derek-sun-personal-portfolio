@@ -1,0 +1,194 @@
+.screen {
+  background:
+    radial-gradient(ellipse at 50% 80%, rgba(255, 92, 200, 0.12), transparent 60%),
+    radial-gradient(ellipse at 50% 20%, rgba(42, 13, 74, 0.5), transparent 70%);
+  gap: 2em;
+  padding: 16px;
+}
+
+.heading {
+  color: var(--magenta);
+  font-size: clamp(14px, 2.6vw, 22px);
+  letter-spacing: 0.2em;
+  text-shadow: 0 0 16px rgba(255, 92, 200, 0.5);
+}
+.divider {
+  width: min(380px, 70vw);
+  border-top: 2px dashed rgba(255, 92, 200, 0.4);
+}
+
+/* ── machine body ── */
+.machine {
+  position: relative;
+  background: linear-gradient(to bottom, #1d0f33, #0d0820);
+  padding: 22px 26px 26px;
+  box-shadow:
+    0 0 0 4px #0d0820,
+    0 0 0 8px var(--magenta),
+    0 0 0 12px #0d0820,
+    0 0 44px rgba(255, 92, 200, 0.3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.marquee {
+  font-size: clamp(11px, 1.8vw, 15px);
+  color: var(--amber);
+  letter-spacing: 0.22em;
+  padding: 10px 26px;
+  background: #160826;
+  box-shadow: 0 0 0 2px var(--amber), inset 0 0 18px rgba(255, 207, 82, 0.25);
+  animation: marqueeGlow 2.2s ease-in-out infinite;
+}
+@keyframes marqueeGlow {
+  0%, 100% { text-shadow: 0 0 8px rgba(255, 207, 82, 0.6); }
+  50% { text-shadow: 0 0 20px rgba(255, 207, 82, 1); }
+}
+
+.reels {
+  display: flex;
+  gap: 14px;
+  position: relative;
+  padding: 6px;
+}
+
+/* payline through the middle of the reels */
+.payline {
+  position: absolute;
+  left: -8px;
+  right: -8px;
+  top: 50%;
+  height: 2px;
+  background: rgba(255, 74, 107, 0.7);
+  box-shadow: 0 0 10px rgba(255, 74, 107, 0.8);
+  pointer-events: none;
+}
+.paylineTag {
+  position: absolute;
+  right: -8px;
+  top: 50%;
+  transform: translateY(-130%);
+  font-size: 6px;
+  color: var(--red);
+}
+
+.reel {
+  width: clamp(76px, 13vw, 110px);
+  aspect-ratio: 3 / 4;
+  background: radial-gradient(ellipse at 50% 40%, #efe7d8, #b8ad97);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 4vw, 34px);
+  color: #1d0f33;
+  box-shadow: inset 0 8px 16px rgba(0, 0, 0, 0.45), inset 0 -8px 16px rgba(0, 0, 0, 0.45), 0 0 0 3px #060410;
+  overflow: hidden;
+  font-weight: bold;
+  font-family: var(--font-pixel);
+}
+.reel.spinning { animation: reelShake 0.09s linear infinite; }
+@keyframes reelShake {
+  0% { transform: translateY(-1px); }
+  50% { transform: translateY(1px); }
+  100% { transform: translateY(-1px); }
+}
+
+.reelLabel {
+  margin-top: 8px;
+  text-align: center;
+  font-size: 8px;
+  color: var(--green);
+  line-height: 1.9;
+  min-height: 3.6em;
+}
+.reelValue { color: #fff; font-size: 7px; display: block; }
+.reelValue:hover { color: var(--amber); text-shadow: 0 0 8px rgba(255, 207, 82, 0.7); }
+
+/* ── lever ── */
+.lever {
+  position: absolute;
+  right: -58px;
+  top: 90px;
+  width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+}
+.leverTrack {
+  width: 10px;
+  height: 90px;
+  background: #060410;
+  box-shadow: 0 0 0 2px #2a0d4a;
+  position: relative;
+}
+.leverKnob {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #ff8aa6, var(--red));
+  box-shadow: 0 0 14px rgba(255, 74, 107, 0.7);
+  transition: top 180ms ease-in;
+}
+.lever.pulled .leverKnob { top: 64px; }
+.leverText {
+  margin-top: 10px;
+  font-size: 6px;
+  color: var(--red);
+  text-align: center;
+  line-height: 1.8;
+  animation: pulse-amber 1.4s ease-in-out infinite;
+}
+
+.coinSlot {
+  font-size: 7px;
+  color: var(--amber);
+  padding: 6px 14px;
+  box-shadow: 0 0 0 2px var(--amber);
+}
+
+/* ── jackpot ── */
+.jackpot {
+  position: absolute;
+  inset: 0;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6em;
+  background: rgba(5, 3, 16, 0.8);
+  pointer-events: none;
+}
+.jackpotText {
+  font-size: clamp(26px, 7vw, 58px);
+  color: var(--amber);
+  text-shadow: 0 0 30px rgba(255, 207, 82, 0.9), 0 0 80px rgba(255, 207, 82, 0.5);
+  animation: jackpotPulse 0.5s ease-in-out infinite;
+}
+@keyframes jackpotPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.08); }
+}
+.cta { font-size: clamp(9px, 1.8vw, 13px); color: #fff; }
+
+.back {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  color: var(--green-dim);
+  font-size: 10px;
+  padding: 8px;
+  z-index: 2;
+}
+.back:hover { color: var(--green); }
+
+@media (max-width: 620px) {
+  .lever { right: -44px; }
+}

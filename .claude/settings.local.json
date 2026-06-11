@@ -16,7 +16,21 @@
       "PowerShell(git checkout *)",
       "PowerShell(Select-String -Path \"index.html\" -Pattern \"bg-canvas|wipe-canvas|about-overlay|about-btn|marioStars\" | Select-Object -First 12 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
       "PowerShell(Select-String -Path \"index.html\" -Pattern \"ARCADE PORTFOLIO|PRESS ENTER TO CONTINUE|all systems ready|SELECT EXPERIENCE\" | Select-Object -First 8 | ForEach-Object { \"$\\($_.LineNumber\\): $\\($_.Line.Trim\\(\\)\\)\" })",
-      "PowerShell(git *)"
+      "PowerShell(git *)",
+      "PowerShell(Get-ChildItem | Select-Object Name, Length; \\(Get-Content index.html | Measure-Object -Line\\).Lines)",
+      "PowerShell(npm install *)",
+      "PowerShell(npm run *)",
+      "Skill(run)",
+      "PowerShell(try { \\(Get-Command chromium-cli -ErrorAction Stop\\).Source } catch { \"chromium-cli not found\" })",
+      "PowerShell(npm ls *)",
+      "PowerShell($tries = 0; while \\($tries -lt 20\\) { try { $r = Invoke-WebRequest -Uri http://localhost:5173 -UseBasicParsing -TimeoutSec 2; if \\($r.StatusCode -eq 200\\) { \"dev server up\"; break } } catch {}; Start-Sleep -Milliseconds 500; $tries++ }; if \\($tries -ge 20\\) { \"dev server NOT responding\" })",
+      "PowerShell(node smoke.mjs)",
+      "PowerShell(node smoke2.mjs)",
+      "PowerShell(node smoke3.mjs)",
+      "PowerShell(node -e \"import\\('playwright-core'\\).then\\(async \\({chromium}\\) => { const b = await chromium.launch\\({channel:'chrome', headless:false, args:['--headless=new']}\\); const p = await b.newPage\\(\\); await p.goto\\('http://localhost:5173'\\); const gpu = await p.evaluate\\(\\(\\) => { const gl = document.createElement\\('canvas'\\).getContext\\('webgl2'\\); const ext = gl.getExtension\\('WEBGL_debug_renderer_info'\\); return gl.getParameter\\(ext.UNMASKED_RENDERER_WEBGL\\); }\\); console.log\\(gpu\\); await b.close\\(\\); }\\)\")",
+      "PowerShell(node smoke4.mjs)",
+      "PowerShell(node smoke5.mjs)",
+      "PowerShell(node repro.mjs)"
     ]
   }
 }

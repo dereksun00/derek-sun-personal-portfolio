@@ -1,0 +1,93 @@
+.screen {
+  background: radial-gradient(ellipse at 50% 0%, rgba(42, 13, 74, 0.5), transparent 70%);
+  gap: 2.4em;
+  padding: 16px;
+}
+
+.title {
+  color: var(--green);
+  font-size: clamp(12px, 2.2vw, 18px);
+  letter-spacing: 0.18em;
+  text-shadow: 0 0 14px rgba(107, 255, 138, 0.5);
+}
+
+.grid {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(10px, 2vh, 22px);
+  align-items: center;
+}
+
+.row {
+  display: flex;
+  gap: clamp(8px, 1.6vw, 18px);
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.alien {
+  --c: var(--green);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 10px;
+  color: var(--c);
+  font-size: clamp(7px, 1vw, 9px);
+  transition: transform 150ms ease, text-shadow 150ms ease;
+  animation: alienBob 2.6s ease-in-out infinite;
+}
+.alien:hover {
+  transform: scale(1.18);
+  text-shadow: 0 0 10px var(--c);
+}
+.alien.zapped { animation: zapFlash 0.35s steps(3) both; }
+@keyframes alienBob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+@keyframes zapFlash {
+  0% { filter: brightness(3); transform: scale(1.4); }
+  100% { filter: brightness(1); transform: scale(1); }
+}
+
+.glyph { font-size: clamp(14px, 2.4vw, 22px); line-height: 1; }
+
+.green { --c: var(--green); }
+.cyan { --c: var(--cyan); }
+.magenta { --c: var(--magenta); }
+.amber { --c: var(--amber); }
+
+.legend {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  font-size: 8px;
+  line-height: 2.1;
+  color: var(--text);
+}
+.dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.back {
+  position: absolute;
+  top: 16px;
+  left: 18px;
+  color: var(--green-dim);
+  font-size: 10px;
+  padding: 8px;
+}
+.back:hover { color: var(--green); }
+
+.hint {
+  position: absolute;
+  bottom: 18px;
+  right: 18px;
+  font-size: 8px;
+  color: var(--green-dim);
+}

@@ -1,0 +1,35 @@
+.panel {
+  --c: var(--green);
+  background: var(--panel);
+  padding: 20px;
+  position: relative;
+  box-shadow:
+    0 0 0 3px var(--panel),
+    0 0 0 6px var(--c),
+    0 0 0 9px var(--panel),
+    0 0 24px rgba(107, 255, 138, 0.18);
+}
+
+.panel::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 3px,
+    rgba(0, 0, 0, 0.12) 3px 4px
+  );
+}
+
+.title {
+  color: var(--amber);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  margin-bottom: 16px;
+  border-bottom: 2px dashed rgba(255, 207, 82, 0.4);
+  padding-bottom: 10px;
+}
+
+.amber { --c: var(--amber); box-shadow: 0 0 0 3px var(--panel), 0 0 0 6px var(--amber), 0 0 0 9px var(--panel), 0 0 24px rgba(255, 207, 82, 0.18); }
+.magenta { --c: var(--magenta); box-shadow: 0 0 0 3px var(--panel), 0 0 0 6px var(--magenta), 0 0 0 9px var(--panel), 0 0 24px rgba(255, 92, 200, 0.18); }

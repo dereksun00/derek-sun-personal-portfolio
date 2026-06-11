@@ -1,0 +1,59 @@
+.screen {
+  background: radial-gradient(ellipse at 50% 70%, rgba(42, 13, 74, 0.55), transparent 65%);
+}
+
+.canvasWrap {
+  position: absolute;
+  inset: 0;
+}
+
+.hint {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: clamp(9px, 1.5vw, 13px);
+  z-index: 2;
+}
+
+.dragHint {
+  position: absolute;
+  bottom: 3%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: var(--green-dim);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* ── DOM fallback (no WebGL2) ── */
+.fallback {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.2em;
+  text-align: center;
+  padding: 0 16px;
+}
+
+.fallbackHeading {
+  font-size: clamp(22px, 6vw, 52px);
+}
+
+.fallbackSub {
+  color: var(--amber);
+  font-size: clamp(8px, 1.8vw, 12px);
+  letter-spacing: 0.12em;
+}
+
+.version {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--green-dim);
+  font-size: 8px;
+  z-index: 2;
+  pointer-events: none;
+}

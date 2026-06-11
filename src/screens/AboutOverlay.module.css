@@ -1,0 +1,43 @@
+.backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 22;
+  background: rgba(5, 3, 16, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+.card {
+  width: min(560px, 94vw);
+  background: var(--panel);
+  padding: 30px 32px;
+  position: relative;
+  box-shadow:
+    0 0 0 3px var(--panel),
+    0 0 0 6px var(--amber),
+    0 0 0 9px var(--panel),
+    0 0 36px rgba(255, 207, 82, 0.3);
+  font-size: clamp(9px, 1.5vw, 12px);
+  line-height: 2.2;
+  color: var(--text);
+}
+
+.title {
+  font-size: clamp(14px, 2.6vw, 22px);
+  margin-bottom: 18px;
+  display: block;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: var(--red);
+  font-size: 14px;
+  padding: 6px;
+}
+.close:hover { text-shadow: 0 0 10px rgba(255, 74, 107, 0.8); }
+
+.meta { color: var(--amber); }

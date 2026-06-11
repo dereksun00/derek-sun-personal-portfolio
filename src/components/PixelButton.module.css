@@ -1,0 +1,49 @@
+.btn {
+  --c: var(--green);
+  font-family: var(--font-pixel);
+  font-size: 11px;
+  color: var(--c);
+  padding: 12px 18px;
+  letter-spacing: 0.1em;
+  position: relative;
+  background: rgba(12, 8, 32, 0.85);
+  box-shadow: 0 0 0 2px var(--c);
+  transition: text-shadow 160ms ease, box-shadow 160ms ease, transform 80ms ease;
+  overflow: hidden;
+}
+
+.btn:hover,
+.btn:focus-visible,
+.btn.selected {
+  text-shadow: 0 0 10px var(--c);
+  box-shadow: 0 0 0 2px var(--c), 0 0 18px rgba(107, 255, 138, 0.45);
+  outline: none;
+}
+
+.btn:active {
+  transform: translateY(2px);
+}
+
+/* scanline sweep on hover */
+.btn::before {
+  content: '';
+  position: absolute;
+  left: -20%;
+  top: -150%;
+  width: 140%;
+  height: 60%;
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.14), transparent);
+  transform: rotate(0.001deg);
+  transition: top 380ms ease;
+  pointer-events: none;
+}
+.btn:hover::before { top: 160%; }
+
+.amber { --c: var(--amber); }
+.amber:hover, .amber:focus-visible, .amber.selected {
+  box-shadow: 0 0 0 2px var(--amber), 0 0 18px rgba(255, 207, 82, 0.45);
+}
+.magenta { --c: var(--magenta); }
+.magenta:hover, .magenta:focus-visible, .magenta.selected {
+  box-shadow: 0 0 0 2px var(--magenta), 0 0 18px rgba(255, 92, 200, 0.45);
+}

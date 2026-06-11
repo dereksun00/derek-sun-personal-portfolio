@@ -1,0 +1,46 @@
+.wrap {
+  position: relative;
+  display: inline-block;
+  color: var(--green);
+}
+
+.layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0;
+}
+
+.r { color: var(--red); }
+.b { color: var(--cyan); }
+
+/* breathing glow on the base text */
+.breathe {
+  animation: breathe 3.2s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%, 100% { text-shadow: 0 0 6px rgba(107, 255, 138, 0.4), 0 0 18px rgba(107, 255, 138, 0.25); }
+  50% { text-shadow: 0 0 12px rgba(107, 255, 138, 0.85), 0 0 34px rgba(107, 255, 138, 0.5); }
+}
+
+/* electrical-arc flicker: layers snap apart for a few frames, then settle */
+.glitching .layer { opacity: 0.85; }
+.glitching .r { animation: arcR 0.18s steps(3) both; }
+.glitching .b { animation: arcB 0.18s steps(3) both; }
+.glitching > .base { animation: arcBase 0.18s steps(3) both; }
+
+@keyframes arcR {
+  0% { transform: translate(-3px, 1px); clip-path: inset(10% 0 55% 0); }
+  50% { transform: translate(2px, -2px); clip-path: inset(45% 0 20% 0); }
+  100% { transform: translate(-1px, 0); clip-path: inset(70% 0 5% 0); }
+}
+@keyframes arcB {
+  0% { transform: translate(3px, -1px); clip-path: inset(60% 0 15% 0); }
+  50% { transform: translate(-2px, 2px); clip-path: inset(15% 0 60% 0); }
+  100% { transform: translate(1px, 0); clip-path: inset(5% 0 80% 0); }
+}
+@keyframes arcBase {
+  0% { transform: translate(1px, 0); }
+  50% { transform: translate(-1px, 1px); }
+  100% { transform: translate(0, 0); }
+}

@@ -1,0 +1,124 @@
+.screen {
+  background: linear-gradient(to bottom, #0a0612 0%, #160826 55%, #1d0f33 100%);
+  padding: 0;
+}
+
+.hudTop {
+  position: absolute;
+  top: 14px;
+  left: 18px;
+  right: 18px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 10px;
+  color: var(--green);
+  letter-spacing: 0.08em;
+  z-index: 5;
+}
+.sep { color: var(--green-dim); margin: 0 10px; }
+.right { color: var(--amber); }
+
+/* wrappers own positioning; ScanlinePanel keeps its own position: relative */
+.questPanelWrap {
+  position: absolute;
+  top: 52px;
+  left: 24px;
+  width: min(300px, 42vw);
+  z-index: 4;
+  font-size: 11px;
+}
+
+.questList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.questItem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 4px;
+  color: var(--text);
+  text-align: left;
+  font-size: 10px;
+  transition: color 150ms ease, text-shadow 150ms ease;
+}
+.questItem.sel {
+  color: var(--amber);
+  text-shadow: 0 0 8px rgba(255, 207, 82, 0.6);
+}
+.questItem .arrow {
+  width: 1em;
+  color: var(--amber);
+  visibility: hidden;
+}
+.questItem.sel .arrow { visibility: visible; }
+.tag {
+  font-size: 7px;
+  color: var(--green);
+  border: 1px solid var(--green-dim);
+  padding: 2px 4px;
+  margin-left: 4px;
+}
+
+.detailPanelWrap {
+  position: absolute;
+  top: 52px;
+  right: 24px;
+  width: min(330px, 44vw);
+  z-index: 4;
+  font-size: 9px;
+  line-height: 1.8;
+  color: var(--text);
+}
+.detailStatus { color: var(--magenta); margin-bottom: 8px; }
+.detailMore { color: var(--green-dim); margin-top: 10px; }
+
+.hudBottom {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 22px;
+  font-size: 8px;
+  color: var(--green-dim);
+  z-index: 5;
+  white-space: nowrap;
+}
+
+/* touch d-pad */
+.dpad {
+  position: absolute;
+  bottom: 18px;
+  left: 18px;
+  z-index: 6;
+  display: none;
+  grid-template-columns: repeat(3, 46px);
+  grid-template-rows: repeat(2, 46px);
+  gap: 6px;
+}
+.dpadBtn {
+  background: rgba(12, 8, 32, 0.8);
+  box-shadow: 0 0 0 2px var(--green-dim);
+  color: var(--green);
+  font-size: 14px;
+  touch-action: none;
+}
+.up { grid-column: 2; grid-row: 1; }
+.left { grid-column: 1; grid-row: 2; }
+.downBtn { grid-column: 2; grid-row: 2; }
+.rightBtn { grid-column: 3; grid-row: 2; }
+
+@media (pointer: coarse) {
+  .dpad { display: grid; }
+  .detailPanelWrap { display: none; }
+  .hudBottom { display: none; }
+}
+
+@media (max-width: 700px) {
+  .detailPanelWrap { display: none; }
+  .questPanelWrap { width: min(260px, 60vw); }
+}
