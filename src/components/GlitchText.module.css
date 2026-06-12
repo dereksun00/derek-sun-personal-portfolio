@@ -1,7 +1,7 @@
 .wrap {
   position: relative;
   display: inline-block;
-  color: var(--green);
+  color: var(--amber);
 }
 
 .layer {
@@ -11,7 +11,7 @@
   opacity: 0;
 }
 
-.r { color: var(--red); }
+.r { color: var(--magenta); }
 .b { color: var(--cyan); }
 
 /* breathing glow on the base text */
@@ -19,8 +19,8 @@
   animation: breathe 3.2s ease-in-out infinite;
 }
 @keyframes breathe {
-  0%, 100% { text-shadow: 0 0 6px rgba(107, 255, 138, 0.4), 0 0 18px rgba(107, 255, 138, 0.25); }
-  50% { text-shadow: 0 0 12px rgba(107, 255, 138, 0.85), 0 0 34px rgba(107, 255, 138, 0.5); }
+  0%, 100% { text-shadow: 0 0 6px rgba(255, 207, 82, 0.4), 0 0 18px rgba(255, 207, 82, 0.25); }
+  50% { text-shadow: 0 0 12px rgba(255, 207, 82, 0.85), 0 0 34px rgba(255, 207, 82, 0.5); }
 }
 
 /* electrical-arc flicker: layers snap apart for a few frames, then settle */

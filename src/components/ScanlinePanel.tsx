@@ -3,14 +3,14 @@ import styles from './ScanlinePanel.module.css';
 
 interface Props {
   title?: string;
-  color?: 'green' | 'amber' | 'magenta';
+  color?: 'cyan' | 'amber' | 'magenta';
   className?: string;
   children: ReactNode;
 }
 
 /** Double-bordered pixel panel with baked-in scanlines, as in the original quest log. */
-export default function ScanlinePanel({ title, color = 'green', className, children }: Props) {
-  const colorClass = color === 'green' ? '' : styles[color];
+export default function ScanlinePanel({ title, color = 'cyan', className, children }: Props) {
+  const colorClass = color === 'cyan' ? '' : styles[color];
   return (
     <div className={`${styles.panel} ${colorClass} ${className ?? ''}`}>
       {title && <div className={styles.title}>{title}</div>}

@@ -2,14 +2,13 @@ import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 
 export type Screen =
-  | 'boot'
   | 'title'
-  | 'save'
   | 'select'
   | 'quest'
   | 'fighter'
   | 'invaders'
-  | 'contact';
+  | 'contact'
+  | 'about';
 
 export type TransitionPhase =
   | 'idle'
@@ -18,26 +17,38 @@ export type TransitionPhase =
   | 'swap'      // screen committed behind opaque flash; incoming snapshot in flight
   | 'expand';   // reverse-expand reveals the incoming snapshot
 
+/**
+ * blackhole — the whole world changes (screen-level navigation only)
+ * scanline  — CRT channel-change wipe, ~250ms (overlays open/close)
+ * instant   — commit now with a brief flash (something else IS the transition)
+ */
+export type TransitionKind = 'blackhole' | 'scanline' | 'instant';
+
 interface DerekOS {
   screen: Screen;
-  pendingScreen: Screen | null;
+  /** state mutation applied at the swap point of the running transition */
+  pendingCommit: (() => void) | null;
   phase: TransitionPhase;
+  transitionKind: TransitionKind;
+  /** bumped by 'instant' transitions; TransitionManager renders the flash */
+  flashNonce: number;
   /** WebGL2 + html2canvas unavailable → CSS iris fallback */
   lowFi: boolean;
+  /** true once the title CRT warm-up has played (first load only) */
   booted: boolean;
   debug: boolean;
-  aboutOpen: boolean;
   /** id of the open project/experience overlay, null when closed */
   overlayId: string | null;
   overlayKind: 'project' | 'experience' | null;
 
+  /** run any state change through a transition; black hole is opt-in, not default */
+  transition: (commit: () => void, kind?: TransitionKind) => void;
   navigateTo: (s: Screen) => void;
   setPhase: (p: TransitionPhase) => void;
   commitScreen: () => void;
   setBooted: () => void;
   toggleDebug: () => void;
-  setAboutOpen: (v: boolean) => void;
-  openOverlay: (kind: 'project' | 'experience', id: string) => void;
+  openOverlay: (kind: 'project' | 'experience', id: string, t?: TransitionKind) => void;
   closeOverlay: () => void;
 }
 
@@ -52,31 +63,50 @@ function detectLowFi(): boolean {
 }
 
 export const useStore = create<DerekOS>((set, get) => ({
-  screen: 'boot',
-  pendingScreen: null,
+  screen: 'title',
+  pendingCommit: null,
   phase: 'idle',
+  transitionKind: 'blackhole',
+  flashNonce: 0,
   lowFi: detectLowFi(),
   booted: false,
   debug: false,
-  aboutOpen: false,
   overlayId: null,
   overlayKind: null,
 
+  transition: (commit, kind = 'blackhole') => {
+    if (get().phase !== 'idle') return;
+    if (kind === 'instant') {
+      commit();
+      set((s) => ({ flashNonce: s.flashNonce + 1 }));
+      return;
+    }
+    set({ pendingCommit: commit, phase: 'capturing', transitionKind: kind });
+  },
   navigateTo: (s) => {
     const { screen, phase } = get();
     if (s === screen || phase !== 'idle') return;
-    set({ pendingScreen: s, phase: 'capturing', aboutOpen: false, overlayId: null, overlayKind: null });
+    // screen changes are the only world-changes — always the black hole
+    get().transition(() => set({ screen: s, overlayId: null, overlayKind: null }), 'blackhole');
   },
   setPhase: (p) => set({ phase: p }),
   commitScreen: () => {
-    const { pendingScreen } = get();
-    if (pendingScreen) set({ screen: pendingScreen, pendingScreen: null });
+    const { pendingCommit } = get();
+    pendingCommit?.();
+    set({ pendingCommit: null });
   },
   setBooted: () => set({ booted: true }),
   toggleDebug: () => set((st) => ({ debug: !st.debug })),
-  setAboutOpen: (v) => set({ aboutOpen: v }),
-  openOverlay: (kind, id) => set({ overlayKind: kind, overlayId: id }),
-  closeOverlay: () => set({ overlayId: null, overlayKind: null }),
+  openOverlay: (kind, id, t = 'scanline') => {
+    const { phase, overlayId } = get();
+    if (phase !== 'idle' || overlayId === id) return;
+    get().transition(() => set({ overlayKind: kind, overlayId: id }), t);
+  },
+  closeOverlay: () => {
+    const { phase, overlayId } = get();
+    if (phase !== 'idle' || !overlayId) return;
+    get().transition(() => set({ overlayId: null, overlayKind: null }), 'scanline');
+  },
 }));
 
 // dev-only escape hatch so integration tests can await screen/phase state

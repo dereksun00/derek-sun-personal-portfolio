@@ -12,11 +12,11 @@
   justify-content: space-between;
   align-items: center;
   font-size: 10px;
-  color: var(--green);
+  color: var(--cyan);
   letter-spacing: 0.08em;
   z-index: 5;
 }
-.sep { color: var(--green-dim); margin: 0 10px; }
+.sep { color: var(--cyan-dim); margin: 0 10px; }
 .right { color: var(--amber); }
 
 /* wrappers own positioning; ScanlinePanel keeps its own position: relative */
@@ -57,8 +57,8 @@
 .questItem.sel .arrow { visibility: visible; }
 .tag {
   font-size: 7px;
-  color: var(--green);
-  border: 1px solid var(--green-dim);
+  color: var(--cyan);
+  border: 1px solid var(--cyan-dim);
   padding: 2px 4px;
   margin-left: 4px;
 }
@@ -74,7 +74,7 @@
   color: var(--text);
 }
 .detailStatus { color: var(--magenta); margin-bottom: 8px; }
-.detailMore { color: var(--green-dim); margin-top: 10px; }
+.detailMore { color: var(--cyan-dim); margin-top: 10px; }
 
 .hudBottom {
   position: absolute;
@@ -84,7 +84,7 @@
   display: flex;
   gap: 22px;
   font-size: 8px;
-  color: var(--green-dim);
+  color: var(--cyan-dim);
   z-index: 5;
   white-space: nowrap;
 }
@@ -102,8 +102,8 @@
 }
 .dpadBtn {
   background: rgba(12, 8, 32, 0.8);
-  box-shadow: 0 0 0 2px var(--green-dim);
-  color: var(--green);
+  box-shadow: 0 0 0 2px var(--cyan-dim);
+  color: var(--cyan);
   font-size: 14px;
   touch-action: none;
 }

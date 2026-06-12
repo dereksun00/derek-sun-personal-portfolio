@@ -1,16 +1,20 @@
 import { useEffect, useState } from 'react';
 import styles from './Select.module.css';
 import PixelButton from '../components/PixelButton';
+import PixelSprite, { SpriteName } from '../components/PixelArt';
 import { GAME_SELECT } from '../content';
 import { Screen, useStore } from '../store';
 import { audio } from '../sound/AudioEngine';
 
-const GAME_ICONS: Record<string, string> = { quest: '🍄', fighter: '🥊', invaders: '👾' };
+const GAME_ICONS: Record<string, { sprite: SpriteName; glow: string }> = {
+  quest: { sprite: 'mushroom', glow: 'rgba(255, 74, 107, 0.6)' },
+  fighter: { sprite: 'glove', glow: 'rgba(255, 92, 200, 0.6)' },
+  invaders: { sprite: 'invader', glow: 'rgba(76, 242, 255, 0.6)' },
+};
 
 /** Game select: three idle-bobbing cabinets + contact / about. */
 export default function Select() {
   const navigateTo = useStore((s) => s.navigateTo);
-  const setAboutOpen = useStore((s) => s.setAboutOpen);
   const [sel, setSel] = useState(0);
 
   useEffect(() => {
@@ -59,7 +63,9 @@ export default function Select() {
               navigateTo(g.id as Screen);
             }}
           >
-            <div className={styles.cabScreen}>{GAME_ICONS[g.id]}</div>
+            <div className={styles.cabScreen}>
+              <PixelSprite name={GAME_ICONS[g.id].sprite} px={5} glow={GAME_ICONS[g.id].glow} />
+            </div>
             <div className={styles.cabName}>{g.name}</div>
             <div className={styles.cabLabel}>{g.label}</div>
           </button>
@@ -69,7 +75,7 @@ export default function Select() {
         <PixelButton color="magenta" onClick={() => navigateTo('contact')}>
           {GAME_SELECT.contact}
         </PixelButton>
-        <PixelButton color="amber" onClick={() => setAboutOpen(true)}>
+        <PixelButton color="amber" onClick={() => navigateTo('about')}>
           {GAME_SELECT.about}
         </PixelButton>
       </div>

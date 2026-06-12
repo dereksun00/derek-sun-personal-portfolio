@@ -30,7 +30,19 @@
       "PowerShell(node -e \"import\\('playwright-core'\\).then\\(async \\({chromium}\\) => { const b = await chromium.launch\\({channel:'chrome', headless:false, args:['--headless=new']}\\); const p = await b.newPage\\(\\); await p.goto\\('http://localhost:5173'\\); const gpu = await p.evaluate\\(\\(\\) => { const gl = document.createElement\\('canvas'\\).getContext\\('webgl2'\\); const ext = gl.getExtension\\('WEBGL_debug_renderer_info'\\); return gl.getParameter\\(ext.UNMASKED_RENDERER_WEBGL\\); }\\); console.log\\(gpu\\); await b.close\\(\\); }\\)\")",
       "PowerShell(node smoke4.mjs)",
       "PowerShell(node smoke5.mjs)",
-      "PowerShell(node repro.mjs)"
+      "PowerShell(node repro.mjs)",
+      "Bash(rm src/screens/Boot.tsx src/screens/Boot.module.css src/screens/Save.tsx src/screens/Save.module.css src/screens/AboutOverlay.tsx src/components/Cursor.tsx)",
+      "Read(//c/c/Users/sunde/OneDrive/Documents/derek-sun-portfolio/src/**)",
+      "Bash(sed -i 's/#5ce8ff/#4cf2ff/g' src/effects/BlackHoleTransition.tsx src/screens/Title.tsx)",
+      "Read(//c/c/Users/sunde/OneDrive/Documents/derek-sun-portfolio/**)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(npx vite *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:5173)",
+      "Bash(node smoke.mjs)",
+      "Bash(netstat -ano)",
+      "Bash(awk '{print $5}')",
+      "Bash(xargs -r taskkill //F //PID)"
     ]
   }
 }

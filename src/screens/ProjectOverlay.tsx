@@ -114,7 +114,7 @@ export default function ProjectOverlay() {
         {project && (
           <div className={styles.lore}>
             {lore.slice(0, typed)}
-            {typed < lore.length && <span style={{ color: 'var(--green)' }}>▌</span>}
+            {typed < lore.length && <span style={{ color: 'var(--amber)' }}>▌</span>}
           </div>
         )}
 

@@ -1,5 +1,5 @@
 .panel {
-  --c: var(--green);
+  --c: var(--cyan);
   background: var(--panel);
   padding: 20px;
   position: relative;
@@ -7,7 +7,7 @@
     0 0 0 3px var(--panel),
     0 0 0 6px var(--c),
     0 0 0 9px var(--panel),
-    0 0 24px rgba(107, 255, 138, 0.18);
+    0 0 24px rgba(76, 242, 255, 0.18);
 }
 
 .panel::after {

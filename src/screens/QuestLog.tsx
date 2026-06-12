@@ -20,13 +20,8 @@ export default function QuestLog() {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (overlayId) return; // overlay owns the keyboard while open
-      if (e.key === 'w' || e.key === 'W') {
-        setSel((s) => (s + PROJECTS.length - 1) % PROJECTS.length);
-        audio.cursor();
-      } else if (e.key === 's' || e.key === 'S') {
-        setSel((s) => (s + 1) % PROJECTS.length);
-        audio.cursor();
-      } else if (e.key === 'Enter') {
+      // W/A/S/D belong to Mario — the quest list is hover/click + ENTER
+      if (e.key === 'Enter') {
         audio.open();
         openOverlay('project', PROJECTS[sel].id);
       } else if (e.key === 'Escape') {
@@ -67,7 +62,7 @@ export default function QuestLog() {
           setSel(Math.max(0, PROJECTS.findIndex((p) => p.id === id)));
           openOverlay('project', id);
         }}
-        onPipe={() => navigateTo('contact')}
+        onFlag={() => navigateTo('contact')}
       />
 
       <div className={styles.hudTop}>

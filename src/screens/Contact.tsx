@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styles from './Contact.module.css';
+import PixelSprite from '../components/PixelArt';
 import { CONTACT, SLOT_REVEALS } from '../content';
 import { useStore } from '../store';
 import { audio } from '../sound/AudioEngine';
@@ -8,34 +9,8 @@ import { audio } from '../sound/AudioEngine';
 const SPIN_GLYPHS = ['in', '@', '★', '◆', '♥'];
 const PULL_DURATIONS = [600, 800, 1000];
 
-/** Pixel-art GitHub octocat for the third reel. */
-function Octocat({ size = 34 }: { size?: number }) {
-  const MAP = [
-    '..XXXXXXXX..',
-    '.XXXXXXXXXX.',
-    'XX.XXXXXX.XX',
-    'XXXXXXXXXXXX',
-    'XXXXXXXXXXXX',
-    'XX.XX..XX.XX',
-    'XXXXXXXXXXXX',
-    '.XXXXXXXXXX.',
-    '..XX.XX.XX..',
-    '..XXXXXXXX..',
-  ];
-  const px = size / 12;
-  return (
-    <svg width={size} height={(MAP.length * size) / 12} aria-label="GitHub octocat">
-      {MAP.flatMap((row, y) =>
-        row.split('').map((c, x) =>
-          c === 'X' ? <rect key={`${x}-${y}`} x={x * px} y={y * px} width={px + 0.3} height={px + 0.3} fill="#1d0f33" /> : null,
-        ),
-      )}
-    </svg>
-  );
-}
-
 function ReelFace({ symbol }: { symbol: string }) {
-  if (symbol === 'octocat') return <Octocat />;
+  if (symbol === 'code') return <PixelSprite name="brackets" px={4} glow="rgba(255, 207, 82, 0.5)" />;
   return <>{symbol}</>;
 }
 
@@ -51,6 +26,7 @@ export default function Contact() {
   const [faces, setFaces] = useState<string[]>(['?', '?', '?']);
   const [pulled, setPulled] = useState(false);
   const [jackpot, setJackpot] = useState(false);
+  const [inserted, setInserted] = useState(false);
   const timers = useRef<number[]>([]);
 
   useEffect(() => () => timers.current.forEach((t) => window.clearTimeout(t)), []);
@@ -123,44 +99,71 @@ export default function Contact() {
       <div className={styles.divider} />
 
       <div className={styles.machine}>
-        <div className={styles.marquee}>{CONTACT.marquee}</div>
+        {/* nameplate etched into the top of the bezel */}
+        <div className={styles.nameplate}>{CONTACT.marquee}</div>
 
         <div className={styles.reels}>
-          <div className={styles.payline} aria-hidden />
-          <span className={styles.paylineTag}>{CONTACT.payline}</span>
+          {/* payline only exists during the spin — a magenta scan, not a static artifact */}
+          <AnimatePresence>
+            {spinning && (
+              <motion.div
+                className={styles.payline}
+                aria-hidden
+                initial={{ opacity: 0, scaleX: 0.2 }}
+                animate={{ opacity: 1, scaleX: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.18 }}
+              />
+            )}
+          </AnimatePresence>
           {SLOT_REVEALS.map((r, i) => (
-            <div key={r.label}>
-              <div className={`${styles.reel} ${spinning && i >= revealed ? styles.spinning : ''}`}>
+            // reel + info panel share one border so they read as a single component
+            <div key={r.label} className={styles.reelUnit}>
+              <div
+                className={`${styles.reel} ${spinning && i >= revealed ? styles.spinning : ''} ${jackpot ? styles.matched : ''}`}
+                style={jackpot ? { animationDelay: `${i * 0.12}s` } : undefined}
+              >
                 <ReelFace symbol={faces[i]} />
               </div>
-              <div className={styles.reelLabel}>
+              <div className={styles.reelInfo}>
                 {i < revealed && (
-                  <motion.span initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>
-                    {r.label}
+                  <motion.div
+                    className={styles.revealPanel}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ type: 'spring', damping: 18, stiffness: 260 }}
+                  >
+                    <span className={styles.revealLabel}>{r.label}</span>
                     <a className={styles.reelValue} href={r.url} target="_blank" rel="noopener noreferrer">
                       {r.value}
                     </a>
-                  </motion.span>
+                  </motion.div>
                 )}
               </div>
             </div>
           ))}
         </div>
 
-        <button className={styles.coinSlot} onClick={pull} onMouseEnter={() => audio.coin()}>
-          {CONTACT.coinSlot}
-        </button>
+        {/* coin door: slit cut into the bezel + chunky INSERT COIN button */}
+        <div className={styles.coinDoor}>
+          <span className={`${styles.coinSlit} ${inserted ? styles.slitGlow : ''}`} aria-hidden />
+          <button
+            className={styles.coinSlot}
+            onClick={() => {
+              audio.coinSlot();
+              setInserted(true);
+              timers.current.push(window.setTimeout(() => setInserted(false), 600));
+              pull();
+            }}
+          >
+            {CONTACT.coinSlot}
+          </button>
+        </div>
 
         <div className={`${styles.lever} ${pulled ? styles.pulled : ''}`} onClick={pull} role="button" aria-label={CONTACT.lever}>
+          <div className={styles.leverArrow} aria-hidden>▶</div>
           <div className={styles.leverTrack}>
             <div className={styles.leverKnob} />
-          </div>
-          <div className={styles.leverText}>
-            PULL
-            <br />
-            TO
-            <br />
-            SPIN
           </div>
         </div>
       </div>

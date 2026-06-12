@@ -167,6 +167,63 @@ class AudioEngine {
       setTimeout(() => s.dispose(), 500);
     });
   }
+  /** Goomba stomp: quick descending squash + coin-bright confirm. */
+  stomp() {
+    this.go(() => {
+      const t = Tone.now();
+      this.sub.triggerAttackRelease(140, 0.12, t);
+      this.noise.triggerAttackRelease(0.05, t);
+      this.square.triggerAttackRelease(880, 0.05, t + 0.06);
+    });
+  }
+  /** Mario takes a side hit: dull thud + downward blip. */
+  hurt() {
+    this.go(() => {
+      const t = Tone.now();
+      this.sub.triggerAttackRelease(70, 0.18, t);
+      this.square.triggerAttackRelease(220, 0.08, t + 0.02);
+      this.square.triggerAttackRelease(165, 0.1, t + 0.1);
+    });
+  }
+  /** Invaders laser: fast descending zap, brighter than `zap`. */
+  laser() {
+    this.go(() => {
+      const s = new Tone.Synth({
+        oscillator: { type: 'square' },
+        envelope: { attack: 0.001, decay: 0.09, sustain: 0, release: 0.02 },
+        volume: -20,
+      }).toDestination();
+      s.triggerAttack(1400);
+      s.frequency.rampTo(300, 0.09);
+      s.triggerRelease(Tone.now() + 0.1);
+      setTimeout(() => s.dispose(), 400);
+    });
+  }
+  /** Invader destroyed: noise burst + sub hit. */
+  explosion() {
+    this.go(() => {
+      const t = Tone.now();
+      this.noise.triggerAttackRelease(0.18, t);
+      this.sub.triggerAttackRelease(55, 0.3, t);
+    });
+  }
+  /** Flagpole slide: ascending triumphant run. */
+  flagpole() {
+    this.go(() => {
+      const t = Tone.now();
+      [392, 494, 587, 740, 880, 1175].forEach((f, i) =>
+        this.square.triggerAttackRelease(f, 0.07, t + i * 0.07));
+    });
+  }
+  /** Physical coin drop into the slot: two metallic ticks + thunk. */
+  coinSlot() {
+    this.go(() => {
+      const t = Tone.now();
+      this.square.triggerAttackRelease(1568, 0.02, t);
+      this.square.triggerAttackRelease(1319, 0.03, t + 0.05);
+      this.sub.triggerAttackRelease(110, 0.1, t + 0.09);
+    });
+  }
   punch() {
     this.go(() => {
       const t = Tone.now();

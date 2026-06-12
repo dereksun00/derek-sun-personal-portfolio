@@ -38,20 +38,6 @@
   );
 }
 
-/* full-screen brightness flicker, like a tube that's slightly tired */
-.flicker {
-  position: absolute;
-  inset: 0;
-  background: #fff;
-  mix-blend-mode: overlay;
-  animation: flick 0.12s steps(2) infinite;
-}
-@keyframes flick {
-  0% { opacity: 0.015; }
-  50% { opacity: 0.045; }
-  100% { opacity: 0.02; }
-}
-
 /* corner vignette + faked curvature shading */
 .vignette {
   position: absolute;
@@ -83,9 +69,9 @@
   background: linear-gradient(
     to bottom,
     transparent,
-    rgba(201, 198, 214, 0.05) 30%,
-    rgba(107, 255, 138, 0.04) 50%,
-    rgba(201, 198, 214, 0.05) 70%,
+    rgba(232, 230, 220, 0.05) 30%,
+    rgba(76, 242, 255, 0.04) 50%,
+    rgba(232, 230, 220, 0.05) 70%,
     transparent
   );
   filter: blur(1px);

@@ -18,16 +18,24 @@ import { audio } from '../sound/AudioEngine';
 export default function Title() {
   const navigateTo = useStore((s) => s.navigateTo);
   const lowFi = useStore((s) => s.lowFi);
+  const setBooted = useStore((s) => s.setBooted);
   const [entering, setEntering] = useState(false);
   // bumped on webglcontextlost to remount the Canvas with a fresh context
   const [glKey, setGlKey] = useState(0);
+
+  // without the 3D cabinet there's no warm-up loop to arm `booted`
+  useEffect(() => {
+    if (!lowFi) return;
+    const id = window.setTimeout(setBooted, 1600);
+    return () => window.clearTimeout(id);
+  }, [lowFi, setBooted]);
 
   const enter = () => {
     if (entering) return;
     void audio.unlock();
     audio.open();
     if (lowFi) {
-      navigateTo('save');
+      navigateTo('select');
     } else {
       setEntering(true); // camera dolly first; onEntered fires the transition
     }
@@ -84,13 +92,13 @@ export default function Title() {
             <color attach="background" args={['#050310']} />
             <ambientLight intensity={0.25} />
             <pointLight position={[-2.2, 1.8, 1.6]} color="#ff5cc8" intensity={6} />
-            <pointLight position={[2.2, 1.2, 1.8]} color="#5ce8ff" intensity={5} />
+            <pointLight position={[2.2, 1.2, 1.8]} color="#4cf2ff" intensity={5} />
             <spotLight position={[0, 3.2, 2.4]} angle={0.5} penumbra={0.7} intensity={9} color="#c9c6d6" />
             <Suspense fallback={null}>
-              <ArcadeCabinet entering={entering} onEntered={() => navigateTo('save')} />
+              <ArcadeCabinet entering={entering} onEntered={() => navigateTo('select')} />
             </Suspense>
             <EffectComposer>
-              <Bloom intensity={0.9} luminanceThreshold={0.55} luminanceSmoothing={0.3} mipmapBlur />
+              <Bloom intensity={1.2} luminanceThreshold={0.5} luminanceSmoothing={0.3} mipmapBlur />
             </EffectComposer>
           </Canvas>
         </div>

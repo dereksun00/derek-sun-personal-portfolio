@@ -59,7 +59,7 @@ export default function StaticScreenshot({ src, label }: Props) {
         position: 'relative',
         aspectRatio: '16 / 10',
         background: '#000',
-        boxShadow: '0 0 0 2px var(--green-dim)',
+        boxShadow: '0 0 0 2px var(--cyan-dim)',
         overflow: 'hidden',
         borderRadius: 4,
       }}
@@ -101,7 +101,7 @@ export default function StaticScreenshot({ src, label }: Props) {
           left: 6,
           bottom: 4,
           fontSize: 7,
-          color: 'var(--green-dim)',
+          color: 'var(--cyan-dim)',
           textShadow: '0 0 4px #000',
           pointerEvents: 'none',
         }}

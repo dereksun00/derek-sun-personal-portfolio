@@ -1,0 +1,48 @@
+.wipe {
+  position: fixed;
+  inset: 0;
+  z-index: 8000;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* the rolling band: dark scanline body with cyan/magenta chromatic edges */
+.band {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 42%;
+  background:
+    repeating-linear-gradient(to bottom, transparent 0 2px, rgba(0, 0, 0, 0.5) 2px 4px),
+    linear-gradient(
+      to bottom,
+      transparent,
+      rgba(10, 6, 18, 0.94) 22%,
+      rgba(10, 6, 18, 0.94) 78%,
+      transparent
+    );
+  border-top: 2px solid rgba(76, 242, 255, 0.75);
+  border-bottom: 2px solid rgba(255, 92, 200, 0.75);
+  box-shadow:
+    0 -8px 22px rgba(76, 242, 255, 0.3),
+    0 8px 22px rgba(255, 92, 200, 0.3);
+  animation: bandRoll 250ms linear forwards;
+}
+@keyframes bandRoll {
+  from { top: -45%; }
+  to { top: 105%; }
+}
+
+/* brief whole-frame tear while the band passes */
+.tear {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(to bottom, transparent 0 3px, rgba(0, 0, 0, 0.22) 3px 4px);
+  animation: tearFade 250ms linear forwards;
+}
+@keyframes tearFade {
+  0% { opacity: 0; }
+  30% { opacity: 1; transform: translateX(-2px); }
+  60% { opacity: 1; transform: translateX(2px); }
+  100% { opacity: 0; transform: translateX(0); }
+}

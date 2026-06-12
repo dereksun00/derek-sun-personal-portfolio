@@ -81,7 +81,7 @@ function Debris({ progressRef }: { progressRef: MutableRefObject<number> }) {
     const mesh = meshRef.current;
     if (!mesh) return;
     const amber = new THREE.Color('#ffcf52');
-    const cyan = new THREE.Color('#5ce8ff');
+    const cyan = new THREE.Color('#4cf2ff');
     for (let i = 0; i < DEBRIS_COUNT; i++) {
       mesh.setColorAt(i, i % 3 === 0 ? cyan : amber);
     }
@@ -142,7 +142,7 @@ export default function BlackHoleTransition({ texRef, progressRef, texVersion }:
         <Debris progressRef={progressRef} />
         {!window.location.search.includes('nobloom') && (
           <EffectComposer>
-            <Bloom intensity={0.85} luminanceThreshold={0.78} luminanceSmoothing={0.25} mipmapBlur />
+            <Bloom intensity={1.15} luminanceThreshold={0.7} luminanceSmoothing={0.25} mipmapBlur />
           </EffectComposer>
         )}
       </Canvas>

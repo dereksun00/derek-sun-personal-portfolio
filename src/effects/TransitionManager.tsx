@@ -4,24 +4,28 @@ import * as THREE from 'three';
 import { useStore } from '../store';
 import { snapshotScreen } from './snapshot';
 import BlackHoleTransition from './BlackHoleTransition';
+import wipeStyles from './ScanlineWipe.module.css';
 import { audio } from '../sound/AudioEngine';
 
 const CONSUME_S = 0.85;
 const EXPAND_S = 0.6;
+const WIPE_MS = 250; // scanline channel-change duration
 
 // A main-thread hitch (WebGL context creation, snapshot upload) must not
 // fast-forward the collapse: clamp any frame gap > 250ms to a ~30fps step.
 gsap.ticker.lagSmoothing(250, 33);
 
 /**
- * Owns the whole transition lifecycle:
- *   capturing → consume (black hole eats snapshot A)
- *   → swap (white flash holds; screen commits; snapshot B captured)
- *   → expand (hole runs in reverse over snapshot B) → idle
- * Falls back to a CSS iris wipe when WebGL2/html2canvas aren't available.
+ * Owns every transition kind from one place:
+ *   blackhole — capturing → consume → swap → expand → idle (world changes)
+ *   scanline  — 250ms CRT channel-change wipe (overlays open/close)
+ *   instant   — commit already happened in the store; render a soft flash
+ * Black hole falls back to a CSS iris wipe when WebGL2/html2canvas are out.
  */
 export default function TransitionManager() {
   const phase = useStore((s) => s.phase);
+  const kind = useStore((s) => s.transitionKind);
+  const flashNonce = useStore((s) => s.flashNonce);
   const lowFi = useStore((s) => s.lowFi);
   const setPhase = useStore((s) => s.setPhase);
   const commitScreen = useStore((s) => s.commitScreen);
@@ -30,10 +34,36 @@ export default function TransitionManager() {
   const progressRef = useRef(0);
   const [texVersion, setTexVersion] = useState(0);
   const [flash, setFlash] = useState(false);
+  const [wipe, setWipe] = useState(false);
+  const [softFlash, setSoftFlash] = useState(false);
 
-  /* ── capture outgoing screen ───────────────────────────── */
+  /* ── scanline: commit mid-wipe, settle in ~250ms ───────── */
   useEffect(() => {
-    if (phase !== 'capturing') return;
+    if (phase !== 'capturing' || kind !== 'scanline') return;
+    setWipe(true);
+    audio.glitch();
+    const commitT = window.setTimeout(commitScreen, WIPE_MS / 2);
+    const doneT = window.setTimeout(() => {
+      setWipe(false);
+      setPhase('idle');
+    }, WIPE_MS + 30);
+    return () => {
+      window.clearTimeout(commitT);
+      window.clearTimeout(doneT);
+    };
+  }, [phase, kind, commitScreen, setPhase]);
+
+  /* ── instant: the store already committed; brief soft flash ── */
+  useEffect(() => {
+    if (flashNonce === 0) return;
+    setSoftFlash(true);
+    const t = window.setTimeout(() => setSoftFlash(false), 90);
+    return () => window.clearTimeout(t);
+  }, [flashNonce]);
+
+  /* ── capture outgoing screen (black hole only) ─────────── */
+  useEffect(() => {
+    if (phase !== 'capturing' || kind !== 'blackhole') return;
     if (lowFi) {
       setPhase('consume');
       return;
@@ -59,7 +89,7 @@ export default function TransitionManager() {
     return () => {
       cancelled = true;
     };
-  }, [phase, lowFi, setPhase]);
+  }, [phase, kind, lowFi, setPhase]);
 
   /* ── consume: collapse to the singularity ──────────────── */
   useEffect(() => {
@@ -158,6 +188,13 @@ export default function TransitionManager() {
         <BlackHoleTransition texRef={texRef} progressRef={progressRef} texVersion={texVersion} />
       )}
       {active && lowFi && <IrisFallback collapsing={phase === 'consume'} />}
+      {/* scanline channel-change wipe (overlays) */}
+      {wipe && (
+        <div className={`${wipeStyles.wipe} no-capture`} aria-hidden>
+          <div className={wipeStyles.tear} />
+          <div className={wipeStyles.band} />
+        </div>
+      )}
       {/* white flash at the moment of total collapse */}
       <div
         className="no-capture"
@@ -170,6 +207,20 @@ export default function TransitionManager() {
           pointerEvents: 'none',
           opacity: flash ? 1 : 0,
           transition: flash ? 'opacity 60ms linear' : 'opacity 280ms ease-out',
+        }}
+      />
+      {/* soft flash for instant transitions */}
+      <div
+        className="no-capture"
+        aria-hidden
+        style={{
+          position: 'fixed',
+          inset: 0,
+          zIndex: 8400,
+          background: '#fff',
+          pointerEvents: 'none',
+          opacity: softFlash ? 0.3 : 0,
+          transition: softFlash ? 'opacity 30ms linear' : 'opacity 160ms ease-out',
         }}
       />
     </>

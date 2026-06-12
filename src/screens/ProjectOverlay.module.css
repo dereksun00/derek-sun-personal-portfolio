@@ -26,12 +26,12 @@
 }
 
 .esc {
-  color: var(--green-dim);
+  color: var(--cyan-dim);
   font-size: 9px;
   margin-bottom: 18px;
   padding: 4px;
 }
-.esc:hover { color: var(--green); }
+.esc:hover { color: var(--cyan); }
 
 .title {
   font-size: clamp(16px, 3.4vw, 28px);
@@ -66,7 +66,7 @@
   line-height: 1.9;
 }
 .bullets li { margin-bottom: 10px; padding-left: 1.2em; position: relative; }
-.bullets li::before { content: '•'; color: var(--green); position: absolute; left: 0; }
+.bullets li::before { content: '•'; color: var(--cyan); position: absolute; left: 0; }
 
 .statsRow {
   display: flex;
@@ -76,7 +76,7 @@
   color: var(--amber);
   flex-wrap: wrap;
 }
-.statBar { color: var(--green); letter-spacing: 0.1em; }
+.statBar { color: var(--cyan); letter-spacing: 0.1em; }
 .special { color: var(--magenta); font-style: italic; }
 
 .sectionHead {
@@ -105,7 +105,7 @@
 }
 
 .pill {
-  --c: var(--green);
+  --c: var(--cyan);
   font-size: 8px;
   color: var(--c);
   padding: 6px 10px;
@@ -128,7 +128,7 @@
 }
 .pill:hover {
   text-shadow: 0 0 8px var(--c);
-  box-shadow: 0 0 0 1px var(--c), 0 0 14px rgba(107, 255, 138, 0.4);
+  box-shadow: 0 0 0 1px var(--c), 0 0 14px rgba(76, 242, 255, 0.4);
 }
 .pill:hover::before { top: 170%; }
 

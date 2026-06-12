@@ -58,9 +58,9 @@ export default function DebugOverlay() {
           position: 'absolute',
           top: 10,
           right: 14,
-          color: 'var(--green)',
+          color: 'var(--cyan)',
           fontSize: 12,
-          textShadow: '0 0 6px rgba(107,255,138,0.6)',
+          textShadow: '0 0 6px rgba(76,242,255,0.6)',
         }}
       >
         FPS {fps}
@@ -73,7 +73,7 @@ export default function DebugOverlay() {
           fontFamily: 'var(--font-term)',
           fontSize: 14,
           lineHeight: 1.3,
-          color: 'rgba(107,255,138,0.45)',
+          color: 'rgba(76,242,255,0.45)',
           maxWidth: '40ch',
         }}
       >

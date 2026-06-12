@@ -1,5 +1,5 @@
 .btn {
-  --c: var(--green);
+  --c: var(--cyan);
   font-family: var(--font-pixel);
   font-size: 11px;
   color: var(--c);
@@ -16,7 +16,7 @@
 .btn:focus-visible,
 .btn.selected {
   text-shadow: 0 0 10px var(--c);
-  box-shadow: 0 0 0 2px var(--c), 0 0 18px rgba(107, 255, 138, 0.45);
+  box-shadow: 0 0 0 2px var(--c), 0 0 18px rgba(76, 242, 255, 0.45);
   outline: none;
 }
 

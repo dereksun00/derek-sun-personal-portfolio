@@ -10,43 +10,55 @@ const SCREEN_H = 400;
 
 /**
  * Draws the live title content onto the CRT face texture each frame:
- * mini star drift, DEREK SUN with occasional RGB-split arcs, blinking
- * PLAY prompt, scanlines. Cheap 2D canvas → CanvasTexture.
+ * mini star drift, DEREK SUN in amber, blinking PLAY prompt, scanlines.
+ * `warm` ∈ [0,1] drives the power-on effect: the image unfolds from a
+ * bright horizontal line, with RGB-split jitter that dies as it warms.
+ * Cheap 2D canvas → CanvasTexture.
  */
-function drawTitleFace(ctx: CanvasRenderingContext2D, t: number) {
+function drawTitleFace(ctx: CanvasRenderingContext2D, t: number, warm: number) {
   ctx.fillStyle = '#0a0612';
   ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+
+  // power-on: collapse the whole frame toward a glowing center line
+  const cold = 1 - warm;
+  ctx.save();
+  if (warm < 1) {
+    const squash = Math.max(0.012, Math.pow(warm / 0.45, 2)); // unfolds in the first ~45%
+    ctx.translate(0, SCREEN_H / 2);
+    ctx.scale(1, Math.min(1, squash));
+    ctx.translate((Math.random() - 0.5) * 10 * cold, -SCREEN_H / 2 + (Math.random() - 0.5) * 6 * cold);
+  }
 
   // deterministic mini starfield (no allocations per frame)
   for (let i = 0; i < 42; i++) {
     const sx = ((i * 137.5 + t * (4 + (i % 3) * 4)) % SCREEN_W);
     const sy = (i * 89.3) % SCREEN_H;
-    ctx.fillStyle = i % 7 === 0 ? '#ffffff' : 'rgba(201,198,214,0.55)';
+    ctx.fillStyle = i % 7 === 0 ? '#ffffff' : 'rgba(232,230,220,0.5)';
     ctx.fillRect(SCREEN_W - sx, sy, i % 5 === 0 ? 2 : 1, i % 5 === 0 ? 2 : 1);
   }
 
   ctx.textAlign = 'center';
   const cx = SCREEN_W / 2;
 
-  // heading: glitch window ~1 in every 4 seconds
-  const glitch = (t % 4) > 3.82;
+  // heading: RGB-split arcs only while the tube is still warming up
+  const glitch = warm < 1 && Math.random() < 0.5;
   const breathe = 6 + 6 * (0.5 + 0.5 * Math.sin(t * 2));
   ctx.font = '38px "Press Start 2P"';
   if (glitch) {
-    const j = () => (Math.random() - 0.5) * 8;
-    ctx.fillStyle = '#ff4a6b';
+    const j = () => (Math.random() - 0.5) * 10 * cold;
+    ctx.fillStyle = '#ff5cc8';
     ctx.fillText(TITLE.heading, cx + j(), 150 + j() * 0.4);
-    ctx.fillStyle = '#5ce8ff';
+    ctx.fillStyle = '#4cf2ff';
     ctx.fillText(TITLE.heading, cx + j(), 150 + j() * 0.4);
   }
-  ctx.shadowColor = '#6bff8a';
+  ctx.shadowColor = '#ffcf52';
   ctx.shadowBlur = breathe;
-  ctx.fillStyle = '#6bff8a';
+  ctx.fillStyle = '#ffcf52';
   ctx.fillText(TITLE.heading, cx, 150);
   ctx.shadowBlur = 0;
 
   ctx.font = '11px "Press Start 2P"';
-  ctx.fillStyle = '#ffcf52';
+  ctx.fillStyle = '#4cf2ff';
   ctx.fillText(TITLE.subtitle, cx, 205);
 
   if (Math.sin(t * 4.5) > -0.35) {
@@ -59,12 +71,22 @@ function drawTitleFace(ctx: CanvasRenderingContext2D, t: number) {
   }
 
   ctx.font = '8px "Press Start 2P"';
-  ctx.fillStyle = '#2a8c44';
+  ctx.fillStyle = '#2a7d8f';
   ctx.fillText('DEREK OS v1.0 — © 2026', cx, 372);
 
   // baked scanlines
   ctx.fillStyle = 'rgba(0,0,0,0.22)';
   for (let y = 0; y < SCREEN_H; y += 4) ctx.fillRect(0, y, SCREEN_W, 2);
+
+  ctx.restore();
+
+  // overbright bloom flash that decays as the phosphor settles
+  if (warm < 1) {
+    ctx.fillStyle = `rgba(255, 255, 255, ${0.55 * cold})`;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+    ctx.fillStyle = `rgba(76, 242, 255, ${0.18 * cold})`;
+    ctx.fillRect(0, 0, SCREEN_W, SCREEN_H);
+  }
 }
 
 function makeMarqueeTexture(): THREE.CanvasTexture {
@@ -98,6 +120,10 @@ interface Props {
 export default function ArcadeCabinet({ entering, onEntered }: Props) {
   const group = useRef<THREE.Group>(null);
   const debug = useStore((s) => s.debug);
+  const booted = useStore((s) => s.booted);
+  const setBooted = useStore((s) => s.setBooted);
+  // CRT warm-up runs only on first load; t0 captured on the first frame
+  const warmRef = useRef({ t0: -1, skip: booted });
   const { camera, gl } = useThree();
   const [dragging, setDragging] = useState(false);
   const targetRot = useRef({ x: 0, y: 0 });
@@ -175,8 +201,16 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
     g.rotation.x += (targetRot.current.x - g.rotation.x) * 0.08;
     g.position.y = Math.sin(t * 0.8) * 0.008;
     // redraw the CRT face (camera looks at it, so always live)
-    drawTitleFace(faceCtx, t);
+    const wr = warmRef.current;
+    if (wr.t0 < 0) wr.t0 = t;
+    const warm = wr.skip ? 1 : Math.min(1, (t - wr.t0) / 0.8);
+    drawTitleFace(faceCtx, t, warm);
     faceTex.needsUpdate = true;
+    // arm the "booted" flag once the tube has settled (+ glitch tail)
+    if (!wr.skip && t - wr.t0 > 1.6) {
+      wr.skip = true;
+      setBooted();
+    }
   });
 
   const plastic = { color: '#170d2b', roughness: 0.62, metalness: 0.15, wireframe: debug };
@@ -242,8 +276,8 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
         <mesh key={x} position={[x, 0.805, 0.47]} rotation={[0.5, 0, 0]}>
           <cylinderGeometry args={[0.045, 0.05, 0.035, 12]} />
           <meshStandardMaterial
-            color={i === 0 ? '#6bff8a' : '#ffcf52'}
-            emissive={i === 0 ? '#6bff8a' : '#ffcf52'}
+            color={i === 0 ? '#4cf2ff' : '#ffcf52'}
+            emissive={i === 0 ? '#4cf2ff' : '#ffcf52'}
             emissiveIntensity={0.7}
             roughness={0.3}
             wireframe={debug}

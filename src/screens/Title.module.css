@@ -22,7 +22,7 @@
   left: 50%;
   transform: translateX(-50%);
   font-size: 8px;
-  color: var(--green-dim);
+  color: var(--cyan-dim);
   z-index: 2;
   pointer-events: none;
 }
@@ -52,7 +52,7 @@
   bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
-  color: var(--green-dim);
+  color: var(--cyan-dim);
   font-size: 8px;
   z-index: 2;
   pointer-events: none;

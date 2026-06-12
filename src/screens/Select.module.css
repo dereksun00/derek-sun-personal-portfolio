@@ -20,7 +20,7 @@
 
 /* mini cabinet card */
 .cab {
-  --c: var(--green);
+  --c: var(--cyan);
   width: clamp(150px, 22vw, 210px);
   background: #0c0820;
   padding: 16px 14px 18px;
@@ -91,8 +91,8 @@
   position: absolute;
   top: 16px;
   left: 18px;
-  color: var(--green-dim);
+  color: var(--cyan-dim);
   font-size: 10px;
   padding: 8px;
 }
-.back:hover { color: var(--green); text-shadow: 0 0 8px rgba(107, 255, 138, 0.6); }
+.back:hover { color: var(--cyan); text-shadow: 0 0 8px rgba(76, 242, 255, 0.6); }
