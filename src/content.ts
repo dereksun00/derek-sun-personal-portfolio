@@ -179,7 +179,7 @@ export const CONTACT = {
 
 export const ABOUT = {
   title: 'DEREK SUN',
-  class: 'LV. 19 — FULL-STACK BUILDER',
+  class: 'LV. 19 · FULL-STACK BUILDER',
   stats: [
     { label: 'CLASS', value: 'CS + STATS' },
     { label: 'GUILD', value: 'UNIVERSITY OF TORONTO' },
@@ -190,7 +190,7 @@ export const ABOUT = {
   ],
   caption: 'FULL-STACK ENGINEER',
   backstory:
-    'Software engineer building AI systems and full-stack products that run in production. Away from the keyboard I powerlift — current total: 1,145 lb (SBD).',
+    'Software engineer building AI systems and full-stack products that run in production. Away from the keyboard I powerlift. Current total: 1,145 lb (SBD).',
   equipment: [
     { name: 'CLAUDE', kind: 'PRIMARY WEAPON', icon: 'orb' },
     { name: 'LEETCODE', kind: 'SECONDARY WEAPON', icon: 'sword' },
@@ -200,7 +200,7 @@ export const ABOUT = {
     { name: 'BASKETBALL', kind: 'SIDE QUEST', icon: 'basketball' },
   ],
   achievements: [
-    { name: 'T-CARE — 1ST PLACE', detail: 'UofT × AWS Hackathon · Best Project for Improving Access to Campus Support Services · 30+ teams' },
+    { name: 'T-CARE · 1ST PLACE', detail: 'UofT × AWS Hackathon · Best Project for Improving Access to Campus Support Services · 30+ teams' },
     { name: 'TWO INTERNSHIPS, ONE SUMMER', detail: 'Nova Vacation Homes + Maybole · May–Aug 2026' },
     { name: 'SHIPPED TO PAYING USERS', detail: 'Multi-tenant AI voice receptionist live in production' },
   ],

@@ -35,7 +35,7 @@ const overlayIs = (id) =>
     { timeout: 20000 },
   );
 
-await page.goto('http://localhost:5173', { waitUntil: 'networkidle' });
+await page.goto(process.env.SMOKE_URL ?? 'http://localhost:5173', { waitUntil: 'networkidle' });
 await settled('title'); // the cabinet IS the entry — no boot/save gates
 await page.waitForTimeout(2600); // CRT warm-up + idle
 await page.screenshot({ path: 'smoke-shots/20-title.png' });

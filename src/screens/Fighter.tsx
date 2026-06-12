@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styles from './Fighter.module.css';
+import FighterBackdrop from '../components/FighterBackdrop';
 import PixelSprite, { SpriteName } from '../components/PixelArt';
 import { EXPERIENCES, LOCKED_FIGHTER } from '../content';
 import { useStore } from '../store';
@@ -79,6 +80,7 @@ export default function Fighter() {
 
   return (
     <div className={`screen ${styles.screen}`}>
+      <FighterBackdrop />
       <button
         className={styles.back}
         onClick={() => {

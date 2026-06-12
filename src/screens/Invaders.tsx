@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import styles from './Invaders.module.css';
+import InvadersBackdrop from '../components/InvadersBackdrop';
 import InvadersGame, { InvaderStats } from '../components/InvadersGame';
 import { INVADERS_COPY, SKILL_INFO } from '../content';
 import { useStore } from '../store';
@@ -57,6 +58,7 @@ export default function Invaders() {
 
   return (
     <div className={`screen ${styles.screen}`}>
+      <InvadersBackdrop />
       <InvadersGame
         key={round}
         onZap={(skill) => {

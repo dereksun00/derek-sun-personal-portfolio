@@ -9,7 +9,7 @@ import { audio } from '../sound/AudioEngine';
 /**
  * Quest log = the Mario world. W/S navigates the quest list, ENTER opens
  * the selected quest, arrow keys drive Mario — jumping under a ? block
- * opens that project, the pipe warps to contact.
+ * opens that project, the flagpole completes the level back to game select.
  */
 export default function QuestLog() {
   const navigateTo = useStore((s) => s.navigateTo);
@@ -62,7 +62,7 @@ export default function QuestLog() {
           setSel(Math.max(0, PROJECTS.findIndex((p) => p.id === id)));
           openOverlay('project', id);
         }}
-        onFlag={() => navigateTo('contact')}
+        onFlag={() => navigateTo('select')}
       />
 
       <div className={styles.hudTop}>

@@ -1,6 +1,11 @@
 .screen {
-  background: radial-gradient(ellipse at 50% 30%, rgba(42, 13, 74, 0.45), transparent 70%);
   gap: 3em;
+}
+
+/* everything except the backdrop floats above it */
+.title, .cabinets, .buttons {
+  position: relative;
+  z-index: 1;
 }
 
 .title {
@@ -28,7 +33,12 @@
   flex-direction: column;
   align-items: center;
   gap: 12px;
-  box-shadow: 0 0 0 3px var(--c);
+  /* glow halo keeps the cards popping against the synthwave backdrop */
+  box-shadow:
+    0 0 0 3px var(--c),
+    0 0 22px rgba(76, 242, 255, 0.3),
+    0 0 60px rgba(76, 242, 255, 0.12),
+    0 16px 46px rgba(3, 2, 10, 0.75);
   animation: bob 3.4s ease-in-out infinite;
   transition: box-shadow 200ms ease, transform 200ms ease;
 }
@@ -42,7 +52,11 @@
 
 .cab.selected {
   --c: var(--amber);
-  box-shadow: 0 0 0 3px var(--amber), 0 0 32px rgba(255, 207, 82, 0.55);
+  box-shadow:
+    0 0 0 3px var(--amber),
+    0 0 32px rgba(255, 207, 82, 0.6),
+    0 0 90px rgba(255, 207, 82, 0.22),
+    0 16px 46px rgba(3, 2, 10, 0.75);
   animation: bob 1.7s ease-in-out infinite, cabPulse 0.85s ease-in-out infinite;
 }
 @keyframes cabPulse {

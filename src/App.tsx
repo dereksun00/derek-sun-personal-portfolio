@@ -13,6 +13,7 @@ import MuteToggle from './components/MuteToggle';
 import DebugOverlay from './components/DebugOverlay';
 import TransitionManager from './effects/TransitionManager';
 import KonamiHandler from './effects/KonamiHandler';
+import GLBoundary from './components/GLBoundary';
 
 const SCREENS = {
   title: Title,
@@ -37,7 +38,10 @@ export default function App() {
         <ActiveScreen />
         {overlayId && <ProjectOverlay />}
       </div>
-      <TransitionManager />
+      {/* boundary: a transition-layer crash must never unmount the site */}
+      <GLBoundary fallback={null}>
+        <TransitionManager />
+      </GLBoundary>
       <KonamiHandler />
       <DebugOverlay />
       <MuteToggle />

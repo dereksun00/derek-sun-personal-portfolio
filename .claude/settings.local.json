@@ -42,7 +42,12 @@
       "Bash(node smoke.mjs)",
       "Bash(netstat -ano)",
       "Bash(awk '{print $5}')",
-      "Bash(xargs -r taskkill //F //PID)"
+      "Bash(xargs -r taskkill //F //PID)",
+      "PowerShell($c = Get-Content src\\\\content.ts -Raw; $start = $c.IndexOf\\('export const ABOUT'\\); $end = $c.IndexOf\\('export const QUEST_HUD'\\); $about = $c.Substring\\($start, $end - $start\\); if \\($about.Contains\\([char]0x2014\\)\\) { 'EM DASH STILL PRESENT' } else { 'ABOUT section clean' })",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(npx vite --port 5173)",
+      "PowerShell($env:SMOKE_URL = 'http://localhost:5175'; node smoke.mjs)",
+      "PowerShell(Get-Process *)"
     ]
   }
 }

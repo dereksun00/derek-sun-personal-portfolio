@@ -1,21 +1,21 @@
-import { useMemo, useRef, useEffect, MutableRefObject } from 'react';
+import { useMemo, useRef, useEffect, useState, MutableRefObject } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { EffectComposer, Bloom } from '@react-three/postprocessing';
 import * as THREE from 'three';
 import vert from '../three/shaders/blackhole.vert';
 import frag from '../three/shaders/blackhole.frag';
 import { useStore } from '../store';
-
-const DEBRIS_COUNT = 80;
+import { BHQuality } from './quality';
 
 interface SceneProps {
   texRef: MutableRefObject<THREE.CanvasTexture | null>;
   progressRef: MutableRefObject<number>;
   texVersion: number;
+  low: boolean;
 }
 
 /** Fullscreen quad warped by the black hole fragment shader. */
-function HoleQuad({ texRef, progressRef, texVersion }: SceneProps) {
+function HoleQuad({ texRef, progressRef, texVersion, low }: SceneProps) {
   const { viewport } = useThree();
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const debug = useStore((s) => s.debug);
@@ -26,6 +26,7 @@ function HoleQuad({ texRef, progressRef, texVersion }: SceneProps) {
       uProgress: { value: 0 },
       uTime: { value: 0 },
       uAspect: { value: 1 },
+      uLowQ: { value: 0 },
     }),
     [],
   );
@@ -41,9 +42,10 @@ function HoleQuad({ texRef, progressRef, texVersion }: SceneProps) {
     m.uniforms.uProgress.value = progressRef.current;
     m.uniforms.uTime.value = state.clock.elapsedTime;
     m.uniforms.uAspect.value = viewport.aspect;
+    m.uniforms.uLowQ.value = low ? 1 : 0;
   });
 
-  // ShaderMaterial is created once per mount; dispose with the transition
+  // ShaderMaterial is created once per mount; dispose with the canvas
   useEffect(() => {
     const m = matRef.current;
     return () => m?.dispose();
@@ -58,23 +60,24 @@ function HoleQuad({ texRef, progressRef, texVersion }: SceneProps) {
 }
 
 /**
- * ~80 instanced debris sparks pulled into the hole on log-spiral
- * trajectories, shrinking as they fall in. Additive amber/cyan.
+ * Instanced debris sparks pulled into the hole on log-spiral trajectories,
+ * shrinking as they fall in. Additive amber/cyan. One InstancedMesh, one
+ * draw call regardless of count.
  */
-function Debris({ progressRef }: { progressRef: MutableRefObject<number> }) {
+function Debris({ progressRef, count }: { progressRef: MutableRefObject<number>; count: number }) {
   const { viewport } = useThree();
   const meshRef = useRef<THREE.InstancedMesh>(null);
   const dummy = useMemo(() => new THREE.Object3D(), []);
 
   const seeds = useMemo(
     () =>
-      Array.from({ length: DEBRIS_COUNT }, (_, i) => ({
-        ang: (i / DEBRIS_COUNT) * Math.PI * 2 + Math.sin(i * 37.7) * 0.8,
+      Array.from({ length: count }, (_, i) => ({
+        ang: (i / count) * Math.PI * 2 + Math.sin(i * 37.7) * 0.8,
         rad: 0.35 + ((i * 0.6180339887) % 1) * 1.1, // golden-ratio spread
         size: 0.006 + ((i * 0.7548776662) % 1) * 0.014,
         speed: 0.7 + ((i * 0.2387) % 1) * 0.8,
       })),
-    [],
+    [count],
   );
 
   useEffect(() => {
@@ -82,11 +85,11 @@ function Debris({ progressRef }: { progressRef: MutableRefObject<number> }) {
     if (!mesh) return;
     const amber = new THREE.Color('#ffcf52');
     const cyan = new THREE.Color('#4cf2ff');
-    for (let i = 0; i < DEBRIS_COUNT; i++) {
+    for (let i = 0; i < count; i++) {
       mesh.setColorAt(i, i % 3 === 0 ? cyan : amber);
     }
     if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
-  }, []);
+  }, [count]);
 
   useFrame(() => {
     const mesh = meshRef.current;
@@ -94,7 +97,7 @@ function Debris({ progressRef }: { progressRef: MutableRefObject<number> }) {
     const p = progressRef.current;
     const scaleX = viewport.width / 2;
     const scaleY = viewport.height / 2;
-    for (let i = 0; i < DEBRIS_COUNT; i++) {
+    for (let i = 0; i < count; i++) {
       const s = seeds[i];
       // radius decays toward the singularity; angle accelerates as 1/r
       const fall = Math.pow(Math.max(1 - p * s.speed, 0), 1.6);
@@ -112,7 +115,7 @@ function Debris({ progressRef }: { progressRef: MutableRefObject<number> }) {
   });
 
   return (
-    <instancedMesh ref={meshRef} args={[undefined, undefined, DEBRIS_COUNT]} frustumCulled={false}>
+    <instancedMesh key={count} ref={meshRef} args={[undefined, undefined, count]} frustumCulled={false}>
       <planeGeometry args={[1, 1]} />
       <meshBasicMaterial color="#ffcf52" transparent blending={THREE.AdditiveBlending} depthWrite={false} toneMapped={false} />
     </instancedMesh>
@@ -123,24 +126,65 @@ export interface BlackHoleCanvasProps {
   texRef: MutableRefObject<THREE.CanvasTexture | null>;
   progressRef: MutableRefObject<number>;
   texVersion: number;
+  /** transition running AND a snapshot is loaded — controls visibility + frameloop */
+  active: boolean;
+  quality: BHQuality;
 }
 
 /**
- * The fullscreen transition overlay. Mounted by TransitionManager only
- * while a transition is running, so it costs nothing at idle.
+ * The fullscreen transition overlay. Mounted PERSISTENTLY by
+ * TransitionManager (not per-transition): creating a WebGL context and
+ * compiling the hole + bloom shaders mid-transition was the first-run
+ * jank. Instead the canvas mounts once at app start, renders hidden for
+ * ~700ms to compile everything, then parks with frameloop="never" (zero
+ * idle cost). Activating a transition just flips visibility + frameloop.
+ *
+ * quality 'low' (set adaptively after a slow first transition): 1x dpr,
+ * no bloom composer, half the debris, no chromatic aberration.
+ *
+ * StrictMode safety (verified against @react-three/fiber 8.17 source):
+ * R3F defers root/renderer creation until its ResizeObserver measures the
+ * container, which lands AFTER StrictMode's synchronous mount→unmount→
+ * remount replay — the replay's unmountComponentAtNode no-ops because no
+ * root exists yet, so the WebGL context is created exactly once. Two
+ * rules keep it that way: (1) never key/conditionally remount this
+ * component (its mount condition must stay the stable `!lowFi`), and
+ * (2) nothing may call getContext on R3F's canvas before the renderer
+ * does — html2canvas does exactly that to canvases it clones, which is
+ * why snapshot.ts must never let a clone reach this canvas.
  */
-export default function BlackHoleTransition({ texRef, progressRef, texVersion }: BlackHoleCanvasProps) {
+export default function BlackHoleTransition({ texRef, progressRef, texVersion, active, quality }: BlackHoleCanvasProps) {
+  const [warming, setWarming] = useState(true);
+  useEffect(() => {
+    const t = window.setTimeout(() => setWarming(false), 700);
+    return () => window.clearTimeout(t);
+  }, []);
+
+  const low = quality === 'low';
+  const running = active || warming;
+
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 8000 }} className="no-capture" aria-hidden>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        zIndex: 8000,
+        visibility: active ? 'visible' : 'hidden',
+        pointerEvents: 'none',
+      }}
+      className="no-capture"
+      aria-hidden
+    >
       <Canvas
         orthographic
         camera={{ position: [0, 0, 5], zoom: 1 }}
-        dpr={Math.min(window.devicePixelRatio, 2)}
+        dpr={low ? 1 : Math.min(window.devicePixelRatio, 1.5)}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
+        frameloop={running ? 'always' : 'never'}
       >
-        <HoleQuad texRef={texRef} progressRef={progressRef} texVersion={texVersion} />
-        <Debris progressRef={progressRef} />
-        {!window.location.search.includes('nobloom') && (
+        <HoleQuad texRef={texRef} progressRef={progressRef} texVersion={texVersion} low={low} />
+        <Debris progressRef={progressRef} count={low ? 40 : 80} />
+        {!low && !window.location.search.includes('nobloom') && (
           <EffectComposer>
             <Bloom intensity={1.15} luminanceThreshold={0.7} luminanceSmoothing={0.25} mipmapBlur />
           </EffectComposer>

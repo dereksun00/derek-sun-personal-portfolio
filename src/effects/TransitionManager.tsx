@@ -2,8 +2,10 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import * as THREE from 'three';
 import { useStore } from '../store';
-import { snapshotScreen } from './snapshot';
+import { snapshotScreen, warmUpSnapshot } from './snapshot';
 import BlackHoleTransition from './BlackHoleTransition';
+import GLBoundary from '../components/GLBoundary';
+import { getBHQuality, bhQualityDecided, reportTransitionFps } from './quality';
 import wipeStyles from './ScanlineWipe.module.css';
 import { audio } from '../sound/AudioEngine';
 
@@ -36,6 +38,45 @@ export default function TransitionManager() {
   const [flash, setFlash] = useState(false);
   const [wipe, setWipe] = useState(false);
   const [softFlash, setSoftFlash] = useState(false);
+  const [bhQuality, setBhQuality] = useState(getBHQuality());
+
+  /* ── warm html2canvas at idle so the first capture doesn't hitch ── */
+  useEffect(() => {
+    if (lowFi) return;
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    const id = w.requestIdleCallback
+      ? w.requestIdleCallback(() => warmUpSnapshot())
+      : window.setTimeout(warmUpSnapshot, 1500);
+    return () => {
+      if (w.cancelIdleCallback) w.cancelIdleCallback(id);
+      else window.clearTimeout(id);
+    };
+  }, [lowFi]);
+
+  /* ── profile the first transition's consume phase; drop to low quality
+        for later transitions if it can't hold ~45fps ── */
+  useEffect(() => {
+    if (phase !== 'consume' || lowFi || bhQualityDecided()) return;
+    let frames = 0;
+    const start = performance.now();
+    let raf = 0;
+    const loop = () => {
+      frames++;
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => {
+      cancelAnimationFrame(raf);
+      const secs = (performance.now() - start) / 1000;
+      if (secs > 0.3) {
+        reportTransitionFps(frames / secs);
+        setBhQuality(getBHQuality());
+      }
+    };
+  }, [phase, lowFi]);
 
   /* ── scanline: commit mid-wipe, settle in ~250ms ───────── */
   useEffect(() => {
@@ -184,8 +225,20 @@ export default function TransitionManager() {
 
   return (
     <>
-      {active && !lowFi && texRef.current && (
-        <BlackHoleTransition texRef={texRef} progressRef={progressRef} texVersion={texVersion} />
+      {/* persistent: mounts once, pre-warms shaders, then idles at zero cost.
+          GLBoundary: if the WebGL canvas ever fails, transitions degrade to
+          the white flash (the phase machine runs independently of this
+          canvas) instead of React unmounting the whole app. */}
+      {!lowFi && (
+        <GLBoundary fallback={null}>
+          <BlackHoleTransition
+            texRef={texRef}
+            progressRef={progressRef}
+            texVersion={texVersion}
+            active={active && texRef.current !== null}
+            quality={bhQuality}
+          />
+        </GLBoundary>
       )}
       {active && lowFi && <IrisFallback collapsing={phase === 'consume'} />}
       {/* scanline channel-change wipe (overlays) */}

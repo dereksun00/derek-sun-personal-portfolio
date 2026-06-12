@@ -1,0 +1,143 @@
+/* Synthwave backdrop: sky gradient base, nebula layer, grid/horizon layer.
+   Sky/ground split sits at 62% — keep in sync with HORIZON in the component. */
+
+.bg {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    #050310 0%,
+    #0c0524 36%,
+    #1b0a38 56%,
+    #2a0d4a 62%,
+    #07030f 62.6%,
+    #04020a 100%
+  );
+}
+
+/* parallax layers are oversized so translate never exposes an edge */
+.layer {
+  position: absolute;
+  inset: -28px;
+  will-change: transform;
+}
+
+/* ── nebula clouds: 5 big painted blobs over the upper sky ──
+   each gets its own drift vector via --dx/--dy so they slide across one
+   another and recombine instead of breathing in lockstep */
+.nebula {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+  animation: nebDrift 40s ease-in-out infinite alternate;
+}
+.nebMagenta {
+  --dx: 9vw;
+  --dy: 4vh;
+  width: 38vw;
+  height: 34vh;
+  left: 2%;
+  top: 2%;
+  opacity: 0.26;
+  background: radial-gradient(circle, #ff5cc8, transparent 70%);
+}
+.nebCyan {
+  --dx: -8vw;
+  --dy: 6vh;
+  width: 32vw;
+  height: 28vh;
+  right: 4%;
+  top: 10%;
+  opacity: 0.2;
+  background: radial-gradient(circle, #4cf2ff, transparent 70%);
+  animation-duration: 52s;
+  animation-delay: -18s;
+}
+.nebBlue {
+  --dx: 6vw;
+  --dy: -5vh;
+  width: 40vw;
+  height: 36vh;
+  left: 26%;
+  top: -6%;
+  opacity: 0.28;
+  background: radial-gradient(circle, #4a3ed8, transparent 70%);
+  animation-duration: 60s;
+  animation-delay: -30s;
+}
+.nebMagenta2 {
+  --dx: -10vw;
+  --dy: 3vh;
+  width: 28vw;
+  height: 24vh;
+  right: 22%;
+  top: 30%;
+  opacity: 0.18;
+  background: radial-gradient(circle, #ff5cc8, transparent 70%);
+  animation-duration: 46s;
+  animation-delay: -8s;
+}
+.nebCyan2 {
+  --dx: 7vw;
+  --dy: 7vh;
+  width: 26vw;
+  height: 22vh;
+  left: 12%;
+  top: 26%;
+  opacity: 0.18;
+  background: radial-gradient(circle, #4cf2ff, transparent 72%);
+  animation-duration: 38s;
+  animation-delay: -25s;
+}
+@keyframes nebDrift {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to { transform: translate3d(var(--dx, 5vw), var(--dy, 3vh), 0) scale(1.12); }
+}
+/* blurred blobs are pretty but pricey — hold them still on phones */
+@media (max-width: 767px), (pointer: coarse) {
+  .nebula { animation: none; }
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* ── horizon: thin hot magenta→orange band where grid meets sky ── */
+.horizon {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 62%;
+  height: 3px;
+  transform: translateY(-50%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 92, 200, 0.75) 28%,
+    rgba(255, 158, 82, 0.95) 50%,
+    rgba(255, 92, 200, 0.75) 72%,
+    transparent
+  );
+  filter: blur(1px);
+  box-shadow:
+    0 0 18px 4px rgba(255, 120, 140, 0.35),
+    0 0 70px 18px rgba(255, 92, 200, 0.16);
+}
+
+/* ── mobile fallback: static gradient grid, zero per-frame cost ── */
+.staticGrid {
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+        to top,
+        rgba(255, 92, 200, 0.32) 0 1px,
+        transparent 1px 30px
+      )
+      bottom / 100% 38% no-repeat,
+    linear-gradient(180deg, transparent 62%, rgba(255, 92, 200, 0.05) 63%, transparent 100%);
+}

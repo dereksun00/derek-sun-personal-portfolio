@@ -129,9 +129,10 @@ export default function Contact() {
                 {i < revealed && (
                   <motion.div
                     className={styles.revealPanel}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ type: 'spring', damping: 18, stiffness: 260 }}
+                    initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    /* fixed tween (not a spring) so every panel lands with identical timing */
+                    transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
                   >
                     <span className={styles.revealLabel}>{r.label}</span>
                     <a className={styles.reelValue} href={r.url} target="_blank" rel="noopener noreferrer">

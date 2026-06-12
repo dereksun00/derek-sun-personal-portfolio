@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import styles from './Select.module.css';
 import PixelButton from '../components/PixelButton';
+import SynthwaveBackdrop from '../components/SynthwaveBackdrop';
 import PixelSprite, { SpriteName } from '../components/PixelArt';
 import { GAME_SELECT } from '../content';
 import { Screen, useStore } from '../store';
@@ -39,6 +40,7 @@ export default function Select() {
 
   return (
     <div className={`screen ${styles.screen}`}>
+      <SynthwaveBackdrop />
       <button
         className={styles.back}
         onClick={() => {

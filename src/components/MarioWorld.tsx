@@ -157,7 +157,8 @@ const FLAG_X = LEVEL - 180;
 /**
  * The quest world — a real scrolling platformer. Arrow keys / WASD move,
  * space or up jumps. Stomp goombas for points, bump ? blocks to open
- * projects, reach the flagpole at the far right to reveal CONTACT.
+ * projects, reach the flagpole at the far right to complete the level
+ * (black hole back to game select).
  * Side hits knock Mario back with 0.5s of i-frames — never a restart.
  */
 export default function MarioWorld({ selected, onBump, onFlag }: Props) {
@@ -206,6 +207,11 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
     const popups: Popup[] = [];
     const coins: Coin[] = [];
 
+    /* ── nightscape backdrop state (seeded on resize) ── */
+    const stars: { x: number; y: number; size: number; tw: number }[] = [];
+    const fireflies: { x: number; y: number; phase: number; speed: number; drift: number }[] = [];
+    let skyGrad: CanvasGradient | null = null;
+
     const burst = (x: number, y: number, color: string, n = 10) => {
       for (let i = 0; i < n; i++) {
         const a = (i / n) * Math.PI * 2 + Math.random() * 0.5;
@@ -221,6 +227,31 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
         b.baseY = GROUND() - 150 - (i % 2) * 28;
       });
       mario.y = GROUND() - 16 * PX;
+
+      skyGrad = ctx.createLinearGradient(0, 0, 0, h);
+      skyGrad.addColorStop(0, '#060a24');
+      skyGrad.addColorStop(0.5, '#140a30');
+      skyGrad.addColorStop(1, '#251047');
+      stars.length = 0;
+      const starCount = Math.round((w * h) / 9000);
+      for (let i = 0; i < starCount; i++) {
+        stars.push({
+          x: Math.random() * (w + 400),
+          y: Math.random() * Math.max(GROUND() - 160, 100),
+          size: Math.random() < 0.85 ? 1 : 2,
+          tw: Math.random() * Math.PI * 2,
+        });
+      }
+      fireflies.length = 0;
+      for (let i = 0; i < 14; i++) {
+        fireflies.push({
+          x: Math.random() * LEVEL,
+          y: GROUND() - 10 - Math.random() * 150,
+          phase: Math.random() * Math.PI * 2,
+          speed: 0.12 + Math.random() * 0.25,
+          drift: Math.random() * Math.PI * 2,
+        });
+      }
     };
     resize();
     window.addEventListener('resize', resize);
@@ -384,38 +415,107 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
       }
 
       /* ── draw ── */
-      ctx.clearRect(0, 0, w, h);
 
-      // layer 1: distant mountains (slowest)
-      ctx.fillStyle = 'rgba(42, 13, 74, 0.55)';
+      // sky: deep blue fading to purple at the horizon
+      ctx.fillStyle = skyGrad ?? '#0a0612';
+      ctx.fillRect(0, 0, w, h);
+
+      // stars: slowest layer, gentle twinkle
+      ctx.fillStyle = '#e8e6dc';
+      for (const s of stars) {
+        const span = w + 400;
+        const sx = ((((s.x - camX * 0.08) % span) + span) % span) - 200;
+        ctx.globalAlpha = 0.25 + (0.5 + 0.5 * Math.sin(s.tw + t * 1.4)) * 0.5;
+        ctx.fillRect(sx, s.y, s.size, s.size);
+      }
+      ctx.globalAlpha = 1;
+
+      // moon: big, glowing, drifting slowly
+      const moonX = w * 0.74 - camX * 0.06 + Math.sin(t * 0.05) * 24;
+      const moonY = h * 0.18 + Math.sin(t * 0.07) * 9;
+      const moonR = Math.min(w, h) * 0.05 + 26;
+      const mGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.4, moonX, moonY, moonR * 3);
+      mGlow.addColorStop(0, 'rgba(228, 232, 255, 0.3)');
+      mGlow.addColorStop(1, 'rgba(228, 232, 255, 0)');
+      ctx.fillStyle = mGlow;
+      ctx.fillRect(moonX - moonR * 3, moonY - moonR * 3, moonR * 6, moonR * 6);
+      ctx.fillStyle = '#e9ecff';
+      ctx.beginPath();
+      ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = 'rgba(186, 192, 230, 0.75)';
+      for (const [ox, oy, or] of [[-0.3, -0.15, 0.18], [0.25, 0.3, 0.12], [0.1, -0.4, 0.09]] as const) {
+        ctx.beginPath();
+        ctx.arc(moonX + moonR * ox, moonY + moonR * oy, moonR * or, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // classic pixel clouds drifting at different speeds, in front of the moon
+      for (let i = 0; i < 10; i++) {
+        const sc = 1 + (i % 3) * 0.5;
+        const cw = 56 * sc;
+        const cx = ((i * 340 + t * (5 + i * 2)) % (LEVEL + cw)) - cw - camX * 0.12;
+        if (cx < -cw || cx > w + cw) continue;
+        const cy = 50 + ((i * 67) % 150);
+        ctx.globalAlpha = 0.22 + (i % 2) * 0.08;
+        ctx.fillStyle = '#cfd2ee';
+        ctx.fillRect(cx, cy + 8 * sc, 56 * sc, 12 * sc);
+        ctx.fillRect(cx + 6 * sc, cy + 2 * sc, 16 * sc, 8 * sc);
+        ctx.fillRect(cx + 22 * sc, cy - 6 * sc, 16 * sc, 16 * sc);
+        ctx.fillRect(cx + 38 * sc, cy + 2 * sc, 12 * sc, 8 * sc);
+      }
+      ctx.globalAlpha = 1;
+
+      // layer 1: distant stepped pixel mountains (slowest)
+      ctx.fillStyle = '#1b0c38';
       for (let i = 0; i < 14; i++) {
         const mx = i * 320 + 60 - camX * 0.25;
         if (mx < -200 || mx > w + 200) continue;
         const mh2 = 90 + (i % 3) * 50;
-        ctx.beginPath();
-        ctx.moveTo(mx - 130, GROUND());
-        ctx.lineTo(mx, GROUND() - mh2);
-        ctx.lineTo(mx + 130, GROUND());
-        ctx.fill();
+        const steps = Math.ceil(mh2 / 14);
+        for (let k = 0; k < steps; k++) {
+          const half = 130 * ((k + 1) / steps);
+          ctx.fillRect(mx - half, GROUND() - mh2 + k * 14, half * 2, 15);
+        }
       }
-      // layer 2: mid hills
-      ctx.fillStyle = 'rgba(143, 58, 115, 0.28)';
+
+      // Bowser's castle: silhouette on the far-right horizon, creeps into
+      // view as Mario nears the flagpole (same depth as the mountains)
+      const castleX = w - 150 + (LEVEL - w) * 0.25 - camX * 0.25;
+      if (castleX < w + 160 && castleX > -200) {
+        const gy = GROUND();
+        ctx.fillStyle = 'rgba(16, 6, 32, 0.92)';
+        ctx.fillRect(castleX, gy - 96, 120, 96); // keep
+        for (let i = 0; i < 6; i++) ctx.fillRect(castleX + i * 20, gy - 108, 12, 12);
+        ctx.fillRect(castleX + 38, gy - 150, 44, 60); // central tower
+        for (let i = 0; i < 3; i++) ctx.fillRect(castleX + 38 + i * 16, gy - 162, 10, 12);
+        ctx.fillRect(castleX - 18, gy - 70, 22, 70); // side towers
+        ctx.fillRect(castleX + 116, gy - 70, 22, 70);
+        ctx.fillRect(castleX - 20, gy - 80, 26, 10);
+        ctx.fillRect(castleX + 114, gy - 80, 26, 10);
+        ctx.fillStyle = 'rgba(255, 207, 82, 0.16)'; // one faint lit window
+        ctx.fillRect(castleX + 54, gy - 132, 12, 16);
+      }
+
+      // layer 2: rolling hills with pixel pines
       for (let i = 0; i < 12; i++) {
         const hx = i * 380 + 140 - camX * 0.5;
-        if (hx < -160 || hx > w + 160) continue;
+        if (hx < -200 || hx > w + 200) continue;
+        ctx.fillStyle = 'rgba(74, 28, 100, 0.55)';
         ctx.beginPath();
         ctx.arc(hx, GROUND() + 30, 110, Math.PI, 0);
         ctx.fill();
-      }
-      // layer 3: clouds (slow drift + light parallax)
-      ctx.fillStyle = 'rgba(232, 230, 220, 0.25)';
-      for (let i = 0; i < 12; i++) {
-        const cw = 70 + (i % 3) * 30;
-        const cx = ((i * 300 + t * (6 + i * 2)) % (LEVEL + cw)) - cw - camX * 0.7;
-        if (cx < -cw || cx > w + cw) continue;
-        const cy = 60 + (i * 53) % 140;
-        ctx.fillRect(cx, cy, cw, 14);
-        ctx.fillRect(cx + 12, cy - 10, cw - 24, 12);
+        // 2-3 pines per hill crest
+        ctx.fillStyle = 'rgba(30, 12, 54, 0.9)';
+        for (let p2 = 0; p2 < 2 + (i % 2); p2++) {
+          const px2 = hx - 40 + p2 * 38 + (i % 3) * 9;
+          const base = GROUND() - 50 + Math.abs(p2 - 1) * 22;
+          const s = 3 + (p2 % 2);
+          ctx.fillRect(px2 - 3 * s, base - 4 * s, 6 * s, 2 * s);
+          ctx.fillRect(px2 - 2 * s, base - 6 * s, 4 * s, 2 * s);
+          ctx.fillRect(px2 - s, base - 8 * s, 2 * s, 2 * s);
+          ctx.fillRect(px2 - 1, base - 2 * s, 2, 2 * s);
+        }
       }
 
       // ground: pixel brick strip (world-locked)
@@ -429,6 +529,27 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
       }
       ctx.fillStyle = 'rgba(76, 242, 255, 0.5)';
       ctx.fillRect(0, GROUND(), w, 2);
+
+      // fireflies: drift upward near the ground, pulsing in and out
+      for (const f of fireflies) {
+        f.phase += 0.025 + f.speed * 0.012;
+        f.y -= f.speed;
+        f.x += Math.sin(t * 0.8 + f.drift) * 0.3;
+        if (f.y < GROUND() - 190) {
+          f.y = GROUND() - 8;
+          f.x = camX + Math.random() * w;
+          f.phase = Math.random() * Math.PI * 2;
+        }
+        const ffx = f.x - camX;
+        if (ffx < -10 || ffx > w + 10) continue;
+        const a = Math.max(0, Math.sin(f.phase));
+        ctx.globalAlpha = a * 0.85;
+        ctx.fillStyle = '#ffe88a';
+        ctx.fillRect(ffx, f.y, 2, 2);
+        ctx.globalAlpha = a * 0.22;
+        ctx.fillRect(ffx - 2, f.y - 2, 6, 6);
+      }
+      ctx.globalAlpha = 1;
 
       // flagpole
       const fx = FLAG_X - camX;
