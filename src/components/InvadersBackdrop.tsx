@@ -2,26 +2,17 @@ import { useEffect, useRef, useState } from 'react';
 import styles from './InvadersBackdrop.module.css';
 
 interface DeepStar { x: number; y: number; size: number; layer: number; tw: number }
-interface Asteroid {
-  x: number;
-  y: number;
-  vx: number;
-  vy: number;
-  rot: number;
-  vr: number;
-  verts: { a: number; r: number }[];
-}
 interface Streak { x: number; y: number; vx: number; vy: number; life: number; maxLife: number }
 
 const LAYER_SPEED = [4, 9, 18]; // px/s downward drift per depth
 const LAYER_ALPHA = [0.3, 0.55, 0.9];
 
 /**
- * Deep-space battle station backdrop behind the Invaders game: 3-depth
- * drifting starfield, ringed planet, slow tumbling asteroids, a faint
- * space station and occasional debris streaks on one canvas. The big
- * nebula is CSS (blurred blobs) so it costs nothing per frame. Static
- * single frame on coarse pointers / prefers-reduced-motion.
+ * Deep-space starfield behind the Invaders game: 3-depth drifting stars
+ * and occasional debris streaks on one cheap 2D canvas, with a CSS nebula
+ * band layered behind. The hero bodies — ringed planet, tumbling
+ * asteroids, station — are real 3D and live in InvadersBodies, layered on
+ * top of this. Static single frame on coarse pointers / reduced-motion.
  */
 export default function InvadersBackdrop() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,7 +32,6 @@ export default function InvadersBackdrop() {
     let h = 0;
     let raf = 0;
     let stars: DeepStar[] = [];
-    let asteroids: Asteroid[] = [];
     let streaks: Streak[] = [];
     let nextStreak = 2 + Math.random() * 4;
     let t = 0;
@@ -63,85 +53,6 @@ export default function InvadersBackdrop() {
           });
         }
       });
-      asteroids = Array.from({ length: 6 }, () => {
-        const base = 6 + Math.random() * 11;
-        return {
-          x: Math.random() * w,
-          y: Math.random() * h * 0.8,
-          vx: (Math.random() - 0.5) * 14,
-          vy: 3 + Math.random() * 7,
-          rot: Math.random() * Math.PI * 2,
-          vr: (Math.random() - 0.5) * 0.5,
-          verts: Array.from({ length: 7 }, (_, k) => ({
-            a: (k / 7) * Math.PI * 2,
-            r: base * (0.7 + Math.random() * 0.55),
-          })),
-        };
-      });
-    };
-
-    const drawPlanet = () => {
-      const px = w * 0.82;
-      const py = h * 0.3;
-      const r = Math.min(w, h) * 0.13 + 30;
-      ctx.save();
-      ctx.translate(px, py);
-      ctx.rotate(-0.32);
-      // ring back half (hidden behind the planet at the middle)
-      ctx.strokeStyle = 'rgba(130, 160, 255, 0.3)';
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, r * 1.75, r * 0.42, 0, Math.PI, Math.PI * 2);
-      ctx.stroke();
-      ctx.rotate(0.32);
-      // sphere with an off-center highlight
-      const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, r * 0.15, 0, 0, r);
-      grad.addColorStop(0, '#4a3ed8');
-      grad.addColorStop(0.55, '#2a1d72');
-      grad.addColorStop(1, '#120c33');
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(0, 0, r, 0, Math.PI * 2);
-      ctx.fill();
-      // faint latitude bands
-      ctx.strokeStyle = 'rgba(255, 92, 200, 0.1)';
-      ctx.lineWidth = 3;
-      for (const yy of [-0.35, 0, 0.4]) {
-        ctx.beginPath();
-        ctx.ellipse(0, r * yy, r * Math.sqrt(1 - yy * yy) * 0.96, r * 0.1, 0, 0, Math.PI * 2);
-        ctx.stroke();
-      }
-      // ring front half passes over the planet
-      ctx.rotate(-0.32);
-      ctx.strokeStyle = 'rgba(150, 180, 255, 0.4)';
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.ellipse(0, 0, r * 1.75, r * 0.42, 0, 0, Math.PI);
-      ctx.stroke();
-      ctx.restore();
-    };
-
-    const drawStation = () => {
-      // barely-visible station silhouette, far background
-      const sx = w * 0.16 + (animate ? Math.sin(t * 0.05) * 12 : 0);
-      const sy = h * 0.2 + (animate ? Math.sin(t * 0.08) * 5 : 0);
-      ctx.strokeStyle = 'rgba(110, 130, 200, 0.2)';
-      ctx.fillStyle = 'rgba(110, 130, 200, 0.14)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(sx, sy, 26, 0, Math.PI * 2); // outer ring
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.arc(sx, sy, 7, 0, Math.PI * 2); // hub
-      ctx.fill();
-      ctx.beginPath(); // spokes
-      ctx.moveTo(sx - 26, sy);
-      ctx.lineTo(sx + 26, sy);
-      ctx.moveTo(sx, sy - 26);
-      ctx.lineTo(sx, sy + 26);
-      ctx.stroke();
-      ctx.fillRect(sx - 48, sy - 3, 14, 6); // solar panels
-      ctx.fillRect(sx + 34, sy - 3, 14, 6);
     };
 
     const frame = (dt: number) => {
@@ -164,38 +75,6 @@ export default function InvadersBackdrop() {
         ctx.fillRect(s.x, s.y, s.size, s.size);
       }
       ctx.globalAlpha = 1;
-
-      drawStation();
-      drawPlanet();
-
-      // asteroids: slow tumble + drift, wrapping at the edges
-      for (const a of asteroids) {
-        if (animate) {
-          a.x += a.vx * dt;
-          a.y += a.vy * dt;
-          a.rot += a.vr * dt;
-          if (a.y > h + 30) { a.y = -30; a.x = Math.random() * w; }
-          if (a.x > w + 30) a.x = -30;
-          if (a.x < -30) a.x = w + 30;
-        }
-        ctx.save();
-        ctx.translate(a.x, a.y);
-        ctx.rotate(a.rot);
-        ctx.fillStyle = '#0d0a22';
-        ctx.strokeStyle = 'rgba(140, 120, 200, 0.3)';
-        ctx.lineWidth = 1;
-        ctx.beginPath();
-        a.verts.forEach((v, i) => {
-          const vx = Math.cos(v.a) * v.r;
-          const vy = Math.sin(v.a) * v.r;
-          if (i === 0) ctx.moveTo(vx, vy);
-          else ctx.lineTo(vx, vy);
-        });
-        ctx.closePath();
-        ctx.fill();
-        ctx.stroke();
-        ctx.restore();
-      }
 
       // debris streaks
       if (animate) {

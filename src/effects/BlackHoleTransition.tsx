@@ -5,17 +5,17 @@ import * as THREE from 'three';
 import vert from '../three/shaders/blackhole.vert';
 import frag from '../three/shaders/blackhole.frag';
 import { useStore } from '../store';
-import { BHQuality } from './quality';
+import { BHTier } from './quality';
 
 interface SceneProps {
   texRef: MutableRefObject<THREE.CanvasTexture | null>;
   progressRef: MutableRefObject<number>;
   texVersion: number;
-  low: boolean;
+  aberration: boolean;
 }
 
 /** Fullscreen quad warped by the black hole fragment shader. */
-function HoleQuad({ texRef, progressRef, texVersion, low }: SceneProps) {
+function HoleQuad({ texRef, progressRef, texVersion, aberration }: SceneProps) {
   const { viewport } = useThree();
   const matRef = useRef<THREE.ShaderMaterial>(null);
   const debug = useStore((s) => s.debug);
@@ -26,7 +26,7 @@ function HoleQuad({ texRef, progressRef, texVersion, low }: SceneProps) {
       uProgress: { value: 0 },
       uTime: { value: 0 },
       uAspect: { value: 1 },
-      uLowQ: { value: 0 },
+      uAberration: { value: 1 },
     }),
     [],
   );
@@ -42,7 +42,7 @@ function HoleQuad({ texRef, progressRef, texVersion, low }: SceneProps) {
     m.uniforms.uProgress.value = progressRef.current;
     m.uniforms.uTime.value = state.clock.elapsedTime;
     m.uniforms.uAspect.value = viewport.aspect;
-    m.uniforms.uLowQ.value = low ? 1 : 0;
+    m.uniforms.uAberration.value = aberration ? 1 : 0;
   });
 
   // ShaderMaterial is created once per mount; dispose with the canvas
@@ -128,7 +128,9 @@ export interface BlackHoleCanvasProps {
   texVersion: number;
   /** transition running AND a snapshot is loaded — controls visibility + frameloop */
   active: boolean;
-  quality: BHQuality;
+  /** 'high' (full) or 'medium' (no aberration, reduced bloom, fewer debris).
+      'low' is the potato tier and never reaches this component (CSS iris). */
+  tier: BHTier;
 }
 
 /**
@@ -139,8 +141,10 @@ export interface BlackHoleCanvasProps {
  * ~700ms to compile everything, then parks with frameloop="never" (zero
  * idle cost). Activating a transition just flips visibility + frameloop.
  *
- * quality 'low' (set adaptively after a slow first transition): 1x dpr,
- * no bloom composer, half the debris, no chromatic aberration.
+ * tier 'medium' (decent integrated, or a 'high' machine that measured slow):
+ * 1x dpr, reduced bloom, half the debris, no chromatic aberration. 'high'
+ * gets the full pass. The 'low'/potato tier never mounts this — it uses the
+ * CSS iris in TransitionManager.
  *
  * StrictMode safety (verified against @react-three/fiber 8.17 source):
  * R3F defers root/renderer creation until its ResizeObserver measures the
@@ -153,14 +157,14 @@ export interface BlackHoleCanvasProps {
  * does — html2canvas does exactly that to canvases it clones, which is
  * why snapshot.ts must never let a clone reach this canvas.
  */
-export default function BlackHoleTransition({ texRef, progressRef, texVersion, active, quality }: BlackHoleCanvasProps) {
+export default function BlackHoleTransition({ texRef, progressRef, texVersion, active, tier }: BlackHoleCanvasProps) {
   const [warming, setWarming] = useState(true);
   useEffect(() => {
     const t = window.setTimeout(() => setWarming(false), 700);
     return () => window.clearTimeout(t);
   }, []);
 
-  const low = quality === 'low';
+  const high = tier === 'high';
   const running = active || warming;
 
   return (
@@ -178,15 +182,21 @@ export default function BlackHoleTransition({ texRef, progressRef, texVersion, a
       <Canvas
         orthographic
         camera={{ position: [0, 0, 5], zoom: 1 }}
-        dpr={low ? 1 : Math.min(window.devicePixelRatio, 1.5)}
+        dpr={high ? Math.min(window.devicePixelRatio, 1.5) : 1}
         gl={{ antialias: false, powerPreference: 'high-performance' }}
         frameloop={running ? 'always' : 'never'}
       >
-        <HoleQuad texRef={texRef} progressRef={progressRef} texVersion={texVersion} low={low} />
-        <Debris progressRef={progressRef} count={low ? 40 : 80} />
-        {!low && !window.location.search.includes('nobloom') && (
+        <HoleQuad texRef={texRef} progressRef={progressRef} texVersion={texVersion} aberration={high} />
+        <Debris progressRef={progressRef} count={high ? 80 : 40} />
+        {!window.location.search.includes('nobloom') && (
           <EffectComposer>
-            <Bloom intensity={1.15} luminanceThreshold={0.7} luminanceSmoothing={0.25} mipmapBlur />
+            {high ? (
+              <Bloom intensity={1.15} luminanceThreshold={0.7} luminanceSmoothing={0.25} mipmapBlur />
+            ) : (
+              // reduced bloom for medium: lower intensity, higher threshold, no
+              // mipmap chain (the cheaper single-pass blur)
+              <Bloom intensity={0.6} luminanceThreshold={0.82} luminanceSmoothing={0.2} />
+            )}
           </EffectComposer>
         )}
       </Canvas>

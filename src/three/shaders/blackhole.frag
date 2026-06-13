@@ -2,7 +2,7 @@ uniform sampler2D uTex;     // snapshot of the screen being consumed/revealed
 uniform float uProgress;    // 0 = untouched screen, 1 = fully collapsed
 uniform float uTime;        // seconds; drives accretion disk rotation
 uniform float uAspect;      // viewport width / height
-uniform float uLowQ;        // 1.0 = low quality: no aberration, wider disk (no bloom pass)
+uniform float uAberration;  // 1.0 = chromatic aberration on (high); 0.0 = off (medium), with a slightly wider/brighter disk to compensate for the reduced bloom
 
 varying vec2 vUv;
 
@@ -49,14 +49,15 @@ void main() {
   vec2 off = dir * split / vec2(uAspect, 1.0);
 
   vec3 col;
-  if (uLowQ > 0.5) {
-    // low quality: single tap, no RGB split
+  if (uAberration < 0.5) {
+    // medium: single tap, no RGB split
     col = texture2D(uTex, clamp(uv2, 0.0, 1.0)).rgb;
   } else {
     col.r = texture2D(uTex, clamp(uv2 + off, 0.0, 1.0)).r;
     col.g = texture2D(uTex, clamp(uv2, 0.0, 1.0)).g;
     col.b = texture2D(uTex, clamp(uv2 - off, 0.0, 1.0)).b;
   }
+  float noBloom = 1.0 - uAberration; // medium widens/brightens the disk a touch
 
   // light dims near the horizon — nothing escapes
   col *= 1.0 - 0.55 * prog * smoothstep(horizon * 2.2, horizon, r);
@@ -66,12 +67,12 @@ void main() {
   // grading to cyan at the outer edge, with rotating noise streaks.
   // HDR values (>1) here are what feed the bloom pass.
   float diskR = horizon * 1.18 + 0.02;
-  // low quality widens the band to stand in for the missing bloom halo
-  float band = exp(-pow((r - diskR) / ((0.028 + 0.03 * prog) * (1.0 + 0.8 * uLowQ)), 2.0));
+  // medium widens the band slightly to stand in for the reduced bloom halo
+  float band = exp(-pow((r - diskR) / ((0.028 + 0.03 * prog) * (1.0 + 0.5 * noBloom)), 2.0));
   float streaks = 0.55 + 0.45 * noise1(ang * 4.0 + uTime * 3.0 + r * 30.0);
   float diskT = clamp((r - horizon) / max(diskR * 1.7 - horizon, 1e-4), 0.0, 1.0);
   vec3 diskCol = mix(vec3(1.0, 0.42, 0.05), vec3(0.35, 0.9, 1.0), diskT);
-  float diskI = band * streaks * smoothstep(0.05, 0.35, prog) * (1.7 + 0.4 * uLowQ);
+  float diskI = band * streaks * smoothstep(0.05, 0.35, prog) * (1.7 + 0.3 * noBloom);
   col += diskCol * diskI;
 
   // photon ring: razor-thin hot glow right at the horizon lip

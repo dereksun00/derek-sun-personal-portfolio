@@ -115,10 +115,19 @@ interface Props {
   /** true once the user pressed enter — camera dollies into the CRT */
   entering: boolean;
   onEntered: () => void;
+  /** fired once after the cabinet has actually rendered a few frames
+      (context up + shaders compiled), so the boot loader can lift */
+  onReady?: () => void;
 }
 
-export default function ArcadeCabinet({ entering, onEntered }: Props) {
+export default function ArcadeCabinet({ entering, onEntered, onReady }: Props) {
   const group = useRef<THREE.Group>(null);
+  const stick = useRef<THREE.Group>(null);
+  const buttonMats = useRef<THREE.MeshStandardMaterial[]>([]);
+  // onReady in a ref so the useFrame closure can never call a stale one
+  const onReadyRef = useRef(onReady);
+  onReadyRef.current = onReady;
+  const readyRef = useRef({ frames: 0, fired: false });
   const debug = useStore((s) => s.debug);
   const booted = useStore((s) => s.booted);
   const setBooted = useStore((s) => s.setBooted);
@@ -128,6 +137,23 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
   const [dragging, setDragging] = useState(false);
   const targetRot = useRef({ x: 0, y: 0 });
   const last = useRef({ x: 0, y: 0 });
+
+  // soft radial light-spill on the floor so the cabinet isn't floating in void
+  const floorTex = useMemo(() => {
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    const g = c.getContext('2d')!;
+    const grad = g.createRadialGradient(128, 128, 6, 128, 128, 128);
+    grad.addColorStop(0, 'rgba(255, 140, 220, 0.85)');
+    grad.addColorStop(0.3, 'rgba(180, 80, 210, 0.45)');
+    grad.addColorStop(0.62, 'rgba(90, 120, 230, 0.2)');
+    grad.addColorStop(1, 'rgba(76, 120, 220, 0)');
+    g.fillStyle = grad;
+    g.fillRect(0, 0, 256, 256);
+    const tex = new THREE.CanvasTexture(c);
+    tex.colorSpace = THREE.SRGBColorSpace;
+    return tex;
+  }, []);
 
   // live CRT face texture
   const { faceTex, faceCtx } = useMemo(() => {
@@ -144,8 +170,9 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
     () => () => {
       faceTex.dispose();
       marqueeTex.dispose();
+      floorTex.dispose();
     },
-    [faceTex, marqueeTex],
+    [faceTex, marqueeTex, floorTex],
   );
 
   /* aim the camera at the CRT face once */
@@ -194,12 +221,34 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
   useFrame((state) => {
     const g = group.current;
     if (!g) return;
+    // signal the boot loader once a few real frames have drawn — by now the
+    // context exists and the cabinet/bloom shaders are compiled, so the
+    // loader can lift onto an already-rendered cabinet (no pop-in)
+    const rr = readyRef.current;
+    if (!rr.fired) {
+      rr.frames++;
+      if (rr.frames >= 3) {
+        rr.fired = true;
+        onReadyRef.current?.();
+      }
+    }
     const t = state.clock.elapsedTime;
     // ease toward drag target + gentle idle sway/bob
     const idleY = entering ? 0 : Math.sin(t * 0.5) * 0.03;
     g.rotation.y += (targetRot.current.y + idleY - g.rotation.y) * 0.08;
     g.rotation.x += (targetRot.current.x - g.rotation.x) * 0.08;
     g.position.y = Math.sin(t * 0.8) * 0.008;
+
+    // joystick idle sway — a gentle lean from the mount, livelier when idle
+    if (stick.current) {
+      const amp = entering ? 0 : 1;
+      stick.current.rotation.x = Math.sin(t * 1.1) * 0.06 * amp;
+      stick.current.rotation.z = Math.cos(t * 0.8) * 0.05 * amp;
+    }
+    // buttons breathe out of phase so the deck feels alive but not busy
+    buttonMats.current.forEach((m, i) => {
+      if (m) m.emissiveIntensity = 0.5 + 0.5 * (0.5 + 0.5 * Math.sin(t * 2.4 + i * Math.PI));
+    });
     // redraw the CRT face (camera looks at it, so always live)
     const wr = warmRef.current;
     if (wr.t0 < 0) wr.t0 = t;
@@ -260,22 +309,28 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
         <boxGeometry args={[0.98, 0.08, 0.42]} />
         <meshStandardMaterial {...plastic} />
       </mesh>
-      {/* joystick */}
-      <group position={[-0.22, 0.82, 0.46]} rotation={[0.5, 0, 0]}>
-        <mesh>
-          <cylinderGeometry args={[0.018, 0.025, 0.14, 8]} />
-          <meshStandardMaterial color="#222" roughness={0.4} wireframe={debug} />
-        </mesh>
-        <mesh position={[0, 0.09, 0]}>
-          <sphereGeometry args={[0.045, 12, 12]} />
-          <meshStandardMaterial color="#ff4a6b" roughness={0.25} wireframe={debug} />
-        </mesh>
+      {/* joystick — inner group sways from the base (shaft offset up so the
+          pivot sits at the deck, not the shaft's middle) */}
+      <group position={[-0.22, 0.79, 0.46]} rotation={[0.5, 0, 0]}>
+        <group ref={stick}>
+          <mesh position={[0, 0.07, 0]}>
+            <cylinderGeometry args={[0.018, 0.025, 0.14, 8]} />
+            <meshStandardMaterial color="#222" roughness={0.4} wireframe={debug} />
+          </mesh>
+          <mesh position={[0, 0.16, 0]}>
+            <sphereGeometry args={[0.045, 12, 12]} />
+            <meshStandardMaterial color="#ff4a6b" roughness={0.25} wireframe={debug} />
+          </mesh>
+        </group>
       </group>
-      {/* buttons */}
+      {/* buttons (emissive intensity pulsed in useFrame) */}
       {[0.08, 0.26].map((x, i) => (
         <mesh key={x} position={[x, 0.805, 0.47]} rotation={[0.5, 0, 0]}>
           <cylinderGeometry args={[0.045, 0.05, 0.035, 12]} />
           <meshStandardMaterial
+            ref={(m: THREE.MeshStandardMaterial | null) => {
+              if (m) buttonMats.current[i] = m;
+            }}
             color={i === 0 ? '#4cf2ff' : '#ffcf52'}
             emissive={i === 0 ? '#4cf2ff' : '#ffcf52'}
             emissiveIntensity={0.7}
@@ -293,10 +348,11 @@ export default function ArcadeCabinet({ entering, onEntered }: Props) {
         <boxGeometry args={[0.035, 0.1, 0.012]} />
         <meshStandardMaterial color="#ffcf52" emissive="#ffcf52" emissiveIntensity={1.6} toneMapped={false} wireframe={debug} />
       </mesh>
-      {/* floor glow puddle */}
-      <mesh position={[0, -0.275, 0.1]} rotation={[-Math.PI / 2, 0, 0]}>
-        <circleGeometry args={[1.1, 32]} />
-        <meshBasicMaterial color="#2a0d4a" transparent opacity={0.55} wireframe={debug} />
+      {/* floor: soft radial light-spill so the cabinet sits in a space, not
+          a void — a wide shallow ellipse of neon glow under the deck */}
+      <mesh position={[0, -0.268, 0.42]} rotation={[-Math.PI / 2, 0, 0]} scale={[1.7, 1.15, 1]}>
+        <planeGeometry args={[2.8, 2.8]} />
+        <meshBasicMaterial map={floorTex} transparent opacity={0.95} depthWrite={false} blending={THREE.AdditiveBlending} wireframe={debug} />
       </mesh>
     </group>
   );

@@ -207,10 +207,240 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
     const popups: Popup[] = [];
     const coins: Coin[] = [];
 
-    /* ── nightscape backdrop state (seeded on resize) ── */
+    /* ── nightscape backdrop: layers pre-rendered offscreen on resize,
+       blitted per frame at their own parallax rates (stars 0.05 →
+       mountains 0.15 → castle 0.2 → hills 0.4 → ground 1.0) ── */
     const stars: { x: number; y: number; size: number; tw: number }[] = [];
     const fireflies: { x: number; y: number; phase: number; speed: number; drift: number }[] = [];
-    let skyGrad: CanvasGradient | null = null;
+    let shoots: { x: number; y: number; vx: number; vy: number; life: number; max: number }[] = [];
+    let nextShoot = 5 + Math.random() * 7;
+    let sky: HTMLCanvasElement | null = null;
+    let aurora: HTMLCanvasElement | null = null;
+    let moon: HTMLCanvasElement | null = null;
+    let mountains: HTMLCanvasElement | null = null;
+    let hills: HTMLCanvasElement | null = null;
+    let castle: HTMLCanvasElement | null = null;
+    let castleWins: { x: number; y: number; ph: number }[] = [];
+    const CPX = 6; // castle sprite cell size
+
+    /** deterministic pseudo-random so textures are stable across frames */
+    const rng = (n: number) => {
+      const x = Math.sin(n * 127.1 + 311.7) * 43758.5453;
+      return x - Math.floor(x);
+    };
+
+    const buildSky = () => {
+      const c = document.createElement('canvas');
+      c.width = Math.max(w, 32);
+      c.height = Math.max(h, 32);
+      const g = c.getContext('2d')!;
+      const grad = g.createLinearGradient(0, 0, 0, c.height);
+      grad.addColorStop(0, '#050b2a'); // deep blue
+      grad.addColorStop(0.45, '#150b38'); // purple
+      grad.addColorStop(0.8, '#240e44');
+      grad.addColorStop(1, '#321048'); // dark magenta at the horizon
+      g.fillStyle = grad;
+      g.fillRect(0, 0, c.width, c.height);
+      sky = c;
+    };
+
+    const buildAurora = () => {
+      const c = document.createElement('canvas');
+      c.width = Math.max(w, 600);
+      c.height = Math.max(Math.round(h * 0.34), 80);
+      const g = c.getContext('2d')!;
+      const ribbons = [
+        { col: 'rgba(76, 242, 255, 0.11)', base: c.height * 0.42, amp: 26, ph: 0, th: 38 },
+        { col: 'rgba(255, 92, 200, 0.09)', base: c.height * 0.6, amp: 34, ph: 2.1, th: 30 },
+        { col: 'rgba(76, 242, 255, 0.07)', base: c.height * 0.28, amp: 20, ph: 4.4, th: 52 },
+      ];
+      g.filter = 'blur(12px)';
+      for (const rb of ribbons) {
+        g.fillStyle = rb.col;
+        for (let x = -20; x < c.width + 20; x += 4) {
+          const y = rb.base + Math.sin(x * 0.006 + rb.ph) * rb.amp + Math.sin(x * 0.0017 + rb.ph * 2) * rb.amp * 0.8;
+          g.fillRect(x, y - rb.th / 2, 4, rb.th);
+        }
+      }
+      g.filter = 'none';
+      aurora = c;
+    };
+
+    const buildMoon = () => {
+      const px = 4;
+      const R = 14; // moon radius in cells
+      const halo = R * px * 3;
+      const c = document.createElement('canvas');
+      c.width = c.height = halo * 2;
+      const g = c.getContext('2d')!;
+      const glow = g.createRadialGradient(halo, halo, R * px * 0.5, halo, halo, halo);
+      glow.addColorStop(0, 'rgba(214, 226, 255, 0.3)');
+      glow.addColorStop(0.5, 'rgba(190, 205, 255, 0.09)');
+      glow.addColorStop(1, 'rgba(190, 205, 255, 0)');
+      g.fillStyle = glow;
+      g.fillRect(0, 0, c.width, c.height);
+      const craters = [
+        { x: -6, y: -3, r: 3.2 },
+        { x: 4, y: 5, r: 2.4 },
+        { x: 2, y: -7, r: 1.8 },
+        { x: -2, y: 8, r: 1.4 },
+        { x: 7, y: -1, r: 1.6 },
+      ];
+      for (let yy = -R; yy <= R; yy++) {
+        for (let xx = -R; xx <= R; xx++) {
+          const d2 = xx * xx + yy * yy;
+          if (d2 > R * R) continue;
+          let col = '#e9ecff';
+          if (xx + yy > R * 0.85) col = '#c9d1f2'; // shaded lower-right limb
+          for (const cr of craters) {
+            const dd = (xx - cr.x) ** 2 + (yy - cr.y) ** 2;
+            if (dd <= cr.r * cr.r) col = '#b4bee4';
+            else if (dd <= (cr.r + 0.9) ** 2 && xx - cr.x < 0) col = '#d6ddf8'; // rim catches the light
+          }
+          g.fillStyle = col;
+          g.fillRect(halo + xx * px, halo + yy * px, px, px);
+        }
+      }
+      moon = c;
+    };
+
+    const buildMountains = () => {
+      const T = 1600;
+      const MH = 230;
+      const c = document.createElement('canvas');
+      c.width = T;
+      c.height = MH;
+      const g = c.getContext('2d')!;
+      // peaks drawn at x-T/x/x+T so the tile wraps without a seam
+      const range = (col: string, seedBase: number, hMin: number, hVar: number, yBase: number) => {
+        g.fillStyle = col;
+        let x = rng(seedBase) * 120;
+        let i = 0;
+        while (x < T) {
+          const ph = hMin + rng(seedBase + i * 13.7) * hVar;
+          const hw = ph * (0.8 + rng(seedBase + i * 7.1) * 0.55);
+          const steps = Math.ceil(ph / 12);
+          for (const ox of [-T, 0, T]) {
+            for (let k = 0; k < steps; k++) {
+              const half = Math.round(((hw * (k + 1)) / steps / 8)) * 8;
+              g.fillRect(x + ox - half, yBase - ph + k * 12, half * 2, 13);
+            }
+          }
+          x += hw * (1.05 + rng(seedBase + i * 3.3) * 0.6);
+          i++;
+        }
+        g.fillRect(0, yBase - 6, T, MH - yBase + 6);
+      };
+      range('#2a1452', 11, 100, 110, MH - 24); // back range, moonlit purple
+      range('#1a0b38', 77, 60, 90, MH); // front range, deeper
+      mountains = c;
+    };
+
+    const buildHills = () => {
+      const T = 1400;
+      const HH = 170;
+      const c = document.createElement('canvas');
+      c.width = T;
+      c.height = HH;
+      const g = c.getContext('2d')!;
+      const pine = (x: number, base: number, s: number) => {
+        g.fillStyle = '#160826';
+        g.fillRect(x - s, base - 2 * s, 2 * s, 2 * s); // trunk
+        g.fillStyle = '#170a30';
+        g.fillRect(x - 4 * s, base - 4 * s, 8 * s, 2 * s);
+        g.fillRect(x - 3 * s, base - 6 * s, 6 * s, 2 * s);
+        g.fillRect(x - 2 * s, base - 8 * s, 4 * s, 2 * s);
+        g.fillRect(x - s, base - 10 * s, 2 * s, 2 * s);
+        g.fillStyle = '#2e165c'; // moonlit right side
+        g.fillRect(x + 2 * s, base - 4 * s, s, s);
+        g.fillRect(x + s, base - 6 * s, s, s);
+        g.fillRect(x, base - 8 * s, s, s);
+      };
+      for (let i = 0; i < 6; i++) {
+        const hx = (i * T) / 6 + rng(i * 5.3) * 70;
+        const r = 95 + rng(i * 9.1) * 65;
+        for (const ox of [-T, 0, T]) {
+          g.fillStyle = '#2d1356';
+          g.beginPath();
+          g.arc(hx + ox, HH + r * 0.45, r, Math.PI, 0);
+          g.fill();
+          for (let p2 = 0; p2 < 2 + (i % 2); p2++) {
+            const px2 = hx + ox - 44 + p2 * 42 + rng(i * 3.7 + p2) * 14;
+            const crest = HH + r * 0.45 - Math.sqrt(Math.max(r * r - (px2 - hx - ox) ** 2, 0));
+            pine(px2, crest + 8, 3 + (p2 % 2));
+          }
+        }
+      }
+      hills = c;
+    };
+
+    /** Bowser's castle, pre-rendered: crenellated keep, three towers with
+        stepped pointed roofs, arched gate, moonlit edges, stone texture.
+        Windows (torch flicker) and the flag (waves) are drawn live. */
+    const buildCastle = () => {
+      const COLS = 64;
+      const ROWS = 50;
+      const c = document.createElement('canvas');
+      c.width = COLS * CPX;
+      c.height = ROWS * CPX;
+      const g = c.getContext('2d')!;
+      const STONE = '#1f1040';
+      const DARK = '#140929';
+      const LIT = '#34205c';
+      const EDGE = '#0c051e';
+      const cl = (x: number, y: number, cw: number, ch: number, col: string) => {
+        g.fillStyle = col;
+        g.fillRect(x * CPX, y * CPX, cw * CPX, ch * CPX);
+      };
+      const roof = (xc: number, top: number, half: number) => {
+        for (let k = 0; half - k > 0; k++) {
+          cl(xc - (half - k), top - k, (half - k) * 2, 1, '#33125e');
+          cl(xc - (half - k), top - k, 1, 1, '#462080'); // lit left slope
+        }
+      };
+      // keep body + crenellated battlements
+      cl(12, 24, 40, 26, STONE);
+      cl(12, 24, 1, 26, LIT);
+      cl(51, 24, 1, 26, EDGE);
+      for (let mx = 12; mx < 52; mx += 4) cl(mx, 22, 2, 2, STONE);
+      cl(12, 24, 40, 1, LIT);
+      // side towers with pointed roofs
+      for (const tx of [5, 51]) {
+        cl(tx, 18, 8, 32, STONE);
+        cl(tx, 18, 1, 32, LIT);
+        cl(tx + 7, 18, 1, 32, EDGE);
+        cl(tx - 1, 17, 10, 1, STONE);
+        roof(tx + 4, 16, 6);
+      }
+      // central tower — tallest, carries the flag
+      cl(27, 12, 10, 38, STONE);
+      cl(27, 12, 1, 38, LIT);
+      cl(36, 12, 1, 38, EDGE);
+      cl(26, 11, 12, 1, STONE);
+      roof(32, 10, 7);
+      cl(31, 0, 1, 4, '#8d8aa3'); // flag pole above the apex
+      // arched gate
+      cl(30, 40, 4, 1, EDGE);
+      cl(29, 41, 6, 1, EDGE);
+      cl(28, 42, 8, 8, EDGE);
+      cl(27, 42, 1, 8, LIT);
+      // sparse stone texture
+      g.globalAlpha = 0.4;
+      for (let i = 0; i < 130; i++) {
+        const sx2 = Math.floor(rng(i * 1.7) * COLS);
+        const sy2 = 12 + Math.floor(rng(i * 3.1 + 9) * 38);
+        cl(sx2, sy2, 1, 1, rng(i + 99) < 0.5 ? DARK : LIT);
+      }
+      g.globalAlpha = 1;
+      castle = c;
+      castleWins = [
+        { x: 7 * CPX, y: 26 * CPX, ph: 0.9 }, // left tower
+        { x: 53 * CPX, y: 26 * CPX, ph: 2.2 }, // right tower
+        { x: 30 * CPX, y: 16 * CPX, ph: 4.1 }, // central tower
+        { x: 17 * CPX, y: 30 * CPX, ph: 5.6 }, // keep left
+        { x: 44 * CPX, y: 30 * CPX, ph: 1.6 }, // keep right
+      ];
+    };
 
     const burst = (x: number, y: number, color: string, n = 10) => {
       for (let i = 0; i < n; i++) {
@@ -228,17 +458,19 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
       });
       mario.y = GROUND() - 16 * PX;
 
-      skyGrad = ctx.createLinearGradient(0, 0, 0, h);
-      skyGrad.addColorStop(0, '#060a24');
-      skyGrad.addColorStop(0.5, '#140a30');
-      skyGrad.addColorStop(1, '#251047');
+      buildSky();
+      buildAurora();
+      buildMoon();
+      buildMountains();
+      buildHills();
+      buildCastle();
       stars.length = 0;
-      const starCount = Math.round((w * h) / 9000);
+      const starCount = Math.round((w * h) / 6000); // dense night sky
       for (let i = 0; i < starCount; i++) {
         stars.push({
           x: Math.random() * (w + 400),
           y: Math.random() * Math.max(GROUND() - 160, 100),
-          size: Math.random() < 0.85 ? 1 : 2,
+          size: Math.random() < 0.82 ? 1 : 2,
           tw: Math.random() * Math.PI * 2,
         });
       }
@@ -416,119 +648,178 @@ export default function MarioWorld({ selected, onBump, onFlag }: Props) {
 
       /* ── draw ── */
 
-      // sky: deep blue fading to purple at the horizon
-      ctx.fillStyle = skyGrad ?? '#0a0612';
-      ctx.fillRect(0, 0, w, h);
+      // sky + aurora (aurora breathes and sways, never scrolls — no seam)
+      if (sky) ctx.drawImage(sky, 0, 0, w, h);
+      if (aurora) {
+        ctx.globalAlpha = 0.7 + 0.3 * Math.sin(t * 0.23);
+        ctx.drawImage(aurora, Math.sin(t * 0.05) * 14, 8);
+        ctx.globalAlpha = 1;
+      }
 
-      // stars: slowest layer, gentle twinkle
+      // stars: slowest layer (0.05), gentle twinkle
       ctx.fillStyle = '#e8e6dc';
       for (const s of stars) {
         const span = w + 400;
-        const sx = ((((s.x - camX * 0.08) % span) + span) % span) - 200;
+        const sx = ((((s.x - camX * 0.05) % span) + span) % span) - 200;
         ctx.globalAlpha = 0.25 + (0.5 + 0.5 * Math.sin(s.tw + t * 1.4)) * 0.5;
         ctx.fillRect(sx, s.y, s.size, s.size);
       }
       ctx.globalAlpha = 1;
 
-      // moon: big, glowing, drifting slowly
-      const moonX = w * 0.74 - camX * 0.06 + Math.sin(t * 0.05) * 24;
-      const moonY = h * 0.18 + Math.sin(t * 0.07) * 9;
-      const moonR = Math.min(w, h) * 0.05 + 26;
-      const mGlow = ctx.createRadialGradient(moonX, moonY, moonR * 0.4, moonX, moonY, moonR * 3);
-      mGlow.addColorStop(0, 'rgba(228, 232, 255, 0.3)');
-      mGlow.addColorStop(1, 'rgba(228, 232, 255, 0)');
-      ctx.fillStyle = mGlow;
-      ctx.fillRect(moonX - moonR * 3, moonY - moonR * 3, moonR * 6, moonR * 6);
-      ctx.fillStyle = '#e9ecff';
-      ctx.beginPath();
-      ctx.arc(moonX, moonY, moonR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = 'rgba(186, 192, 230, 0.75)';
-      for (const [ox, oy, or] of [[-0.3, -0.15, 0.18], [0.25, 0.3, 0.12], [0.1, -0.4, 0.09]] as const) {
-        ctx.beginPath();
-        ctx.arc(moonX + moonR * ox, moonY + moonR * oy, moonR * or, 0, Math.PI * 2);
-        ctx.fill();
+      // moon: pre-rendered pixel disc with craters + halo, drifting slowly
+      if (moon) {
+        const moonX = w * 0.72 - camX * 0.05 + Math.sin(t * 0.04) * 18;
+        const moonY = h * 0.17 + Math.sin(t * 0.06) * 7;
+        ctx.drawImage(moon, moonX - moon.width / 2, moonY - moon.height / 2);
       }
 
-      // classic pixel clouds drifting at different speeds, in front of the moon
-      for (let i = 0; i < 10; i++) {
-        const sc = 1 + (i % 3) * 0.5;
-        const cw = 56 * sc;
-        const cx = ((i * 340 + t * (5 + i * 2)) % (LEVEL + cw)) - cw - camX * 0.12;
-        if (cx < -cw || cx > w + cw) continue;
-        const cy = 50 + ((i * 67) % 150);
-        ctx.globalAlpha = 0.22 + (i % 2) * 0.08;
+      // occasional shooting star high in the sky
+      nextShoot -= 1 / 60;
+      if (nextShoot <= 0 && shoots.length < 1) {
+        const dir = Math.random() < 0.5 ? 1 : -1;
+        const sp = 2.4 + Math.random() * 1.8;
+        shoots.push({
+          x: Math.random() * w * 0.8 + w * 0.1,
+          y: Math.random() * h * 0.22,
+          vx: dir * sp,
+          vy: sp * 0.45,
+          life: 0,
+          max: 70 + Math.random() * 50,
+        });
+        nextShoot = 8 + Math.random() * 10;
+      }
+      shoots = shoots.filter((m) => {
+        m.life++;
+        if (m.life > m.max) return false;
+        m.x += m.vx;
+        m.y += m.vy;
+        const fade = Math.sin((m.life / m.max) * Math.PI);
+        const trail = ctx.createLinearGradient(m.x, m.y, m.x - m.vx * 26, m.y - m.vy * 26);
+        trail.addColorStop(0, `rgba(232, 240, 255, ${0.85 * fade})`);
+        trail.addColorStop(1, 'rgba(140, 170, 255, 0)');
+        ctx.strokeStyle = trail;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(m.x, m.y);
+        ctx.lineTo(m.x - m.vx * 26, m.y - m.vy * 26);
+        ctx.stroke();
+        return true;
+      });
+
+      // classic 3-bump pixel clouds, two depths (far set behind mountains)
+      const cloud = (cx2: number, cy2: number, sc: number, alpha: number) => {
+        ctx.globalAlpha = alpha;
         ctx.fillStyle = '#cfd2ee';
-        ctx.fillRect(cx, cy + 8 * sc, 56 * sc, 12 * sc);
-        ctx.fillRect(cx + 6 * sc, cy + 2 * sc, 16 * sc, 8 * sc);
-        ctx.fillRect(cx + 22 * sc, cy - 6 * sc, 16 * sc, 16 * sc);
-        ctx.fillRect(cx + 38 * sc, cy + 2 * sc, 12 * sc, 8 * sc);
+        ctx.fillRect(cx2, cy2 + 8 * sc, 56 * sc, 12 * sc);
+        ctx.fillRect(cx2 + 6 * sc, cy2 + 2 * sc, 16 * sc, 8 * sc);
+        ctx.fillRect(cx2 + 22 * sc, cy2 - 6 * sc, 16 * sc, 16 * sc);
+        ctx.fillRect(cx2 + 38 * sc, cy2 + 2 * sc, 12 * sc, 8 * sc);
+        ctx.fillStyle = '#9aa3d4'; // shaded underside
+        ctx.fillRect(cx2 + 2 * sc, cy2 + 17 * sc, 52 * sc, 3 * sc);
+        ctx.globalAlpha = 1;
+      };
+      for (let i = 0; i < 6; i++) {
+        const sc = 0.8 + (i % 2) * 0.4;
+        const cw = 56 * sc;
+        const cx2 = ((i * 420 + t * (4 + i)) % (LEVEL + cw)) - cw - camX * 0.08;
+        if (cx2 > -cw && cx2 < w + cw) cloud(cx2, 40 + ((i * 73) % 130), sc, 0.16);
       }
-      ctx.globalAlpha = 1;
 
-      // layer 1: distant stepped pixel mountains (slowest)
-      ctx.fillStyle = '#1b0c38';
-      for (let i = 0; i < 14; i++) {
-        const mx = i * 320 + 60 - camX * 0.25;
-        if (mx < -200 || mx > w + 200) continue;
-        const mh2 = 90 + (i % 3) * 50;
-        const steps = Math.ceil(mh2 / 14);
-        for (let k = 0; k < steps; k++) {
-          const half = 130 * ((k + 1) / steps);
-          ctx.fillRect(mx - half, GROUND() - mh2 + k * 14, half * 2, 15);
+      // far mountains (0.15): stepped pixel ranges, two depths in one tile
+      const tile = (img: HTMLCanvasElement, scroll: number, y: number) => {
+        const tw = img.width;
+        let x = (((scroll % tw) + tw) % tw) - tw;
+        for (; x < w; x += tw) ctx.drawImage(img, x, y);
+      };
+      if (mountains) tile(mountains, -camX * 0.15, GROUND() - mountains.height + 24);
+
+      // Bowser's castle (0.2): pre-rendered pixel-art keep that creeps in
+      // from the right as Mario nears the flagpole — the reward beat
+      if (castle) {
+        // Far layer that slides in from the right as Mario nears the flag.
+        // Anchored so it frames fully when the camera pins at its far edge
+        // (which happens ~650px before the flag) and is hidden off-screen at
+        // the start — a constant per-width parallax rate, robust to viewport
+        // size where a fixed 0.2 would barely move on wide screens.
+        const camXmax = Math.max(LEVEL - w, 1);
+        const framedX = w - castle.width - Math.max(96, w * 0.07);
+        const castleX = w + 60 - camX * ((w + 60 - framedX) / camXmax);
+        if (castleX < w + 40 && castleX > -castle.width) {
+          const castleY = GROUND() - castle.height + 4;
+          ctx.drawImage(castle, castleX, castleY);
+          // windows flicker like torchlight, each on its own clock
+          for (const win of castleWins) {
+            const wx2 = castleX + win.x;
+            const wy2 = castleY + win.y;
+            const flick = Math.max(0.35, Math.min(1, 0.66 + 0.2 * Math.sin(t * 8 + win.ph) + 0.16 * Math.sin(t * 21 + win.ph * 3)));
+            ctx.fillStyle = '#ffb347';
+            ctx.globalAlpha = flick * 0.16; // soft torch spill around the opening
+            ctx.fillRect(wx2 - CPX, wy2 - CPX, 4 * CPX, 6 * CPX);
+            ctx.globalAlpha = flick; // crisp arched window: 2-wide body, 1-cell arch cap
+            ctx.fillStyle = '#ffd089';
+            ctx.fillRect(wx2, wy2, 2 * CPX, 4 * CPX);
+            ctx.fillRect(wx2 + 0.5 * CPX, wy2 - CPX, CPX, CPX);
+          }
+          ctx.globalAlpha = 1;
+          // flag waving from the tallest tower
+          const fpx = castleX + 31 * CPX;
+          const fpy = castleY;
+          ctx.fillStyle = '#ff5cc8';
+          ctx.beginPath();
+          ctx.moveTo(fpx, fpy + 1);
+          ctx.lineTo(fpx - 17 - Math.sin(t * 4) * 3, fpy + 6);
+          ctx.lineTo(fpx, fpy + 11);
+          ctx.fill();
         }
       }
 
-      // Bowser's castle: silhouette on the far-right horizon, creeps into
-      // view as Mario nears the flagpole (same depth as the mountains)
-      const castleX = w - 150 + (LEVEL - w) * 0.25 - camX * 0.25;
-      if (castleX < w + 160 && castleX > -200) {
-        const gy = GROUND();
-        ctx.fillStyle = 'rgba(16, 6, 32, 0.92)';
-        ctx.fillRect(castleX, gy - 96, 120, 96); // keep
-        for (let i = 0; i < 6; i++) ctx.fillRect(castleX + i * 20, gy - 108, 12, 12);
-        ctx.fillRect(castleX + 38, gy - 150, 44, 60); // central tower
-        for (let i = 0; i < 3; i++) ctx.fillRect(castleX + 38 + i * 16, gy - 162, 10, 12);
-        ctx.fillRect(castleX - 18, gy - 70, 22, 70); // side towers
-        ctx.fillRect(castleX + 116, gy - 70, 22, 70);
-        ctx.fillRect(castleX - 20, gy - 80, 26, 10);
-        ctx.fillRect(castleX + 114, gy - 80, 26, 10);
-        ctx.fillStyle = 'rgba(255, 207, 82, 0.16)'; // one faint lit window
-        ctx.fillRect(castleX + 54, gy - 132, 12, 16);
+      // near clouds drift in front of the castle
+      for (let i = 0; i < 4; i++) {
+        const sc = 1.3 + (i % 2) * 0.5;
+        const cw = 56 * sc;
+        const cx2 = ((i * 760 + 200 + t * (9 + i * 3)) % (LEVEL + cw)) - cw - camX * 0.3;
+        if (cx2 > -cw && cx2 < w + cw) cloud(cx2, 70 + ((i * 97) % 110), sc, 0.26);
       }
 
-      // layer 2: rolling hills with pixel pines
-      for (let i = 0; i < 12; i++) {
-        const hx = i * 380 + 140 - camX * 0.5;
-        if (hx < -200 || hx > w + 200) continue;
-        ctx.fillStyle = 'rgba(74, 28, 100, 0.55)';
-        ctx.beginPath();
-        ctx.arc(hx, GROUND() + 30, 110, Math.PI, 0);
-        ctx.fill();
-        // 2-3 pines per hill crest
-        ctx.fillStyle = 'rgba(30, 12, 54, 0.9)';
-        for (let p2 = 0; p2 < 2 + (i % 2); p2++) {
-          const px2 = hx - 40 + p2 * 38 + (i % 3) * 9;
-          const base = GROUND() - 50 + Math.abs(p2 - 1) * 22;
-          const s = 3 + (p2 % 2);
-          ctx.fillRect(px2 - 3 * s, base - 4 * s, 6 * s, 2 * s);
-          ctx.fillRect(px2 - 2 * s, base - 6 * s, 4 * s, 2 * s);
-          ctx.fillRect(px2 - s, base - 8 * s, 2 * s, 2 * s);
-          ctx.fillRect(px2 - 1, base - 2 * s, 2, 2 * s);
+      // mid hills with pixel pines (0.4)
+      if (hills) tile(hills, -camX * 0.4, GROUND() - hills.height + 8);
+
+      // ground: textured pixel bricks, occasional cracks, world-locked
+      const gy = GROUND();
+      ctx.fillStyle = '#150b26';
+      ctx.fillRect(0, gy, w, h - gy);
+      const rows = Math.ceil((h - gy) / 12);
+      const startB = Math.floor(camX / 24) - 1;
+      const endB = Math.ceil((camX + w) / 24) + 1;
+      for (let bxi = startB; bxi <= endB; bxi++) {
+        for (let row = 0; row < rows; row++) {
+          const off = row % 2 ? 12 : 0;
+          const sx = bxi * 24 + off - camX;
+          const idx = bxi * 31 + row * 57;
+          const shade = rng(idx);
+          ctx.fillStyle = shade < 0.18 ? '#241040' : shade < 0.38 ? '#2e1150' : '#2a0d4a';
+          ctx.fillRect(sx, gy + row * 12 + 2, 22, 10);
+          if (rng(idx * 1.93) < 0.1) {
+            ctx.fillStyle = '#120822'; // cracked brick
+            ctx.fillRect(sx + 6, gy + row * 12 + 3, 2, 5);
+            ctx.fillRect(sx + 8, gy + row * 12 + 6, 2, 4);
+            ctx.fillRect(sx + 13, gy + row * 12 + 2, 2, 4);
+          }
         }
-      }
-
-      // ground: pixel brick strip (world-locked)
-      ctx.fillStyle = '#1d0f33';
-      ctx.fillRect(0, GROUND(), w, h - GROUND());
-      ctx.fillStyle = '#2a0d4a';
-      const startBrick = Math.floor(camX / 24) * 24;
-      for (let x = startBrick; x < camX + w; x += 24) {
-        ctx.fillRect(x - camX, GROUND(), 22, 10);
-        ctx.fillRect(x - camX + 12, GROUND() + 12, 22, 10);
       }
       ctx.fillStyle = 'rgba(76, 242, 255, 0.5)';
-      ctx.fillRect(0, GROUND(), w, 2);
+      ctx.fillRect(0, gy, w, 2);
+      // grass tufts along the lip
+      for (let gx = Math.floor(camX / 46) * 46; gx < camX + w + 46; gx += 46) {
+        const j = rng(gx * 0.137);
+        if (j < 0.3) continue;
+        const sx = gx - camX + j * 30;
+        const th = 3 + Math.round(j * 4);
+        ctx.fillStyle = 'rgba(58, 150, 168, 0.85)';
+        ctx.fillRect(sx, gy - th, 2, th);
+        ctx.fillRect(sx - 3, gy - th + 2, 2, th - 2);
+        ctx.fillRect(sx + 3, gy - th + 2, 2, th - 2);
+      }
 
       // fireflies: drift upward near the ground, pulsing in and out
       for (const f of fireflies) {

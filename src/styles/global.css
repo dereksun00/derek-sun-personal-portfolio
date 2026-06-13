@@ -1,3 +1,17 @@
+/* Self-hosted DotGothic16 (SIL OFL), subset to ONLY the glyphs the Fighter
+   neon signs + lanterns render (居酒屋ラーメンカラオケ寿司バー焼き鳥餃子酒心福赤提灯,
+   ~2.6 KB). Its pixel/dot-matrix look matches the arcade theme and, crucially,
+   makes the signs render identically for every visitor regardless of which
+   CJK fonts their OS has installed. Canvas bakes the signs only after this
+   font reports loaded (see FighterBackdrop). */
+@font-face {
+  font-family: 'DotGothic16';
+  font-style: normal;
+  font-weight: 400;
+  font-display: block;
+  src: url('/fonts/dotgothic16-signs.woff2') format('woff2');
+}
+
 :root {
   --bg: #0a0612;
   --bg-deep: #160826;

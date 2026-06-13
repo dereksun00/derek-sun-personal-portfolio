@@ -163,9 +163,11 @@ export const INVADERS_COPY = {
 };
 
 export const SLOT_REVEALS: SlotReveal[] = [
-  { symbol: 'in', label: 'LINKEDIN', value: 'linkedin.com/in/derek-sun', url: 'https://www.linkedin.com/in/derek-sun/' },
+  // value = compact display (full destination is the href). The email is the
+  // long pole and must read as one unbroken string — see Contact.module.css.
+  { symbol: 'in', label: 'LINKEDIN', value: 'in/derek-sun', url: 'https://www.linkedin.com/in/derek-sun/' },
   { symbol: '@', label: 'EMAIL', value: 'sunderek3602@gmail.com', url: 'mailto:sunderek3602@gmail.com' },
-  { symbol: 'code', label: 'GITHUB', value: 'github.com/dereksun00', url: 'https://github.com/dereksun00' },
+  { symbol: 'code', label: 'GITHUB', value: '/dereksun00', url: 'https://github.com/dereksun00' },
 ];
 
 export const CONTACT = {
@@ -179,7 +181,7 @@ export const CONTACT = {
 
 export const ABOUT = {
   title: 'DEREK SUN',
-  class: 'LV. 19 · FULL-STACK BUILDER',
+  class: 'LV. 19 · SOFTWARE ENGINEER',
   stats: [
     { label: 'CLASS', value: 'CS + STATS' },
     { label: 'GUILD', value: 'UNIVERSITY OF TORONTO' },
@@ -188,7 +190,7 @@ export const ABOUT = {
     { label: 'EXPECTED', value: '2029' },
     { label: 'QUESTS', value: '3 COMPLETE' },
   ],
-  caption: 'FULL-STACK ENGINEER',
+  caption: 'SOFTWARE ENGINEER',
   backstory:
     'Software engineer building AI systems and full-stack products that run in production. Away from the keyboard I powerlift. Current total: 1,145 lb (SBD).',
   equipment: [

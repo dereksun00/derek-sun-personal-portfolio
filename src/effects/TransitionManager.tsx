@@ -5,13 +5,19 @@ import { useStore } from '../store';
 import { snapshotScreen, warmUpSnapshot } from './snapshot';
 import BlackHoleTransition from './BlackHoleTransition';
 import GLBoundary from '../components/GLBoundary';
-import { getBHQuality, bhQualityDecided, reportTransitionFps } from './quality';
+import { getBHTier, bhTierDecided, reportTransitionFps, getTierInfo } from './quality';
 import wipeStyles from './ScanlineWipe.module.css';
 import { audio } from '../sound/AudioEngine';
 
-const CONSUME_S = 0.85;
-const EXPAND_S = 0.6;
 const WIPE_MS = 250; // scanline channel-change duration
+
+// transition lengths per tier — a shorter effect that stays smooth beats a
+// long one that stutters, so weaker tiers run faster
+const DUR = {
+  high: { consume: 0.85, expand: 0.6 },
+  medium: { consume: 0.7, expand: 0.5 },
+  low: { consume: 0.42, expand: 0.4 }, // potato (CSS iris)
+} as const;
 
 // A main-thread hitch (WebGL context creation, snapshot upload) must not
 // fast-forward the collapse: clamp any frame gap > 250ms to a ~30fps step.
@@ -22,7 +28,11 @@ gsap.ticker.lagSmoothing(250, 33);
  *   blackhole — capturing → consume → swap → expand → idle (world changes)
  *   scanline  — 250ms CRT channel-change wipe (overlays open/close)
  *   instant   — commit already happened in the store; render a soft flash
- * Black hole falls back to a CSS iris wipe when WebGL2/html2canvas are out.
+ *
+ * Black hole runs as a WebGL shader on the 'high'/'medium' tiers and as a
+ * fast CSS iris wipe on the 'low'/potato tier (and without WebGL2). Tier is
+ * chosen pre-emptively from hardware on load; the first WebGL transition is
+ * profiled and can downgrade a machine that stutters. See quality.ts.
  */
 export default function TransitionManager() {
   const phase = useStore((s) => s.phase);
@@ -38,11 +48,20 @@ export default function TransitionManager() {
   const [flash, setFlash] = useState(false);
   const [wipe, setWipe] = useState(false);
   const [softFlash, setSoftFlash] = useState(false);
-  const [bhQuality, setBhQuality] = useState(getBHQuality());
+  const [bhTier, setBhTier] = useState(getBHTier());
+  const [, setMeasuredFps] = useState<number | null>(getTierInfo().fps);
+
+  // Whether the persistent WebGL canvas mounts at all. Stable for the page's
+  // life (a later downgrade just stops *using* it; it never unmounts, which
+  // would churn the context). Potato/no-WebGL2 machines never create it.
+  const mountWebGL = useRef(!lowFi && getBHTier() !== 'low').current;
+  // potato path for THIS transition (reactive: a measured downgrade flips it)
+  const usePotato = lowFi || bhTier === 'low';
+  const dur = DUR[usePotato ? 'low' : bhTier];
 
   /* ── warm html2canvas at idle so the first capture doesn't hitch ── */
   useEffect(() => {
-    if (lowFi) return;
+    if (!mountWebGL) return; // CSS iris never snapshots
     const w = window as Window & {
       requestIdleCallback?: (cb: () => void) => number;
       cancelIdleCallback?: (id: number) => void;
@@ -54,12 +73,12 @@ export default function TransitionManager() {
       if (w.cancelIdleCallback) w.cancelIdleCallback(id);
       else window.clearTimeout(id);
     };
-  }, [lowFi]);
+  }, [mountWebGL]);
 
-  /* ── profile the first transition's consume phase; drop to low quality
-        for later transitions if it can't hold ~45fps ── */
+  /* ── profile the first WebGL transition's consume phase; downgrade a tier
+        that can't hold ~50fps for the rest of the session ── */
   useEffect(() => {
-    if (phase !== 'consume' || lowFi || bhQualityDecided()) return;
+    if (phase !== 'consume' || usePotato || bhTierDecided()) return;
     let frames = 0;
     const start = performance.now();
     let raf = 0;
@@ -73,10 +92,11 @@ export default function TransitionManager() {
       const secs = (performance.now() - start) / 1000;
       if (secs > 0.3) {
         reportTransitionFps(frames / secs);
-        setBhQuality(getBHQuality());
+        setBhTier(getBHTier());
+        setMeasuredFps(getTierInfo().fps);
       }
     };
-  }, [phase, lowFi]);
+  }, [phase, usePotato]);
 
   /* ── scanline: commit mid-wipe, settle in ~250ms ───────── */
   useEffect(() => {
@@ -105,12 +125,13 @@ export default function TransitionManager() {
   /* ── capture outgoing screen (black hole only) ─────────── */
   useEffect(() => {
     if (phase !== 'capturing' || kind !== 'blackhole') return;
-    if (lowFi) {
+    if (usePotato) {
+      // CSS iris needs no snapshot — go straight to the collapse
       setPhase('consume');
       return;
     }
     let cancelled = false;
-    audio.startRumble(CONSUME_S + 0.2);
+    audio.startRumble(dur.consume + 0.2);
     snapshotScreen()
       .then((tex) => {
         if (cancelled) {
@@ -130,7 +151,7 @@ export default function TransitionManager() {
     return () => {
       cancelled = true;
     };
-  }, [phase, kind, lowFi, setPhase]);
+  }, [phase, kind, usePotato, dur.consume, setPhase]);
 
   /* ── consume: collapse to the singularity ──────────────── */
   useEffect(() => {
@@ -138,7 +159,7 @@ export default function TransitionManager() {
     const obj = { p: progressRef.current };
     const tween = gsap.to(obj, {
       p: 1,
-      duration: lowFi ? 0.45 : CONSUME_S,
+      duration: dur.consume,
       ease: 'power2.in',
       onUpdate: () => {
         progressRef.current = obj.p;
@@ -152,7 +173,7 @@ export default function TransitionManager() {
     return () => {
       tween.kill();
     };
-  }, [phase, lowFi, setPhase]);
+  }, [phase, dur.consume, setPhase]);
 
   /* ── swap: commit screen behind the flash, capture incoming ── */
   useEffect(() => {
@@ -163,7 +184,7 @@ export default function TransitionManager() {
     requestAnimationFrame(() =>
       requestAnimationFrame(async () => {
         if (cancelled) return;
-        if (!lowFi) {
+        if (!usePotato) {
           try {
             // scale 1: this capture happens during the white-flash hold,
             // so latency is more visible than texture sharpness
@@ -187,7 +208,7 @@ export default function TransitionManager() {
     return () => {
       cancelled = true;
     };
-  }, [phase, lowFi, commitScreen, setPhase]);
+  }, [phase, usePotato, commitScreen, setPhase]);
 
   /* ── expand: reverse the collapse over the incoming snapshot ── */
   useEffect(() => {
@@ -195,7 +216,7 @@ export default function TransitionManager() {
     const obj = { p: 1 };
     const tween = gsap.to(obj, {
       p: 0,
-      duration: lowFi ? 0.4 : EXPAND_S,
+      duration: dur.expand,
       ease: 'power3.out',
       onUpdate: () => {
         progressRef.current = obj.p;
@@ -210,7 +231,7 @@ export default function TransitionManager() {
     return () => {
       tween.kill();
     };
-  }, [phase, lowFi, setPhase]);
+  }, [phase, dur.expand, setPhase]);
 
   // dispose any lingering snapshot if the manager itself unmounts
   useEffect(
@@ -229,18 +250,18 @@ export default function TransitionManager() {
           GLBoundary: if the WebGL canvas ever fails, transitions degrade to
           the white flash (the phase machine runs independently of this
           canvas) instead of React unmounting the whole app. */}
-      {!lowFi && (
+      {mountWebGL && (
         <GLBoundary fallback={null}>
           <BlackHoleTransition
             texRef={texRef}
             progressRef={progressRef}
             texVersion={texVersion}
-            active={active && texRef.current !== null}
-            quality={bhQuality}
+            active={active && !usePotato && texRef.current !== null}
+            tier={bhTier}
           />
         </GLBoundary>
       )}
-      {active && lowFi && <IrisFallback collapsing={phase === 'consume'} />}
+      {active && usePotato && <IrisFallback collapsing={phase === 'consume'} />}
       {/* scanline channel-change wipe (overlays) */}
       {wipe && (
         <div className={`${wipeStyles.wipe} no-capture`} aria-hidden>
@@ -276,14 +297,16 @@ export default function TransitionManager() {
           transition: softFlash ? 'opacity 30ms linear' : 'opacity 160ms ease-out',
         }}
       />
+      <PerfOverlay />
     </>
   );
 }
 
 /**
- * Cheap iris wipe for devices without WebGL2. A transparent circle with a
- * viewport-sized box-shadow: black everywhere except the circle, and the
- * circle's width/height animate smoothly (gradients/clip-paths can't).
+ * Cheap iris wipe for the potato tier / devices without WebGL2. A
+ * transparent circle with a viewport-sized box-shadow: black everywhere
+ * except the circle, and the circle's width/height animate smoothly
+ * (gradients/clip-paths can't). A white flash bridges the swap.
  */
 function IrisFallback({ collapsing }: { collapsing: boolean }) {
   const [size, setSize] = useState(collapsing ? '170vmax' : '0vmax');
@@ -307,9 +330,48 @@ function IrisFallback({ collapsing }: { collapsing: boolean }) {
           height: size,
           borderRadius: '50%',
           boxShadow: '0 0 0 200vmax #000',
-          transition: `width 420ms ${collapsing ? 'ease-in' : 'ease-out'}, height 420ms ${collapsing ? 'ease-in' : 'ease-out'}`,
+          transition: `width 400ms ${collapsing ? 'ease-in' : 'ease-out'}, height 400ms ${collapsing ? 'ease-in' : 'ease-out'}`,
         }}
       />
+    </div>
+  );
+}
+
+/**
+ * `?perf` overlay: current tier + the detection inputs + the measured fps of
+ * the first transition, so different machines can be checked at a glance.
+ */
+function PerfOverlay() {
+  const show = typeof location !== 'undefined' && new URLSearchParams(location.search).has('perf');
+  // re-read each render; the profiler's setState above forces a re-render
+  // after measurement so fps/tier stay current
+  if (!show) return null;
+  const i = getTierInfo();
+  const color = i.tier === 'high' ? '#4cf2ff' : i.tier === 'medium' ? '#ffcf52' : '#ff5cc8';
+  return (
+    <div
+      className="no-capture"
+      style={{
+        position: 'fixed',
+        bottom: 10,
+        left: 10,
+        zIndex: 9000,
+        padding: '8px 10px',
+        background: 'rgba(5,3,16,0.82)',
+        border: `1px solid ${color}`,
+        color: '#e8e6dc',
+        font: "11px/1.5 'VT323', monospace",
+        letterSpacing: '0.04em',
+        pointerEvents: 'none',
+        whiteSpace: 'pre',
+      }}
+    >
+      {`TIER `}
+      <b style={{ color }}>{i.tier.toUpperCase()}</b>
+      {`  (${i.source})\n`}
+      {`FPS  ${i.fps ?? '—'}\n`}
+      {`cores ${i.cores}  mem ${i.memory ?? '?'}GB  dpr ${i.dpr}\n`}
+      {`gpu  ${(i.gpu || 'unknown').slice(0, 42)}`}
     </div>
   );
 }

@@ -47,7 +47,29 @@
       "PowerShell(Get-ChildItem *)",
       "PowerShell(npx vite --port 5173)",
       "PowerShell($env:SMOKE_URL = 'http://localhost:5175'; node smoke.mjs)",
-      "PowerShell(Get-Process *)"
+      "PowerShell(Get-Process *)",
+      "Bash(node shot.mjs select)",
+      "Bash(node shot.mjs quest smoke-shots/iter-quest-start.png)",
+      "Bash(RUN_MS=14000 node shot.mjs quest smoke-shots/iter-quest-flag.png)",
+      "Bash(RUN_MS=11000 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(RUN_MS=11500 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(RUN_MS=17000 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(RUN_MS=24000 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(RUN_MS=16000 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(RUN_MS=20000 node shot.mjs quest smoke-shots/iter-quest-castle.png)",
+      "Bash(node -e \"const{execSync}=require\\('child_process'\\);\")",
+      "Bash(node -e \"import\\('playwright-core'\\).then\\(async\\({chromium}\\)=>{const b=await chromium.launch\\({channel:'chrome',headless:true,args:['--use-angle=swiftshader','--enable-unsafe-swiftshader']}\\);const p=await b.newPage\\({viewport:{width:1440,height:900}}\\);await p.goto\\('http://localhost:5173',{waitUntil:'networkidle'}\\);await p.waitForFunction\\(\\(\\)=>window.__derekos?.getState\\(\\).screen==='title'\\);await p.waitForTimeout\\(2400\\);await p.keyboard.press\\('Enter'\\);await p.waitForFunction\\(\\(\\)=>window.__derekos?.getState\\(\\).screen==='select'\\);await p.keyboard.press\\('Enter'\\);await p.waitForFunction\\(\\(\\)=>window.__derekos?.getState\\(\\).screen==='quest'\\);await p.waitForTimeout\\(1000\\);await p.keyboard.down\\('ArrowRight'\\);await p.waitForTimeout\\(20000\\);await p.keyboard.up\\('ArrowRight'\\);const s=await p.evaluate\\(\\(\\)=>window.__derekos?.getState\\(\\).screen\\);console.log\\('after 20s run, screen =',s\\);await b.close\\(\\);}\\)\")",
+      "Bash(node shot.mjs quest smoke-shots/iter-castle-art.png)",
+      "Bash(node *)",
+      "Bash(CLIP='{\"x\":660,\"y\":520,\"width\":460,\"height\":340}' node shot.mjs quest smoke-shots/iter-castle-zoom.png)",
+      "Bash(RUN_MS=200 node shot.mjs quest smoke-shots/iter-quest-start2.png)",
+      "Bash(CLIP='{\"x\":0,\"y\":450,\"width\":1440,\"height\":450}' node shot.mjs fighter smoke-shots/iter-fighter-floor.png)",
+      "Bash(CLIP='{\"x\":820,\"y\":20,\"width\":620,\"height\":500}' node shot.mjs invaders smoke-shots/iter-planet-zoom.png)",
+      "Bash(CLIP='{\"x\":0,\"y\":450,\"width\":1440,\"height\":450}' node shot.mjs title smoke-shots/iter-title-floor.png)",
+      "Bash(curl -s -G https://fonts.googleapis.com/css2 --data-urlencode family=DotGothic16 --data-urlencode text=居酒屋ラーメンカラオケ寿司バー焼き鳥餃子酒心福赤提灯 -H 'User-Agent: __TRACKED_VAR__')",
+      "Bash(CPU=6 node boot-test.mjs)",
+      "Bash(CPU=1 node boot-test.mjs)",
+      "Bash(CLIP='{\"x\":430,\"y\":300,\"width\":580,\"height\":270}' VIEWPORT=1440x900 node shot.mjs contact smoke-shots/contact-reveal-zoom.png)"
     ]
   }
 }

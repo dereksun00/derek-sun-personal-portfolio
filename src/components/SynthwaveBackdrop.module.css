@@ -25,68 +25,71 @@
 
 /* ── nebula clouds: 5 big painted blobs over the upper sky ──
    each gets its own drift vector via --dx/--dy so they slide across one
-   another and recombine instead of breathing in lockstep */
+   another and recombine instead of breathing in lockstep.
+   Gradients fade to a ZERO-ALPHA STOP OF THE SAME HUE — the bare
+   `transparent` keyword is rgba(0,0,0,0) and drags the whole ramp
+   through black, which is why these used to read as grey fog. */
 .nebula {
   position: absolute;
   border-radius: 50%;
-  filter: blur(100px);
+  filter: blur(80px);
   animation: nebDrift 40s ease-in-out infinite alternate;
 }
 .nebMagenta {
   --dx: 9vw;
   --dy: 4vh;
-  width: 38vw;
-  height: 34vh;
-  left: 2%;
-  top: 2%;
-  opacity: 0.26;
-  background: radial-gradient(circle, #ff5cc8, transparent 70%);
+  width: 40vw;
+  height: 36vh;
+  left: 22%;
+  top: 0%;
+  opacity: 0.4;
+  background: radial-gradient(circle, #ff8ad8 0%, #ff5cc8 32%, rgba(255, 92, 200, 0) 72%);
 }
 .nebCyan {
   --dx: -8vw;
   --dy: 6vh;
-  width: 32vw;
-  height: 28vh;
-  right: 4%;
-  top: 10%;
-  opacity: 0.2;
-  background: radial-gradient(circle, #4cf2ff, transparent 70%);
+  width: 34vw;
+  height: 30vh;
+  right: 26%;
+  top: 8%;
+  opacity: 0.34;
+  background: radial-gradient(circle, #9af7ff 0%, #4cf2ff 32%, rgba(76, 242, 255, 0) 72%);
   animation-duration: 52s;
   animation-delay: -18s;
 }
 .nebBlue {
   --dx: 6vw;
   --dy: -5vh;
-  width: 40vw;
-  height: 36vh;
-  left: 26%;
-  top: -6%;
-  opacity: 0.28;
-  background: radial-gradient(circle, #4a3ed8, transparent 70%);
+  width: 42vw;
+  height: 38vh;
+  left: 38%;
+  top: -8%;
+  opacity: 0.36;
+  background: radial-gradient(circle, #7a6cf0 0%, #4a3ed8 36%, rgba(74, 62, 216, 0) 72%);
   animation-duration: 60s;
   animation-delay: -30s;
 }
 .nebMagenta2 {
   --dx: -10vw;
   --dy: 3vh;
-  width: 28vw;
-  height: 24vh;
-  right: 22%;
-  top: 30%;
-  opacity: 0.18;
-  background: radial-gradient(circle, #ff5cc8, transparent 70%);
+  width: 30vw;
+  height: 26vh;
+  right: 2%;
+  top: 16%;
+  opacity: 0.3;
+  background: radial-gradient(circle, #ff8ad8 0%, #ff5cc8 34%, rgba(255, 92, 200, 0) 72%);
   animation-duration: 46s;
   animation-delay: -8s;
 }
 .nebCyan2 {
   --dx: 7vw;
   --dy: 7vh;
-  width: 26vw;
-  height: 22vh;
-  left: 12%;
-  top: 26%;
-  opacity: 0.18;
-  background: radial-gradient(circle, #4cf2ff, transparent 72%);
+  width: 28vw;
+  height: 24vh;
+  left: 2%;
+  top: 10%;
+  opacity: 0.3;
+  background: radial-gradient(circle, #9af7ff 0%, #4cf2ff 34%, rgba(76, 242, 255, 0) 74%);
   animation-duration: 38s;
   animation-delay: -25s;
 }

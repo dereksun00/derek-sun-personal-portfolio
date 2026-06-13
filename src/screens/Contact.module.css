@@ -83,10 +83,13 @@
   z-index: 2;
 }
 
-/* reel + info panel share one border — a single component, not two widgets */
+/* reel + info panel share one border — a single component, not two widgets.
+   Fixed width so the reel face can never sit narrower than the info text
+   (that misalignment read as a dead gap inside the card). */
 .reelUnit {
   display: flex;
   flex-direction: column;
+  width: clamp(124px, 16vw, 168px);
   background: #12081f;
   box-shadow: 0 0 0 2px rgba(76, 242, 255, 0.45), 0 0 14px rgba(76, 242, 255, 0.12);
   transition: box-shadow 180ms ease;
@@ -98,8 +101,8 @@
 
 /* reel face: a little CRT, not a plastic card */
 .reel {
-  width: clamp(76px, 13vw, 110px);
-  aspect-ratio: 3 / 4;
+  width: 100%;
+  height: clamp(86px, 11vw, 112px);
   background: radial-gradient(ellipse at 50% 42%, #241040, #1a0a2e 70%);
   display: flex;
   align-items: center;
@@ -134,20 +137,24 @@
    cards always land aligned regardless of how the values wrap. */
 .reelInfo {
   flex: 1;
-  min-height: 5em;
+  min-height: 4.2em;
   border-top: 1px solid rgba(76, 242, 255, 0.25);
   text-align: center;
   display: flex;
   align-items: stretch;
   justify-content: center;
+  /* size the value font against the cell width so the email always fits */
+  container-type: inline-size;
+  overflow: hidden;
 }
+/* tight centered stack: label then value, equal padding all around */
 .revealPanel {
-  padding: 10px 8px;
+  padding: 11px 8px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 7px;
+  gap: 8px;
   width: 100%;
 }
 .revealLabel {
@@ -155,15 +162,22 @@
   line-height: 1;
   color: var(--cyan);
   letter-spacing: 0.14em;
+  white-space: nowrap;
 }
+/* values in the narrow terminal font, on ONE line, never breaking mid-token.
+   font-size scales with the cell (cqi) so the 22-char email fits at every
+   width; the clamp ceiling keeps the short handles from getting huge. */
 .reelValue {
+  font-family: var(--font-term);
   color: var(--text);
-  font-size: 7px;
-  line-height: 1.7;
-  letter-spacing: 0.03em;
+  font-size: clamp(9px, 7.4cqi, 16px);
+  line-height: 1.4;
+  letter-spacing: 0.01em;
   display: block;
   max-width: 100%;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
+  overflow-wrap: normal;
+  word-break: keep-all;
 }
 .reelValue:hover { color: var(--magenta); text-shadow: 0 0 8px rgba(255, 92, 200, 0.7); }
 
